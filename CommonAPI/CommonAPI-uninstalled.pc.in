@@ -1,0 +1,10 @@
+abs_top_builddir=@abs_top_builddir@
+abs_top_srcdir=@abs_top_srcdir@
+prefix=
+exec_prefix=
+
+Name: Common API C++
+Description: GENIVI Common API C++ Library (uninstalled copy)
+Version: @PACKAGE_VERSION@
+Libs: ${abs_top_builddir}/libCommonAPI.la
+Cflags: -I${abs_top_srcdir}/src

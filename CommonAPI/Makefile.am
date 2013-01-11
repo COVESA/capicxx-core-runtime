@@ -1,0 +1,43 @@
+ACLOCAL_AMFLAGS = -I m4
+
+# ------------------------------------------------------------------------------
+MAINTAINERCLEANFILES = \
+		Makefile.in \
+		aclocal.m4 \
+		configure
+
+clean-local:
+	-rm -rf src-gen
+
+maintainer-clean-local:
+	-rm -rf build-aux
+	-rm -f config.h.in*
+	-rm -f m4/libtool*.m4
+	-rm -f m4/lt*.m4
+
+	
+lib_LTLIBRARIES = libCommonAPI.la
+
+libCommonAPI_la_SOURCES = \
+		src/CommonAPI/Runtime.cpp
+
+CommonAPI_includedir=$(includedir)/CommonAPI-${VERSION}/CommonAPI
+CommonAPI_include_HEADERS = \
+		src/CommonAPI/Attribute.h \
+        src/CommonAPI/AttributeExtension.h \
+        src/CommonAPI/ByteBuffer.h \
+        src/CommonAPI/Event.h \
+        src/CommonAPI/Factory.h \
+		src/CommonAPI/InputStream.h \
+        src/CommonAPI/MiddlewareInfo.h \
+		src/CommonAPI/OutputStream.h \
+        src/CommonAPI/Proxy.h \
+		src/CommonAPI/Runtime.h \
+		src/CommonAPI/SerializableStruct.h \
+		src/CommonAPI/SerializableVariant.h \
+		src/CommonAPI/types.h
+
+libCommonAPI_la_LIBADD = -ldl
+
+pkgconfigdir = ${libdir}/pkgconfig
+pkgconfig_DATA = CommonAPI.pc
