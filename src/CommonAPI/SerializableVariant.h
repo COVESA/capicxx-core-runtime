@@ -22,6 +22,9 @@ class OutputStream;
 
 class TypeOutputStream;
 
+template<typename _Type>
+struct TypeWriter;
+
 class SerializableVariant {
 public:
     virtual ~SerializableVariant() {
@@ -31,6 +34,8 @@ public:
 
     virtual void readFromInputStream(InputStream& inputStream) = 0;
     virtual void writeToOutputStream(OutputStream& outputStream) const = 0;
+
+    virtual void writeToTypeOutputStream(TypeOutputStream& typeOutputStream) const = 0;
 };
 
 template<typename ... _Types>
@@ -54,6 +59,12 @@ struct ApplyVoidVisitor<Visitor, Variant> {
         //won't be called
         assert(false);
     }
+
+    static
+    void visit(Visitor&, const Variant&) {
+        //won't be called
+        assert(false);
+    }
 };
 
 template<class Visitor, class Variant, typename _Type, typename ... _Types>
@@ -63,6 +74,16 @@ struct ApplyVoidVisitor<Visitor, Variant, _Type, _Types...> {
 
     static
     void visit(Visitor& visitor, Variant& var) {
+        if (var.getValueType() == index) {
+            bool b;
+            visitor(var.template get<_Type>(b));
+        } else {
+            ApplyVoidVisitor<Visitor, Variant, _Types...>::visit(visitor, var);
+        }
+    }
+
+    static
+    void visit(Visitor& visitor, const Variant& var) {
         if (var.getValueType() == index) {
             bool b;
             visitor(var.template get<_Type>(b));
@@ -116,6 +137,20 @@ public:
 
 private:
     typename std::aligned_storage<size>::type& storage_;
+};
+
+struct TypeWriteVisitor {
+public:
+    TypeWriteVisitor(TypeOutputStream& typeStream): typeStream_(typeStream) {
+    }
+
+    template<typename _Type>
+    void operator()(const _Type&) const {
+        TypeWriter<_Type>::writeType(typeStream_);
+    }
+
+private:
+    TypeOutputStream& typeStream_;
 };
 
 template<typename _U, typename ... _Types>
@@ -272,8 +307,9 @@ public:
         //TODO
     }
 
-    static void writeToTypeOutputStream(TypeOutputStream& typeOutputStream) {
-        //TODO
+    virtual void writeToTypeOutputStream(TypeOutputStream& typeOutputStream) const {
+        TypeWriteVisitor visitor(typeOutputStream);
+        ApplyVoidVisitor<TypeWriteVisitor, Variant<_Types...>, _Types...>::visit(visitor, *this);
     }
 
     Variant& operator=(const Variant& rhs)

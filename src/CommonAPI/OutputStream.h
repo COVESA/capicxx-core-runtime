@@ -238,21 +238,6 @@ template<typename _Type>
 struct TypeWriter: public VariantTypeWriter<_Type, std::is_base_of<CommonAPI::SerializableVariant, _Type>::value>{};
 
 
-struct TypeSearchVisitor {
-public:
-    TypeSearchVisitor(TypeOutputStream& typeStream): typeStream_(typeStream) {
-    }
-
-    template<typename _Type>
-    void operator()(const _Type& currentType) const {
-        TypeWriter<_Type>::writeType(typeStream_);
-    }
-
-private:
-    TypeOutputStream& typeStream_;
-};
-
-
 
 class OutputStream {
  public:
@@ -318,8 +303,6 @@ class OutputStream {
 
 	virtual void beginWriteMap(size_t elementCount) = 0;
 	virtual void endWriteMap() = 0;
-
-	virtual std::shared_ptr<TypeOutputStream> getNewTypeOutputStream() = 0;
 };
 
 
@@ -388,11 +371,6 @@ inline OutputStream& operator<<(OutputStream& outputStream, const SerializableSt
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const SerializableVariant& serializableVariant) {
-    std::shared_ptr<TypeOutputStream> typeOutStream = outputStream.getNewTypeOutputStream();
-
-//    CommonAPI::TypeSearchVisitor searchVisitor(typeStream_);
-//    CommonAPI::ApplyVoidVisitor<CommonAPI::TypeSearchVisitor, CommonAPI::Variant<uint32_t, double, TestStruct>, uint32_t, double, TestStruct>::visit(searchVisitor, myVariant);
-
     outputStream.beginWriteSerializableVariant(serializableVariant);
     serializableVariant.writeToOutputStream(outputStream);
     outputStream.endWriteSerializableVariant(serializableVariant);
