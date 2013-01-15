@@ -9,6 +9,7 @@
 
 #include "ByteBuffer.h"
 #include "SerializableStruct.h"
+#include "SerializableVariant.h"
 #include "types.h"
 
 #include <cstdint>
