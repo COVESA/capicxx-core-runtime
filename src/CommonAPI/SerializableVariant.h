@@ -20,6 +20,8 @@ namespace CommonAPI {
 class InputStream;
 class OutputStream;
 
+class TypeOutputStream;
+
 class SerializableVariant {
 public:
     virtual ~SerializableVariant() {
@@ -28,7 +30,7 @@ public:
     virtual uint8_t getValueType() const = 0;
 
     virtual void readFromInputStream(InputStream& inputStream) = 0;
-    virtual void writeToOutputStream(OutputStream& outputStream) = 0;
+    virtual void writeToOutputStream(OutputStream& outputStream) const = 0;
 };
 
 template<typename ... _Types>
@@ -263,11 +265,15 @@ public:
     }
 
     virtual void readFromInputStream(InputStream& inputStream) {
-
+        //TODO
     }
 
-    virtual void writeToOutputStream(OutputStream& outputStream) {
+    virtual void writeToOutputStream(OutputStream& outputStream) const {
+        //TODO
+    }
 
+    static void writeToTypeOutputStream(TypeOutputStream& typeOutputStream) {
+        //TODO
     }
 
     Variant& operator=(const Variant& rhs)

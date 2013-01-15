@@ -22,6 +22,238 @@
 
 namespace CommonAPI {
 
+
+class TypeOutputStream {
+  public:
+    virtual ~TypeOutputStream() {}
+
+
+    virtual void writeBoolType() = 0;
+
+    virtual void writeInt8Type() = 0;
+    virtual void writeInt16Type() = 0;
+    virtual void writeInt32Type() = 0;
+    virtual void writeInt64Type() = 0;
+
+    virtual void writeUInt8Type() = 0;
+    virtual void writeUInt16Type() = 0;
+    virtual void writeUInt32Type() = 0;
+    virtual void writeUInt64Type() = 0;
+
+
+    virtual void writeInt8EnumType() = 0;
+    virtual void writeInt16EnumType() = 0;
+    virtual void writeInt32EnumType() = 0;
+    virtual void writeInt64EnumType() = 0;
+
+    virtual void writeUInt8EnumType() = 0;
+    virtual void writeUInt16EnumType() = 0;
+    virtual void writeUInt32EnumType() = 0;
+    virtual void writeUInt64EnumType() = 0;
+
+
+    virtual void writeFloatType() = 0;
+    virtual void writeDoubleType() = 0;
+
+    virtual void writeStringType() = 0;
+    virtual void writeByteBufferType() = 0;
+    virtual void writeVersionType() = 0;
+
+    virtual void beginWriteVectorType() = 0;
+    virtual void endWriteVectorType() = 0;
+
+    virtual void beginWriteMapType() = 0;
+    virtual void endWriteMapType() = 0;
+
+    virtual void beginWriteStructType() = 0;
+    virtual void endWriteStructType() = 0;
+
+    virtual void writeVariantType() = 0;
+
+    virtual std::string retrieveSignature() = 0;
+};
+
+
+template<typename _Type>
+struct TypeWriter;
+
+
+template<typename _Type>
+struct BasicTypeWriter;
+
+
+template<>
+struct BasicTypeWriter<bool> {
+inline static void writeType(TypeOutputStream& typeStream) {
+    typeStream.writeBoolType();
+}
+};
+
+
+template<>
+struct BasicTypeWriter<int8_t> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeInt8Type();
+}
+};
+
+template<>
+struct BasicTypeWriter<int16_t> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeInt16Type();
+}
+};
+
+template<>
+struct BasicTypeWriter<int32_t> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeInt32Type();
+}
+};
+
+template<>
+struct BasicTypeWriter<int64_t> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeInt64Type();
+}
+};
+
+
+template<>
+struct BasicTypeWriter<uint8_t> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeUInt8Type();
+}
+};
+
+template<>
+struct BasicTypeWriter<uint16_t> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeUInt16Type();
+}
+};
+
+template<>
+struct BasicTypeWriter<uint32_t> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeUInt32Type();
+}
+};
+
+template<>
+struct BasicTypeWriter<uint64_t> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeUInt64Type();
+}
+};
+
+
+template<>
+struct BasicTypeWriter<float> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeFloatType();
+}
+};
+
+template<>
+struct BasicTypeWriter<double> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeDoubleType();
+}
+};
+
+
+template<>
+struct BasicTypeWriter<std::string> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeStringType();
+}
+};
+
+template<>
+struct BasicTypeWriter<CommonAPI::ByteBuffer> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeByteBufferType();
+}
+};
+
+template<>
+struct BasicTypeWriter<CommonAPI::Version> {
+inline static void writeType (TypeOutputStream& typeStream) {
+    typeStream.writeVersionType();
+}
+};
+
+
+template<typename _VectorElementType>
+struct BasicTypeWriter<std::vector<_VectorElementType>> {
+inline static void writeType(TypeOutputStream& typeStream) {
+    typeStream.beginWriteVectorType();
+    TypeWriter<_VectorElementType>::writeType(typeStream);
+}
+};
+
+
+template<typename _KeyType, typename _ValueType>
+struct BasicTypeWriter<std::unordered_map<_KeyType, _ValueType>> {
+inline static void writeType(TypeOutputStream& typeStream) {
+    typeStream.beginWriteMapType();
+
+    BasicTypeWriter<_KeyType>::writeType(typeStream);
+    BasicTypeWriter<_ValueType>::writeType(typeStream);
+
+    typeStream.endWriteMapType();
+}
+};
+
+
+template<typename _Type, bool _IsStructType = false>
+struct StructTypeWriter: public BasicTypeWriter<_Type> {
+};
+
+
+template<typename _Type>
+struct StructTypeWriter<_Type, true> {
+inline static void writeType(TypeOutputStream& typeStream) {
+    typeStream.beginWriteStructType();
+    _Type::writeToTypeOutputStream(typeStream);
+    typeStream.endWriteStructType();
+}
+};
+
+
+template<typename _Type, bool _IsVariantType = false>
+struct VariantTypeWriter: public StructTypeWriter<_Type, std::is_base_of<CommonAPI::SerializableStruct, _Type>::value> {
+};
+
+template<typename _Type>
+struct VariantTypeWriter<_Type, true> {
+inline static void writeType(TypeOutputStream& typeStream) {
+    typeStream.writeVariantType();
+}
+};
+
+
+template<typename _Type>
+struct TypeWriter: public VariantTypeWriter<_Type, std::is_base_of<CommonAPI::SerializableVariant, _Type>::value>{};
+
+
+struct TypeSearchVisitor {
+public:
+    TypeSearchVisitor(TypeOutputStream& typeStream): typeStream_(typeStream) {
+    }
+
+    template<typename _Type>
+    void operator()(const _Type& currentType) const {
+        TypeWriter<_Type>::writeType(typeStream_);
+    }
+
+private:
+    TypeOutputStream& typeStream_;
+};
+
+
+
 class OutputStream {
  public:
     virtual ~OutputStream() {}
@@ -60,6 +292,9 @@ class OutputStream {
  	virtual void beginWriteSerializableStruct(const SerializableStruct& serializableStruct) = 0;
 	virtual void endWriteSerializableStruct(const SerializableStruct& serializableStruct) = 0;
 
+    virtual void beginWriteSerializableVariant(const SerializableVariant& serializableVariant) = 0;
+    virtual void endWriteSerializableVariant(const SerializableVariant& serializableVariant) = 0;
+
     virtual void beginWriteBoolVector(uint32_t sizeOfVector) = 0;
     virtual void beginWriteInt8Vector(uint32_t sizeOfVector) = 0;
     virtual void beginWriteInt16Vector(uint32_t sizeOfVector) = 0;
@@ -75,6 +310,7 @@ class OutputStream {
     virtual void beginWriteByteBufferVector(uint32_t sizeOfVector) = 0;
     virtual void beginWriteVersionVector(uint32_t sizeOfVector) = 0;
     virtual void beginWriteVectorOfSerializableStructs(uint32_t sizeOfVector) = 0;
+    virtual void beginWriteVectorOfSerializableVariants(uint32_t sizeOfVector) = 0;
     virtual void beginWriteVectorOfVectors(uint32_t sizeOfVector) = 0;
     virtual void beginWriteVectorOfMaps(uint32_t sizeOfVector) = 0;
 
@@ -82,6 +318,8 @@ class OutputStream {
 
 	virtual void beginWriteMap(size_t elementCount) = 0;
 	virtual void endWriteMap() = 0;
+
+	virtual std::shared_ptr<TypeOutputStream> getNewTypeOutputStream() = 0;
 };
 
 
@@ -145,6 +383,19 @@ inline OutputStream& operator<<(OutputStream& outputStream, const SerializableSt
     outputStream.beginWriteSerializableStruct(serializableStruct);
     serializableStruct.writeToOutputStream(outputStream);
     outputStream.endWriteSerializableStruct(serializableStruct);
+
+    return outputStream;
+}
+
+inline OutputStream& operator<<(OutputStream& outputStream, const SerializableVariant& serializableVariant) {
+    std::shared_ptr<TypeOutputStream> typeOutStream = outputStream.getNewTypeOutputStream();
+
+//    CommonAPI::TypeSearchVisitor searchVisitor(typeStream_);
+//    CommonAPI::ApplyVoidVisitor<CommonAPI::TypeSearchVisitor, CommonAPI::Variant<uint32_t, double, TestStruct>, uint32_t, double, TestStruct>::visit(searchVisitor, myVariant);
+
+    outputStream.beginWriteSerializableVariant(serializableVariant);
+    serializableVariant.writeToOutputStream(outputStream);
+    outputStream.endWriteSerializableVariant(serializableVariant);
 
     return outputStream;
 }
@@ -225,9 +476,22 @@ struct OutputStreamSerializableStructVectorHelper<_VectorElementType, true> {
 };
 
 
+template <typename _VectorElementType, bool _IsSerializableVariant = false>
+struct OutputStreamSerializableVariantVectorHelper: public OutputStreamSerializableStructVectorHelper<_VectorElementType,
+                                                                                                      std::is_base_of<SerializableStruct, _VectorElementType>::value> {
+};
+
 template <typename _VectorElementType>
-struct OutputStreamVectorHelper: OutputStreamSerializableStructVectorHelper<_VectorElementType,
-                                                                            std::is_base_of<SerializableStruct, _VectorElementType>::value> {
+struct OutputStreamSerializableVariantVectorHelper<_VectorElementType, true> {
+    static void beginWriteVector(OutputStream& outputStream, const std::vector<_VectorElementType>& vectorValue) {
+        outputStream.beginWriteVectorOfSerializableVariants(vectorValue.size());
+    }
+};
+
+
+template <typename _VectorElementType>
+struct OutputStreamVectorHelper: OutputStreamSerializableVariantVectorHelper<_VectorElementType,
+                                                                             std::is_base_of<SerializableVariant, _VectorElementType>::value> {
 };
 
 
