@@ -22,6 +22,7 @@
 
 namespace CommonAPI {
 
+class SerializableVariant;
 
 class TypeOutputStream {
   public:
@@ -223,7 +224,7 @@ inline static void writeType(TypeOutputStream& typeStream) {
 
 
 template<typename _Type, bool _IsVariantType = false>
-struct VariantTypeWriter: public StructTypeWriter<_Type, std::is_base_of<CommonAPI::SerializableStruct, _Type>::value> {
+struct VariantTypeWriter: public StructTypeWriter<_Type, std::is_base_of<SerializableStruct, _Type>::value> {
 };
 
 template<typename _Type>
@@ -235,7 +236,7 @@ inline static void writeType(TypeOutputStream& typeStream) {
 
 
 template<typename _Type>
-struct TypeWriter: public VariantTypeWriter<_Type, std::is_base_of<CommonAPI::SerializableVariant, _Type>::value>{};
+struct TypeWriter: public VariantTypeWriter<_Type, std::is_base_of<SerializableVariant, _Type>::value>{};
 
 
 
