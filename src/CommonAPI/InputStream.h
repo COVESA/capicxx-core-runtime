@@ -9,6 +9,7 @@
 
 #include "ByteBuffer.h"
 #include "SerializableStruct.h"
+#include "SerializableVariant.h"
 #include "types.h"
 
 #include <cstdint>
@@ -61,6 +62,8 @@ class InputStream {
 
  	virtual void beginReadSerializableStruct(const SerializableStruct& serializableStruct) = 0;
  	virtual void endReadSerializableStruct(const SerializableStruct& serializableStruct) = 0;
+
+    virtual void readSerializableVariant(SerializableVariant& serializableVariant) = 0;
 
     virtual void beginReadBoolVector() = 0;
     virtual void beginReadInt8Vector() = 0;
@@ -160,6 +163,11 @@ inline InputStream& operator>>(InputStream& inputStream, SerializableStruct& ser
     serializableStruct.readFromInputStream(inputStream);
     inputStream.endReadSerializableStruct(serializableStruct);
 
+    return inputStream;
+}
+
+inline InputStream& operator>>(InputStream& inputStream, SerializableVariant& serializableVariant) {
+    inputStream.readSerializableVariant(serializableVariant);
     return inputStream;
 }
 
