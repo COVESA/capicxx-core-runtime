@@ -138,6 +138,6 @@ private:
 };
 } // namespace CommonAPI
 
-#include "SerializableVariant.ipp"
+#include "SerializableVariant.hpp"
 
 #endif // COMMONAPI_SERIALIZABLE_VARIANT_H_

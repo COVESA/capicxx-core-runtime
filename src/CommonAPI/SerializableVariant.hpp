@@ -8,7 +8,6 @@
 #ifndef __VAR_IMPL__
 #define __VAR_IMPL__
 
-//#include "SerializableVariant.h"
 #include "OutputStream.h"
 
 namespace CommonAPI {
