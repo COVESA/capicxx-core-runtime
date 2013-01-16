@@ -9,6 +9,7 @@
 
 #include "OutputStream.h"
 #include "InputStream.h"
+#include <iostream>
 
 namespace CommonAPI {
 
@@ -159,7 +160,7 @@ public:
     void operator()(const _Type&) {
         _Type value;
         inputStream_ >> value;
-        lhs_.template set<_Type>(std::move(value), true);
+        lhs_.template set<_Type>(std::move(value), false);
     }
 
 private:
@@ -349,6 +350,10 @@ Variant<_Types...>::~Variant() {
 
 template<typename ... _Types>
 void Variant<_Types...>::readFromInputStream(const uint8_t typeIndex, InputStream& inputStream) {
+    if(hasValue()) {
+        DeleteVisitor<maxSize> visitor(valueStorage_);
+        ApplyVoidVisitor<DeleteVisitor<maxSize>, Variant<_Types...>, _Types...>::visit(visitor, *this);
+    }
     valueType_ = typeIndex;
     InputStreamReadVisitor<_Types...> visitor(*this, inputStream);
     ApplyVoidVisitor<InputStreamReadVisitor<_Types...>, Variant<_Types...>, _Types...>::visit(visitor, *this);
@@ -419,7 +424,7 @@ Variant<_Types...>::Variant(_Type && value,
 typename std::enable_if<!std::is_const<_Type>::value>::type*,
 typename std::enable_if<!std::is_reference<_Type>::value>::type*,
 typename std::enable_if<!std::is_same<_Type, Variant<_Types...>>::value>::type*) {
-    set2<typename TypeSelector<_Type, _Types...>::type>(std::move(value), false);
+    set<typename TypeSelector<_Type, _Types...>::type>(std::move(value), false);
 }
 
 template<typename ... _Types>
@@ -452,7 +457,7 @@ void Variant<_Types...>::set(const _U& value, const bool clear) {
 
 template<typename ... _Types>
 template<typename _U>
-void Variant<_Types...>::set2(_U&& value, const bool clear) {
+void Variant<_Types...>::set(_U&& value, const bool clear) {
     typedef typename TypeSelector<_U, _Types...>::type selected_type_t;
 
     selected_type_t&& any_container_value = std::move(value);

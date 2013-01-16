@@ -125,7 +125,7 @@ public:
     void set( const _U& value, const bool clear);
 
     template<typename _U>
-    void set2( _U&& value, const bool clear);
+    void set( _U&& value, const bool clear);
 
 private:
     inline bool hasValue() const {
