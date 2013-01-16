@@ -306,16 +306,15 @@ Variant<_Types...>::Variant() :
 }
 
 template<typename ... _Types>
-Variant<_Types...>::Variant(const Variant& fromVariant) :
-                valueType_(fromVariant.valueType_),
-                valueStorage_(fromVariant.valueStorage_) {
+Variant<_Types...>::Variant(const Variant& fromVariant) {
+    AssignmentVisitor<_Types...> visitor(*this, false);
+    ApplyVoidVisitor<AssignmentVisitor<_Types...> , Variant<_Types...>, _Types...>::visit(visitor, fromVariant);
 }
 
 template<typename ... _Types>
-Variant<_Types...>::Variant(Variant&& fromVariant):
-valueType_(std::move(fromVariant.valueType_)),
-valueStorage_(std::move(fromVariant.valueStorage_)) {
-    fromVariant.valueType_ = TypesTupleSize::value;
+Variant<_Types...>::Variant(Variant&& fromVariant) {
+    AssignmentVisitor<_Types...> visitor(*this, false);
+    ApplyVoidVisitor<AssignmentVisitor<_Types...> , Variant<_Types...>, _Types...>::visit(visitor, fromVariant);
 }
 
 template<typename ... _Types>
