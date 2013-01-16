@@ -9,6 +9,7 @@
 
 #include "ByteBuffer.h"
 #include "SerializableStruct.h"
+#include "SerializableVariant.h"
 #include "types.h"
 
 #include <cstdint>
@@ -62,6 +63,8 @@ class InputStream {
  	virtual void beginReadSerializableStruct(const SerializableStruct& serializableStruct) = 0;
  	virtual void endReadSerializableStruct(const SerializableStruct& serializableStruct) = 0;
 
+    virtual void readSerializableVariant(SerializableVariant& serializableVariant) = 0;
+
     virtual void beginReadBoolVector() = 0;
     virtual void beginReadInt8Vector() = 0;
     virtual void beginReadInt16Vector() = 0;
@@ -77,6 +80,7 @@ class InputStream {
     virtual void beginReadByteBufferVector() = 0;
     virtual void beginReadVersionVector() = 0;
     virtual void beginReadVectorOfSerializableStructs() = 0;
+    virtual void beginReadVectorOfSerializableVariants() = 0;
     virtual void beginReadVectorOfVectors() = 0;
     virtual void beginReadVectorOfMaps() = 0;
 
@@ -163,6 +167,11 @@ inline InputStream& operator>>(InputStream& inputStream, SerializableStruct& ser
     return inputStream;
 }
 
+inline InputStream& operator>>(InputStream& inputStream, SerializableVariant& serializableVariant) {
+    inputStream.readSerializableVariant(serializableVariant);
+    return inputStream;
+}
+
 
 template <typename _VectorElementType>
 class InputStreamGenericTypeVectorHelper {
@@ -239,9 +248,22 @@ struct InputStreamSerializableStructVectorHelper<_VectorElementType, true> {
 };
 
 
+template <typename _VectorElementType, bool _IsSerializableVariant = false>
+struct InputStreamSerializableVariantVectorHelper: InputStreamSerializableStructVectorHelper<_VectorElementType,
+                                                                                             std::is_base_of<SerializableStruct, _VectorElementType>::value> {
+};
+
 template <typename _VectorElementType>
-struct InputStreamVectorHelper: InputStreamSerializableStructVectorHelper<_VectorElementType,
-                                                                          std::is_base_of<SerializableStruct, _VectorElementType>::value> {
+struct InputStreamSerializableVariantVectorHelper<_VectorElementType, true> {
+    static void beginReadVector(InputStream& inputStream, const std::vector<_VectorElementType>& vectorValue) {
+        inputStream.beginReadVectorOfSerializableVariants();
+    }
+};
+
+
+template <typename _VectorElementType>
+struct InputStreamVectorHelper: InputStreamSerializableVariantVectorHelper<_VectorElementType,
+                                                                           std::is_base_of<SerializableVariant, _VectorElementType>::value> {
 };
 
 /**

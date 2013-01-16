@@ -4,11 +4,11 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-#ifndef __VAR_IMPL__
-#define __VAR_IMPL__
+#ifndef COMMONAPI_SERIALIZABLE_VARIANT_IMPL_
+#define COMMONAPI_SERIALIZABLE_VARIANT_IMPL_
 
 #include "OutputStream.h"
+#include "InputStream.h"
 
 namespace CommonAPI {
 
@@ -145,6 +145,28 @@ public:
 private:
     OutputStream& outputStream_;
 };
+
+
+template<typename ... _Types>
+struct InputStreamReadVisitor {
+public:
+    InputStreamReadVisitor(Variant<_Types...>& lhs, InputStream& inputStream) :
+                    lhs_(lhs),
+                    inputStream_(inputStream) {
+    }
+
+    template<typename _Type>
+    void operator()(const _Type&) {
+        _Type value;
+        inputStream_ >> value;
+        lhs_.template set<_Type>(std::move(value), true);
+    }
+
+private:
+    Variant<_Types...>& lhs_;
+    InputStream& inputStream_;
+};
+
 
 template<typename _Type>
 struct TypeEqualsVisitor
@@ -326,8 +348,10 @@ Variant<_Types...>::~Variant() {
 }
 
 template<typename ... _Types>
-void Variant<_Types...>::readFromInputStream(InputStream& inputStream) {
-    //TODO
+void Variant<_Types...>::readFromInputStream(const uint8_t typeIndex, InputStream& inputStream) {
+    valueType_ = typeIndex;
+    InputStreamReadVisitor<_Types...> visitor(*this, inputStream);
+    ApplyVoidVisitor<InputStreamReadVisitor<_Types...>, Variant<_Types...>, _Types...>::visit(visitor, *this);
 }
 
 template<typename ... _Types>
@@ -460,4 +484,4 @@ bool Variant<_Types...>::operator!=(const Variant<_Types...>& rhs) const
 
 }
 
-#endif
+#endif //COMMONAPI_SERIALIZABLE_VARIANT_IMPL_
