@@ -32,7 +32,7 @@ public:
 
     virtual uint8_t getValueType() const = 0;
 
-    virtual void readFromInputStream(InputStream& inputStream) = 0;
+    virtual void readFromInputStream(const uint8_t typeIndex, InputStream& inputStream) = 0;
     virtual void writeToOutputStream(OutputStream& outputStream) const = 0;
 
     virtual void writeToTypeOutputStream(TypeOutputStream& typeOutputStream) const = 0;
@@ -81,7 +81,7 @@ public:
 
     ~Variant();
 
-    virtual void readFromInputStream(InputStream& inputStream);
+    virtual void readFromInputStream(const uint8_t typeIndex, InputStream& inputStream);
 
     virtual void writeToOutputStream(OutputStream& outputStream) const;
 

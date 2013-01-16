@@ -80,6 +80,7 @@ class InputStream {
     virtual void beginReadByteBufferVector() = 0;
     virtual void beginReadVersionVector() = 0;
     virtual void beginReadVectorOfSerializableStructs() = 0;
+    virtual void beginReadVectorOfSerializableVariants() = 0;
     virtual void beginReadVectorOfVectors() = 0;
     virtual void beginReadVectorOfMaps() = 0;
 
@@ -247,9 +248,22 @@ struct InputStreamSerializableStructVectorHelper<_VectorElementType, true> {
 };
 
 
+template <typename _VectorElementType, bool _IsSerializableVariant = false>
+struct InputStreamSerializableVariantVectorHelper: InputStreamSerializableStructVectorHelper<_VectorElementType,
+                                                                                             std::is_base_of<SerializableStruct, _VectorElementType>::value> {
+};
+
 template <typename _VectorElementType>
-struct InputStreamVectorHelper: InputStreamSerializableStructVectorHelper<_VectorElementType,
-                                                                          std::is_base_of<SerializableStruct, _VectorElementType>::value> {
+struct InputStreamSerializableVariantVectorHelper<_VectorElementType, true> {
+    static void beginReadVector(InputStream& inputStream, const std::vector<_VectorElementType>& vectorValue) {
+        inputStream.beginReadVectorOfSerializableVariants();
+    }
+};
+
+
+template <typename _VectorElementType>
+struct InputStreamVectorHelper: InputStreamSerializableVariantVectorHelper<_VectorElementType,
+                                                                           std::is_base_of<SerializableVariant, _VectorElementType>::value> {
 };
 
 /**
