@@ -139,9 +139,9 @@ private:
     typename std::aligned_storage<size>::type& storage_;
 };
 
-struct TypeWriteVisitor {
+struct TypeOutputStreamWriteVisitor {
 public:
-    TypeWriteVisitor(TypeOutputStream& typeStream): typeStream_(typeStream) {
+    TypeOutputStreamWriteVisitor(TypeOutputStream& typeStream): typeStream_(typeStream) {
     }
 
     template<typename _Type>
@@ -151,6 +151,20 @@ public:
 
 private:
     TypeOutputStream& typeStream_;
+};
+
+struct OutputStreamWriteVisitor {
+public:
+    OutputStreamWriteVisitor(OutputStream& outputStream): outputStream_(outputStream) {
+    }
+
+    template<typename _Type>
+    void operator()(const _Type& value) const {
+        outputStream_ << value;
+    }
+
+private:
+    OutputStream& outputStream_;
 };
 
 template<typename _U, typename ... _Types>
@@ -304,12 +318,13 @@ public:
     }
 
     virtual void writeToOutputStream(OutputStream& outputStream) const {
-        //TODO
+        OutputStreamWriteVisitor visitor(outputStream);
+        ApplyVoidVisitor<OutputStreamWriteVisitor, Variant<_Types...>, _Types...>::visit(visitor, *this);
     }
 
     virtual void writeToTypeOutputStream(TypeOutputStream& typeOutputStream) const {
-        TypeWriteVisitor visitor(typeOutputStream);
-        ApplyVoidVisitor<TypeWriteVisitor, Variant<_Types...>, _Types...>::visit(visitor, *this);
+        TypeOutputStreamWriteVisitor visitor(typeOutputStream);
+        ApplyVoidVisitor<TypeOutputStreamWriteVisitor, Variant<_Types...>, _Types...>::visit(visitor, *this);
     }
 
     Variant& operator=(const Variant& rhs)
