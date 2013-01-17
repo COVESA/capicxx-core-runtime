@@ -15,6 +15,7 @@ namespace CommonAPI {
 
 class InputStream;
 class OutputStream;
+class TypeOutputStream;
 
 struct SerializableStruct {
 	virtual ~SerializableStruct() { }

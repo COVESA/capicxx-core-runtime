@@ -115,10 +115,15 @@ public:
                     typename std::enable_if<!std::is_same<_Type, Variant>::value>::type* = 0);
 
     template <typename _Type>
-    const typename VariantTypeSelector<_Type, _Types...>::type & get(bool& success) const;
+    const typename VariantTypeSelector<_Type, _Types...>::type& get() const;
 
     inline uint8_t getValueType() const {
     	return valueType_;
+    }
+
+private:
+    inline bool hasValue() const {
+        return valueType_ < TypesTupleSize::value;
     }
 
     template<typename _U>
@@ -127,14 +132,19 @@ public:
     template<typename _U>
     void set( _U&& value, const bool clear);
 
-private:
-    inline bool hasValue() const {
-        return valueType_ < TypesTupleSize::value;
-    }
+    template<typename _FriendType>
+    friend struct TypeWriter;
+    template<typename ... _FriendTypes>
+    friend struct AssignmentVisitor;
+    template<typename _FriendType>
+    friend struct TypeEqualsVisitor;
+    template<typename ... _FriendTypes>
+    friend struct PartialEqualsVisitor;
+    template<typename ... _FriendTypes>
+    friend struct InputStreamReadVisitor;
 
     uint8_t valueType_;
     typename std::aligned_storage<maxSize>::type valueStorage_;
-
 };
 } // namespace CommonAPI
 

@@ -151,10 +151,6 @@ inline InputStream& operator>>(InputStream& inputStream, std::string& stringValu
 	return inputStream.readValue(stringValue);
 }
 
-inline InputStream& operator>>(InputStream& inputStream, ByteBuffer& byteBufferValue) {
-	return inputStream.readValue(byteBufferValue);
-}
-
 inline InputStream& operator>>(InputStream& inputStream, Version& versionValue) {
 	return inputStream.readVersionValue(versionValue);
 }

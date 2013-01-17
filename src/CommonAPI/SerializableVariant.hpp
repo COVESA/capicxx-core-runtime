@@ -9,21 +9,11 @@
 
 #include "OutputStream.h"
 #include "InputStream.h"
-#include <iostream>
+
+#include <exception>
+
 
 namespace CommonAPI {
-
-template<typename _Type>
-struct TypeWriter;
-
-template<typename ... _Types>
-struct AssignmentVisitor;
-
-template<typename _Type>
-struct TypeEqualsVisitor;
-
-template<typename ... _Types>
-struct PartialEqualsVisitor;
 
 template<class Visitor, class Variant, typename ... _Types>
 struct ApplyVoidVisitor;
@@ -50,21 +40,17 @@ struct ApplyVoidVisitor<Visitor, Variant, _Type, _Types...> {
     static const uint8_t index = ApplyVoidVisitor<Visitor, Variant,
                     _Types...>::index + 1;
 
-    static
-    void visit(Visitor& visitor, Variant& var) {
+    static void visit(Visitor& visitor, Variant& var) {
         if (var.getValueType() == index) {
-            bool b;
-            visitor(var.template get<_Type>(b));
+            visitor(var.template get<_Type>());
         } else {
             ApplyVoidVisitor<Visitor, Variant, _Types...>::visit(visitor, var);
         }
     }
 
-    static
-    void visit(Visitor& visitor, const Variant& var) {
+    static void visit(Visitor& visitor, const Variant& var) {
         if (var.getValueType() == index) {
-            bool b;
-            visitor(var.template get<_Type>(b));
+            visitor(var.template get<_Type>());
         } else {
             ApplyVoidVisitor<Visitor, Variant, _Types...>::visit(visitor, var);
         }
@@ -92,8 +78,7 @@ struct ApplyBoolVisitor<Visitor, Variant, _Type, _Types...> {
 
     static bool visit(Visitor& visitor, Variant& var) {
         if (var.getValueType() == index) {
-            bool b;
-            return visitor(var.template get<_Type>(b));
+            return visitor(var.template get<_Type>());
         } else {
             return ApplyBoolVisitor<Visitor, Variant, _Types...>::visit(visitor,
                             var);
@@ -173,21 +158,15 @@ template<typename _Type>
 struct TypeEqualsVisitor
 {
 public:
-    TypeEqualsVisitor(const _Type& rhs) :
-                    rhs_(rhs)
-    {
+    TypeEqualsVisitor(const _Type& rhs): rhs_(rhs) {
     }
 
-    bool
-    operator()(const _Type& lhs) const
-                      {
+    bool operator()(const _Type& lhs) const {
         return lhs == rhs_;
     }
 
     template<typename _U>
-    bool
-    operator()(const _U&) const
-                      {
+    bool operator()(const _U&) const {
         return false;
     }
 
@@ -391,9 +370,8 @@ Variant<_Types...>& Variant<_Types...>::operator=(Variant<_Types...>&& rhs) {
 template<typename ... _Types>
 template<typename _Type>
 typename std::enable_if<!std::is_same<_Type, Variant<_Types...>>::value, Variant<_Types...>&>::type
-Variant<_Types...>::operator=(const _Type& value)
-                              {
-    set<typename TypeSelector<_Type, _Types...>::type>(value);
+Variant<_Types...>::operator=(const _Type& value) {
+    set<typename TypeSelector<_Type, _Types...>::type>(value, hasValue());
     return *this;
 }
 
@@ -427,19 +405,20 @@ typename std::enable_if<!std::is_same<_Type, Variant<_Types...>>::value>::type*)
     set<typename TypeSelector<_Type, _Types...>::type>(std::move(value), false);
 }
 
+
 template<typename ... _Types>
 template<typename _Type>
-const typename VariantTypeSelector<_Type, _Types...>::type & Variant<_Types...>::get(bool& success) const {
+const typename VariantTypeSelector<_Type, _Types...>::type & Variant<_Types...>::get() const {
     typedef typename TypeSelector<_Type, _Types...>::type selected_type_t;
     uint8_t cType = TypeIndex<_Types...>::template get<selected_type_t>();
     if (cType == valueType_) {
-        success = true;
         return *(reinterpret_cast<const _Type *>(&valueStorage_));
     } else {
-        success = false;
-        return *(reinterpret_cast<const _Type *>(&valueStorage_));
+        std::bad_cast toThrow;
+        throw toThrow;
     }
 }
+
 
 template<typename ... _Types>
 template<typename _U>
