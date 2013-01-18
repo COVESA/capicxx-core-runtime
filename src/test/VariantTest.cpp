@@ -26,67 +26,51 @@ TEST_F(VariantTest, VariantTestPack) {
 
     Variant<int, double, std::string> myVariantf(fromDouble);
 
-    bool success;
+    std::string myString = myVariants->get<std::string>();
+    std::cout << "myString = " << myString << "\n";
 
-    std::string myString = myVariants->get<std::string>(success);
-    std::cout << "myString = " << myString << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
 
-    const int& myInt = myVariant.get<int>(success);
-    std::cout << "myInt = " << myInt << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
+    const int& myInt = myVariant.get<int>();
+    std::cout << "myInt = " << myInt << "\n";
 
     Variant<int, double, std::string> myVariant2 = myVariant;
-    const int& myInt2 = myVariant2.get<int>(success);
-    std::cout << "myInt2 = " << myInt2 << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
+    const int& myInt2 = myVariant2.get<int>();
+    std::cout << "myInt2 = " << myInt2 << "\n";
 
     Variant<int, double, std::string> myVariant3 = fromInt;
-    const int& myInt3 = myVariant3.get<int>(success);
-    std::cout << "myInt3 = " << myInt3 << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
+    const int& myInt3 = myVariant3.get<int>();
+    std::cout << "myInt3 = " << myInt3 << "\n"; "\n";
 
-    myString = myVariants->get<std::string>(success);
-    std::cout << "myString = " << myString << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
+    myString = myVariants->get<std::string>();
+    std::cout << "myString = " << myString << "\n";
 
     Variant<int, double, std::string> myVariantCopy(myVariant);
-    const int& myIntCopy = myVariantCopy.get<int>(success);
-    std::cout << "myIntCopy = " << myIntCopy << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
+    const int& myIntCopy = myVariantCopy.get<int>();
+    std::cout << "myIntCopy = " << myIntCopy << "\n";
 
-    std::cout << "myIntCopy equals myInt= " << "(" << std::boolalpha << (myVariant == myVariantCopy) << ")\n";
-    EXPECT_TRUE((myVariant == myVariantCopy));
+    std::cout << "myIntCopy equals myInt " << "(" << std::boolalpha << (myVariant == myVariantCopy) << ")\n";
 
-    const int& myFake = myVariant.get<double>(success);
-    std::cout << "myFake = " << myFake << " (" << std::boolalpha << success << ")\n";
-    EXPECT_FALSE(success);
+    EXPECT_ANY_THROW(const int& myFake = myVariant.get<double>());
 
     std::cout << "myInt is int = " << " (" << std::boolalpha << myVariant.isType<int>() << ")\n";
     EXPECT_TRUE(myVariant.isType<int>());
 
-    std::cout << "myInt is std::string = " << " (" << std::boolalpha << myVariant.isType<std::string>() << ")\n";
+    std::cout << "myInt is std::string = " << "\n";
     EXPECT_FALSE(myVariant.isType<std::string>());
 
-    const double& myDouble = myVariantf.get<double>(success);
-    std::cout << "myDouble = " << myDouble << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
+    const double& myDouble = myVariantf.get<double>();
+    std::cout << "myDouble = " << myDouble << "\n";
 
     Variant<int, double, std::string> myVariantsCopy(*myVariants);
-    std::string myStringCopy = myVariantsCopy.get<std::string>(success);
-    std::cout << "myStringCopy = " << myStringCopy << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
-//    EXPECT_TRUE((myVariants == myVariantsCopy));
+    std::string myStringCopy = myVariantsCopy.get<std::string>();
+    std::cout << "myStringCopy = " << myStringCopy << "\n";
 
-    bool s2;
-    myVariants->set<std::string>(std::string("Hello World"), s2);
-    myString = myVariants->get<std::string>(success);
-    std::cout << "myString = " << myString << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
+    *myVariants = std::string("Hello World");
+    myString = myVariants->get<std::string>();
+    std::cout << "myString = " << myString << "\n";
 
-    myStringCopy = myVariantsCopy.get<std::string>(success);
-    std::cout << "myStringCopy = " << myStringCopy << " (" << std::boolalpha << success << ")\n";
-    EXPECT_TRUE(success);
+    myStringCopy = myVariantsCopy.get<std::string>();
+    std::cout << "myStringCopy = " << myStringCopy << "\n";
 
     delete myVariants;
 }
