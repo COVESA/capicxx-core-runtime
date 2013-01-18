@@ -35,6 +35,7 @@ CommonAPI_include_HEADERS = \
 		src/CommonAPI/Runtime.h \
 		src/CommonAPI/SerializableStruct.h \
 		src/CommonAPI/SerializableVariant.h \
+		src/CommonAPI/Stub.h \
 		src/CommonAPI/types.h
 
 libCommonAPI_la_LIBADD = -ldl
