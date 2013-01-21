@@ -5,6 +5,7 @@ AC_INIT([GENIVI Common API C++ Library],
         [CommonAPI])
 
 AC_CONFIG_MACRO_DIR([m4])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([build-aux/config.h])
 AC_CONFIG_FILES([
