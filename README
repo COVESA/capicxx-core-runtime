@@ -1,4 +1,78 @@
-Build Instructions
-==================
+GENIVI_CommonAPI
+================
+:Author: Juergen Gehring - juergen.gehring@bmw.de, Manfred Bathelt - manfred.bathelt@bmw.de
+:doctitle: GENIVI_CommonAPI
 
-Use autotools to build this package. 
+Copyright
+---------
+Copyright (C) 2013, GENIVI Alliance, Inc.
+Copyright (C) 2013, BMW AG
+
+This file is part of GENIVI Project IPC Common API.
+ 
+Contributions are licensed to the GENIVI Alliance under one or more
+Contribution License Agreements or MPL 2.0 .
+ 
+(C) Copyright
+This Source Code Form is subject to the terms of the
+Mozilla Public License, v. 2.0. If a  copy of the MPL was not distributed with
+this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+For further information see https://collab.genivi.org/wiki/display/genivi/SysInfraEGCommonIDLCommonAPIGuide
+
+== License
+This project is licensed under MPL 2.0
+
+Contribution is done under GENIVI CLA or MPL2.0. 
+
+== Version
+The current version can be taken from the git.
+
+== Common API Overview
+
+Common API and its machanism specific bindings (e.g. Common API D-Bus) provide a set of libraries and tools to work with 
+RPC communication in a way independent of wich mechanism is used. It consist currently consists of four subprojects:
+----
+CommonAPI - This is the base C++ library, which provides the application interface for users and can
+            load runtime bindings such as dbus. (This is the current package.) 
+CommonAPI-Tools - The eclipse based tools for CommonAPI. This is essentially the code generator for 
+                  Franca -> Common API C++ code. 
+CommonAPI-D-Bus - This is the D-Bus binding C++ library, which provides the necesary code to communicate 
+                  over D-Bus. This is invisible to the application code, and simply needs to be linked against. 
+CommonAPI-D-Bus-Tools - The eclipse based tools for CommonAPI D-Bus. This is the code generator for 
+                        Franca -> Common API D-Bus C++ code.
+----
+== Build Instructions
+
+Use autotools to build this package:
+----
+# ./autoreconf -i
+# ./configure
+# make
+# sudo make install (or alternative install process, eg. checkinstall on debian-based distributions, such as Ubuntu)
+----
+If the environment variable GTEST_CONFIG is set to the path of the gtest-config script in a Gtest tree test will also be built.  
+
+== Working on the code & contribution
+
+.First get the code from the git:
+        git clone 
+
+.Get an overview of all branches:
+        git branch
+
+.Switch to the branch you want to work on (master is the feature branch) and verify that it has switched (* changed)
+        git checkout <your branch>
+        git branch
+
+.Best practice is to create a local branch based on the current branch:
+        git branch working_branch
+
+Start working, best practice is to commit smaller, compilable pieces during the development process that makes it easier to handle later on.
+
+.If you want to commit you changes, send them to the author, you can create a patch like this:
+        git format-patch working_branch <your branch>
+
+This creates a set of patches that are published via the mailing list.The patches will be discussed and then merged & uploaded on the git by the maintainer.
+
+Patches can be accepted either under GENIVI Cla or MPL 2.0 (see section License). Please be sure that the signed-off-by is set correctly. For more, check out http://gerrit.googlecode.com/svn/documentation/2.0/user-signedoffby.html
