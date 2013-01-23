@@ -408,7 +408,7 @@ typename std::enable_if<!std::is_same<_Type, Variant<_Types...>>::value>::type*)
 
 template<typename ... _Types>
 template<typename _Type>
-const typename VariantTypeSelector<_Type, _Types...>::type & Variant<_Types...>::get() const {
+const _Type & Variant<_Types...>::get() const {
     typedef typename TypeSelector<_Type, _Types...>::type selected_type_t;
     uint8_t cType = TypeIndex<_Types...>::template get<selected_type_t>();
     if (cType == valueType_) {

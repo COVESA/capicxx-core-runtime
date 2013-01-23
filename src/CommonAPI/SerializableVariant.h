@@ -114,7 +114,7 @@ public:
                     typename std::enable_if<!std::is_same<_Type, Variant>::value>::type* = 0);
 
     template <typename _Type>
-    const typename VariantTypeSelector<_Type, _Types...>::type& get() const;
+    const _Type& get() const;
 
     inline uint8_t getValueType() const {
     	return valueType_;
