@@ -55,9 +55,8 @@ struct MaxSize<_Type, _Types...> {
                                     current_type_size : next_type_size;
 };
 
-template<typename _SearchType, typename _CurrentType, typename ... _RestTypes>
-struct VariantTypeSelector: VariantTypeSelector<_SearchType, _RestTypes...> {
-};
+template<typename _SearchType, typename ... _RestTypes>
+struct VariantTypeSelector;
 
 template<typename _SearchType, typename ... _RestTypes>
 struct VariantTypeSelector<_SearchType, _SearchType, _RestTypes...> {

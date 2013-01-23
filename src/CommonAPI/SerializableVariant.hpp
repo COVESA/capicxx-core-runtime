@@ -216,7 +216,7 @@ private:
     const bool clear_;
 };
 
-template<typename _U, typename ... _Types>
+template<typename ... _Types>
 struct TypeSelector;
 
 template<typename _U>
