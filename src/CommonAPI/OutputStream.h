@@ -295,6 +295,16 @@ class OutputStream {
     virtual void beginWriteStringVector(uint32_t sizeOfVector) = 0;
     virtual void beginWriteByteBufferVector(uint32_t sizeOfVector) = 0;
     virtual void beginWriteVersionVector(uint32_t sizeOfVector) = 0;
+
+    virtual void beginWriteInt8EnumVector(uint32_t sizeOfVector) = 0;
+    virtual void beginWriteInt16EnumVector(uint32_t sizeOfVector) = 0;
+    virtual void beginWriteInt32EnumVector(uint32_t sizeOfVector) = 0;
+    virtual void beginWriteInt64EnumVector(uint32_t sizeOfVector) = 0;
+    virtual void beginWriteUInt8EnumVector(uint32_t sizeOfVector) = 0;
+    virtual void beginWriteUInt16EnumVector(uint32_t sizeOfVector) = 0;
+    virtual void beginWriteUInt32EnumVector(uint32_t sizeOfVector) = 0;
+    virtual void beginWriteUInt64EnumVector(uint32_t sizeOfVector) = 0;
+
     virtual void beginWriteVectorOfSerializableStructs(uint32_t sizeOfVector) = 0;
     virtual void beginWriteVectorOfSerializableVariants(uint32_t sizeOfVector) = 0;
     virtual void beginWriteVectorOfVectors(uint32_t sizeOfVector) = 0;

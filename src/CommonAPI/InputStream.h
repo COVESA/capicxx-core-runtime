@@ -79,6 +79,16 @@ class InputStream {
     virtual void beginReadStringVector() = 0;
     virtual void beginReadByteBufferVector() = 0;
     virtual void beginReadVersionVector() = 0;
+
+    virtual void beginReadInt8EnumVector() = 0;
+    virtual void beginReadInt16EnumVector() = 0;
+    virtual void beginReadInt32EnumVector() = 0;
+    virtual void beginReadInt64EnumVector() = 0;
+    virtual void beginReadUInt8EnumVector() = 0;
+    virtual void beginReadUInt16EnumVector() = 0;
+    virtual void beginReadUInt32EnumVector() = 0;
+    virtual void beginReadUInt64EnumVector() = 0;
+
     virtual void beginReadVectorOfSerializableStructs() = 0;
     virtual void beginReadVectorOfSerializableVariants() = 0;
     virtual void beginReadVectorOfVectors() = 0;
