@@ -49,9 +49,10 @@ class Factory {
     template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions>
     std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
     buildProxy(const std::string& participantId,
+               const std::string& serviceName,
                const std::string& domain) {
 
-    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceName(), participantId, domain);
+    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceName(), participantId, serviceName, domain);
     	return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
     }
 
@@ -62,19 +63,20 @@ class Factory {
 		std::string domain;
 		std::string serviceName;
 		std::string participantId;
-		if(!splitAddress(serviceAddress, domain, serviceName, participantId)) {
+		if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
 			return false;
 		}
 
-		return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, domain);
+		return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, serviceName, domain);
     }
 
     template <template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
     std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>
     buildProxyWithDefaultAttributeExtension(const std::string& participantId,
-                                       const std::string& domain) {
+                                            const std::string& serviceName,
+                                            const std::string& domain) {
 
-    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t::getInterfaceName(), participantId, domain);
+    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t::getInterfaceName(), participantId, serviceName, domain);
     	return std::make_shared<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>(abstractMiddlewareProxy);
     }
 
@@ -85,11 +87,11 @@ class Factory {
 		std::string domain;
 		std::string serviceName;
 		std::string participantId;
-		if(!splitAddress(serviceAddress, domain, serviceName, participantId)) {
+		if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
 			return false;
 		}
 
-		return buildProxyWithDefaultAttributeExtension<_ProxyClass, _AttributeExtension>(participantId, domain);
+		return buildProxyWithDefaultAttributeExtension<_ProxyClass, _AttributeExtension>(participantId, serviceName, domain);
     }
 
     inline std::shared_ptr<Runtime> getRuntime() {
@@ -99,10 +101,11 @@ class Factory {
     template<typename _Stub>
     bool registerService(std::shared_ptr<_Stub> stub,
     				     const std::string& participantId,
+    				     const std::string& serviceName,
             			 const std::string& domain) {
 
     	std::shared_ptr<StubBase> stubBase = std::dynamic_pointer_cast<StubBase>(stub);
-		std::shared_ptr<CommonAPI::StubAdapter> stubAdapter = createAdapter(stubBase, _Stub::StubAdapterType::getInterfaceName(), participantId, domain);
+		std::shared_ptr<CommonAPI::StubAdapter> stubAdapter = createAdapter(stubBase, _Stub::StubAdapterType::getInterfaceName(), participantId, serviceName, domain);
 		if(!stubAdapter) {
 			return false;
 		}
@@ -123,11 +126,11 @@ class Factory {
 		std::string domain;
 		std::string serviceName;
 		std::string participantId;
-		if(!splitAddress(serviceAddress, domain, serviceName, participantId)) {
+		if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
 			return false;
 		}
 
-		return registerService<_Stub>(stub, participantId, domain);
+		return registerService<_Stub>(stub, participantId, serviceName, domain);
     }
 
     inline bool unregisterService(const std::string& serviceAddress) {
@@ -139,8 +142,8 @@ class Factory {
     virtual bool isServiceInstanceAlive(const std::string& serviceInstanceID, const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
 
  protected:
-    virtual std::shared_ptr<Proxy> createProxy(const char* interfaceName, const std::string& participantId, const std::string& domain) = 0;
-    virtual std::shared_ptr<StubAdapter> createAdapter(std::shared_ptr<StubBase> stubBase, const char* interfaceName, const std::string& participantId, const std::string& domain) = 0;
+    virtual std::shared_ptr<Proxy> createProxy(const char* interfaceName, const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
+    virtual std::shared_ptr<StubAdapter> createAdapter(std::shared_ptr<StubBase> stubBase, const char* interfaceName, const std::string& participantId, const std::string& serivceName, const std::string& domain) = 0;
 
  private:
     std::shared_ptr<Runtime> runtime_;
@@ -148,7 +151,7 @@ class Factory {
 
     const MiddlewareInfo* middlewareInfo_;
 
-    inline bool splitAddress(const std::string& serviceAddress, std::string& domain, std::string& serviceName, std::string& participantId) {
+    inline bool splitValidAddress(const std::string& serviceAddress, std::string& domain, std::string& serviceName, std::string& participantId) {
     	std::istringstream addressStream(serviceAddress);
 		if(!std::getline(addressStream, domain, ':')) {
 			return false;
