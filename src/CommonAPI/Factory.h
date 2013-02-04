@@ -139,6 +139,7 @@ class Factory {
 
     virtual std::vector<std::string> getAvailableServiceInstances(const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
 
+    virtual bool isServiceInstanceAlive(const std::string& serviceAddress) = 0;
     virtual bool isServiceInstanceAlive(const std::string& serviceInstanceID, const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
 
  protected:
