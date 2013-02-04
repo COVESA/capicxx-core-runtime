@@ -52,7 +52,7 @@ class Factory {
                const std::string& serviceName,
                const std::string& domain) {
 
-    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceName(), participantId, serviceName, domain);
+    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceId(), participantId, serviceName, domain);
     	return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
     }
 
@@ -76,7 +76,7 @@ class Factory {
                                             const std::string& serviceName,
                                             const std::string& domain) {
 
-    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t::getInterfaceName(), participantId, serviceName, domain);
+    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t::getInterfaceId(), participantId, serviceName, domain);
     	return std::make_shared<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>(abstractMiddlewareProxy);
     }
 
@@ -105,12 +105,12 @@ class Factory {
             			 const std::string& domain) {
 
     	std::shared_ptr<StubBase> stubBase = std::dynamic_pointer_cast<StubBase>(stub);
-		std::shared_ptr<CommonAPI::StubAdapter> stubAdapter = createAdapter(stubBase, _Stub::StubAdapterType::getInterfaceName(), participantId, serviceName, domain);
+		std::shared_ptr<CommonAPI::StubAdapter> stubAdapter = createAdapter(stubBase, _Stub::StubAdapterType::getInterfaceId(), participantId, serviceName, domain);
 		if(!stubAdapter) {
 			return false;
 		}
 
-		std::string address = domain + ":" + _Stub::StubAdapterType::getInterfaceName() + ":" + participantId;
+		std::string address = domain + ":" + serviceName + ":" + participantId;
 		registeredServices_.insert( {std::move(address), stubAdapter} );
 
 		return true;
@@ -142,8 +142,8 @@ class Factory {
     virtual bool isServiceInstanceAlive(const std::string& serviceInstanceID, const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
 
  protected:
-    virtual std::shared_ptr<Proxy> createProxy(const char* interfaceName, const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
-    virtual std::shared_ptr<StubAdapter> createAdapter(std::shared_ptr<StubBase> stubBase, const char* interfaceName, const std::string& participantId, const std::string& serivceName, const std::string& domain) = 0;
+    virtual std::shared_ptr<Proxy> createProxy(const char* interfaceId, const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
+    virtual std::shared_ptr<StubAdapter> createAdapter(std::shared_ptr<StubBase> stubBase, const char* interfaceId, const std::string& participantId, const std::string& serivceName, const std::string& domain) = 0;
 
  private:
     std::shared_ptr<Runtime> runtime_;
