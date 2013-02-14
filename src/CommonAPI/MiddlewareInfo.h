@@ -23,7 +23,7 @@ inline int FNV1aHash(const char* s) {
     const int FNV_prime = 16777619;
 
     int hashValue = FNV_offset_basis;
-    for (int i = 0; i < strlen(s); i++) {
+    for (unsigned int i = 0; i < strlen(s); i++) {
         hashValue = (hashValue ^ s[i]) * FNV_prime;
     }
     return hashValue;
@@ -34,14 +34,14 @@ typedef std::shared_ptr<Runtime> (*MiddlewareRuntimeLoadFunction) ();
 
 
 struct MiddlewareInfo {
-    const int middlewareId;
     const char* middlewareName_;
-    MiddlewareRuntimeLoadFunction getInstance;
+    const int middlewareId_;
+    MiddlewareRuntimeLoadFunction getInstance_;
 
     MiddlewareInfo(const char* middlewareName, MiddlewareRuntimeLoadFunction middlewareRuntimeLoadFunction):
         middlewareName_(middlewareName),
-        middlewareId(FNV1aHash(middlewareName)),
-        getInstance(middlewareRuntimeLoadFunction) {
+        middlewareId_(FNV1aHash(middlewareName)),
+        getInstance_(middlewareRuntimeLoadFunction) {
 }
 };
 
