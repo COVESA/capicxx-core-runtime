@@ -46,7 +46,7 @@ CommonAPI-D-Bus-Tools - The eclipse based tools for CommonAPI D-Bus. This is the
 
 Use autotools to build this package:
 ----
-# ./autoreconf -i
+# autoreconf -i
 # ./configure
 # make
 # sudo make install (or alternative install process, eg. checkinstall on debian-based distributions, such as Ubuntu)
