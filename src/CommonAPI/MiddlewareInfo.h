@@ -19,7 +19,7 @@ class Runtime;
 
 
 inline int FNV1aHash(const char* s) {
-    const int FNV_offset_basis = 2166136261;
+    const int FNV_offset_basis = 2166136261u;
     const int FNV_prime = 16777619;
 
     int hashValue = FNV_offset_basis;
