@@ -13,6 +13,7 @@
 namespace CommonAPI {
 
 enum class AvailabilityStatus {
+	UNKNOWN,
 	AVAILABLE,
 	NOT_AVAILABLE
 };
