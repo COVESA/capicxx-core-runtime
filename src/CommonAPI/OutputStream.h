@@ -11,6 +11,8 @@
 #include "SerializableStruct.h"
 #include "SerializableVariant.h"
 #include "types.h"
+#include <unistd.h>
+#include <iostream>
 
 #include <cstdint>
 #include <functional>
@@ -314,6 +316,8 @@ class OutputStream {
 
 	virtual void beginWriteMap(size_t elementCount) = 0;
 	virtual void endWriteMap() = 0;
+	virtual void beginWriteMapElement() = 0;
+	virtual void endWriteMapElement() = 0;
 };
 
 
@@ -518,14 +522,14 @@ OutputStream& operator<<(OutputStream& outputStream, const std::unordered_map<_K
 	typedef typename std::unordered_map<_KeyType, _ValueType>::const_iterator MapConstIterator;
 
 	const size_t elementCount = mapValue.size();
-
 	outputStream.beginWriteMap(elementCount);
 
 	for (MapConstIterator iter = mapValue.cbegin(); iter != mapValue.cend(); iter++) {
+	    outputStream.beginWriteMapElement();
 		outputStream << iter->first << iter->second;
-
 		if (outputStream.hasError())
 			return outputStream;
+		outputStream.endWriteMapElement();
 	}
 
 	outputStream.endWriteMap();

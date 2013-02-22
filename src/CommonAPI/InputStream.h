@@ -100,6 +100,8 @@ class InputStream {
  	virtual void beginReadMap() = 0;
  	virtual bool hasMoreMapElements() = 0;
  	virtual void endReadMap() = 0;
+ 	virtual void beginReadMapElement() = 0;
+ 	virtual void endReadMapElement() = 0;
 };
 
 template <typename _EnumBackingType, typename _EnumType>
@@ -312,7 +314,9 @@ InputStream& operator>>(InputStream& inputStream, std::unordered_map<_KeyType, _
 		_KeyType elementKey;
 		_ValueType elementValue;
 
+		inputStream.beginReadMapElement();
 		inputStream >> elementKey >> elementValue;
+		inputStream.endReadMapElement();
 
 		if (inputStream.hasError())
 			break;
