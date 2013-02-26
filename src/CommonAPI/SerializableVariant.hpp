@@ -68,6 +68,7 @@ struct ApplyBoolVisitor<Visitor, Variant> {
     static bool visit(Visitor&, Variant&) {
         //won't be called
         assert(false);
+        return false;
     }
 };
 
@@ -425,7 +426,6 @@ template<typename _U>
 void Variant<_Types...>::set(const _U& value, const bool clear) {
     typedef typename TypeSelector<_U, _Types...>::type selected_type_t;
 
-    const selected_type_t& type_value = value;
     if (clear) {
         DeleteVisitor<maxSize> visitor(valueStorage_);
         ApplyVoidVisitor<DeleteVisitor<maxSize>, Variant<_Types...>, _Types...>::visit(visitor, *this);
