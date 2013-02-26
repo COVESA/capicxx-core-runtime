@@ -145,7 +145,7 @@ public:
     void operator()(const _Type&) {
         _Type value;
         inputStream_ >> value;
-        lhs_.template set<_Type>(std::move(value), false);
+        lhs_.Variant<_Types...>::template set<_Type>(std::move(value), false);
     }
 
 private:
@@ -203,12 +203,12 @@ public:
 
     template<typename _Type>
     void operator()(const _Type& value) const {
-        lhs_.template set<_Type>(value, clear_);
+        lhs_.Variant<_Types...>::template set<_Type>(value, clear_);
     }
 
     template<typename _Type>
     void operator()(_Type& value) const {
-        lhs_.template set<_Type>(value, clear_);
+        lhs_.Variant<_Types...>::template set<_Type>(value, clear_);
     }
 
 private:

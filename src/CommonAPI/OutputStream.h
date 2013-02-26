@@ -369,10 +369,6 @@ inline OutputStream& operator<<(OutputStream& outputStream, const std::string& s
 	return outputStream.writeValue(stringValue);
 }
 
-inline OutputStream& operator<<(OutputStream& outputStream, const ByteBuffer& byteBufferValue) {
-	return outputStream.writeValue(byteBufferValue);
-}
-
 inline OutputStream& operator<<(OutputStream& outputStream, const Version& versionValue) {
 	return outputStream.writeVersionValue(versionValue);
 }
