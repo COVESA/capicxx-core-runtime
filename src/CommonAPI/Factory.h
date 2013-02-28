@@ -134,7 +134,13 @@ class Factory {
     }
 
     inline bool unregisterService(const std::string& serviceAddress) {
-    	return registeredServices_.erase(serviceAddress);
+    	auto foundStubAdapter = registeredServices_.find(serviceAddress);
+    	if(foundStubAdapter != registeredServices_.end()) {
+			std::shared_ptr<CommonAPI::StubAdapter> stubAdapter = foundStubAdapter->second;
+			stubAdapter->deinit();
+	    	return registeredServices_.erase(serviceAddress);
+    	}
+    	return false;
     }
 
     virtual std::vector<std::string> getAvailableServiceInstances(const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
