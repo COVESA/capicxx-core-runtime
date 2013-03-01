@@ -21,8 +21,6 @@ class StubAdapter {
     virtual const std::string& getDomain() const = 0;
     virtual const std::string& getServiceId() const = 0;
     virtual const std::string& getInstanceId() const = 0;
-
-    virtual void deinit() = 0;
 };
 
 struct StubBase {
@@ -39,7 +37,6 @@ class Stub : public StubBase {
 	virtual ~Stub() { }
 
 	virtual _StubRemoteEventHandler* initStubAdapter(const std::shared_ptr<_StubAdapter>& stubAdapter) = 0;
-    virtual void deinitStubAdapter() = 0;
 };
 
 } // namespace CommonAPI
