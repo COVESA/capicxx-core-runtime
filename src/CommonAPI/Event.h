@@ -10,6 +10,7 @@
 #include <functional>
 #include <list>
 #include <tuple>
+#include <mutex>
 
 namespace CommonAPI {
 
@@ -34,7 +35,7 @@ class Event {
 	Subscription subscribeCancellableListener(CancellableListener listener);
 	void unsubscribe(Subscription listenerSubscription);
 
-	virtual ~Event() { }
+	virtual ~Event() {}
 
  protected:
 	// Returns false if all subscriptions were cancelled
@@ -53,6 +54,7 @@ class Event {
 
  private:
 	ListenersList listenersList_;
+	std::mutex listenerListMutex_;
 };
 
 template <typename... _Arguments>
@@ -94,7 +96,9 @@ template <typename... _Arguments>
 void Event<_Arguments...>::unsubscribe(Subscription listenerSubscription) {
 	const CancellableListener cancellableListener = *listenerSubscription;
 
+	listenerListMutex_.lock();
 	listenersList_.erase(listenerSubscription);
+	listenerListMutex_.unlock();
 
 	onListenerRemoved(cancellableListener);
 
@@ -105,6 +109,7 @@ void Event<_Arguments...>::unsubscribe(Subscription listenerSubscription) {
 
 template <typename... _Arguments>
 SubscriptionStatus Event<_Arguments...>::notifyListeners(const _Arguments&... eventArguments) {
+	listenerListMutex_.lock();
 	for (auto iterator = listenersList_.begin(); iterator != listenersList_.end(); ) {
 		const CancellableListener& cancellableListener = *iterator;
 		const SubscriptionStatus listenerSubscriptionStatus = cancellableListener(eventArguments...);
@@ -116,6 +121,7 @@ SubscriptionStatus Event<_Arguments...>::notifyListeners(const _Arguments&... ev
 		} else
 			iterator++;
 	}
+	listenerListMutex_.unlock();
 
 	return listenersList_.empty() ? SubscriptionStatus::CANCEL : SubscriptionStatus::RETAIN;
 }
