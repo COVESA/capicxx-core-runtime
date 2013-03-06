@@ -79,13 +79,16 @@ typename Event<_Arguments...>::Subscription Event<_Arguments...>::subscribe(List
 
 template <typename... _Arguments>
 typename Event<_Arguments...>::Subscription Event<_Arguments...>::subscribeCancellableListener(CancellableListener listener) {
-	const bool firstListenerAdded = listenersList_.empty();
+    listenerListMutex_.lock();
+    const bool firstListenerAdded = listenersList_.empty();
 
 	listenersList_.emplace_front(std::move(listener));
 	Subscription listenerSubscription = listenersList_.begin();
+	listenerListMutex_.unlock();
 
-	if (firstListenerAdded)
+	if (firstListenerAdded) {
 		onFirstListenerAdded(*listenerSubscription);
+	}
 
 	onListenerAdded(*listenerSubscription);
 
@@ -98,13 +101,14 @@ void Event<_Arguments...>::unsubscribe(Subscription listenerSubscription) {
 
 	listenerListMutex_.lock();
 	listenersList_.erase(listenerSubscription);
+	const bool lastListenerRemoved = listenersList_.empty();
 	listenerListMutex_.unlock();
 
 	onListenerRemoved(cancellableListener);
 
-	const bool lastListenerRemoved = listenersList_.empty();
-	if (lastListenerRemoved)
+	if (lastListenerRemoved) {
 		onLastListenerRemoved(cancellableListener);
+	}
 }
 
 template <typename... _Arguments>
@@ -121,9 +125,12 @@ SubscriptionStatus Event<_Arguments...>::notifyListeners(const _Arguments&... ev
 		} else
 			iterator++;
 	}
+
+	const bool lEmpty = listenersList_.empty();
+
 	listenerListMutex_.unlock();
 
-	return listenersList_.empty() ? SubscriptionStatus::CANCEL : SubscriptionStatus::RETAIN;
+	return lEmpty ? SubscriptionStatus::CANCEL : SubscriptionStatus::RETAIN;
 }
 
 template <typename... _Arguments>
