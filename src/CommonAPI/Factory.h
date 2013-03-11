@@ -35,9 +35,20 @@ struct DefaultAttributeProxyFactoryHelper;
 template<template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
 std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t> createProxyWithDefaultAttributeExtension(Factory* specificFactory, const std::string& participantId, const std::string& domain);
 
-
+/**
+ * \brief The main CommonAPI access class. A factory is responsible for creation and destruction of service objects.
+ *
+ * The main CommonAPI access class. A factory is responsible for creation and destruction of service objects.
+ * This includes proxies and stubs. It also provides service discovery methods.
+ */
 class Factory {
  public:
+
+    /**
+     * \brief Creates factory. Don't call manually.
+     *
+     * Creates factory. Don't call manually.
+     */
     Factory(const std::shared_ptr<Runtime> runtime,
             const MiddlewareInfo* middlewareInfo):
                 runtime_(runtime),
@@ -46,6 +57,17 @@ class Factory {
 
     virtual ~Factory() {}
 
+    /**
+     * \brief Build a proxy for the specified address
+     *
+     * Build a proxy for the specified address.
+     * Template this method call for the desired proxy type and attribute extension.
+     *
+     * @param participantId The participant ID of the common API address (last part)
+     * @param serviceName The service name of the common API address (middle part)
+     * @param domain The domain of the common API address (first part)
+     * @return a shared pointer to the constructed proxy
+     */
     template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions>
     std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
     buildProxy(const std::string& participantId,
@@ -56,6 +78,15 @@ class Factory {
     	return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
     }
 
+    /**
+     * \brief Build a proxy for the specified address
+     *
+     * Build a proxy for the specified address.
+     * Template this method call for the desired proxy type and attribute extension.
+     *
+     * @param serviceAddress The common API address
+     * @return a shared pointer to the constructed proxy
+     */
     template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions >
     std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
     buildProxy(const std::string& serviceAddress) {
@@ -70,6 +101,17 @@ class Factory {
 		return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, serviceName, domain);
     }
 
+    /**
+     * \brief Build a proxy for the specified address with one extension for all attributes
+     *
+     * Build a proxy for the specified address with one extension for all attributes
+     * Template this method call for the desired proxy type attribute extension.
+     *
+     * @param participantId The participant ID of the common API address (last part)
+     * @param serviceName The service name of the common API address (middle part)
+     * @param domain The domain of the common API address (first part)
+     * @return a shared pointer to the constructed proxy
+     */
     template <template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
     std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>
     buildProxyWithDefaultAttributeExtension(const std::string& participantId,
@@ -80,6 +122,15 @@ class Factory {
     	return std::make_shared<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>(abstractMiddlewareProxy);
     }
 
+    /**
+     * \brief Build a proxy for the specified address with one extension for all attributes
+     *
+     * Build a proxy for the specified address with one extension for all attributes
+     * Template this method call for the desired proxy type attribute extension.
+     *
+     * @param serviceAddress The common API address
+     * @return a shared pointer to the constructed proxy
+     */
     template <template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
     std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>
     buildProxyWithDefaultAttributeExtension(const std::string& serviceAddress) {
@@ -94,10 +145,28 @@ class Factory {
 		return buildProxyWithDefaultAttributeExtension<_ProxyClass, _AttributeExtension>(participantId, serviceName, domain);
     }
 
+    /**
+     * \brief Get a pointer to the runtime of this factory.
+     *
+     * Get a pointer to the runtime of this factory.
+     *
+     * @return the Runtime
+     */
     inline std::shared_ptr<Runtime> getRuntime() {
         return runtime_;
     }
 
+    /**
+     * \brief Register a service stub under a specified address
+     *
+     * Register a service stub under a specified address
+     *
+     * @param stub The stub pointer
+     * @param participantId The participant ID of the common API address (last part)
+     * @param serviceName The service name of the common API address (middle part)
+     * @param domain The domain of the common API address (first part)
+     * @return Was the registration successful
+     */
     template<typename _Stub>
     bool registerService(std::shared_ptr<_Stub> stub,
     				     const std::string& participantId,
@@ -108,6 +177,15 @@ class Factory {
 		return registerAdapter(stubBase, _Stub::StubAdapterType::getInterfaceId(), participantId, serviceName, domain);
     }
 
+    /**
+     * \brief Register a service stub under a specified address
+     *
+     * Register a service stub under a specified address
+     *
+     * @param stub The stub pointer
+     * @param serviceAddress The common API address
+     * @return Was the registration successful
+     */
     template<typename _Stub>
     bool registerService(std::shared_ptr<_Stub> stub, const std::string& serviceAddress) {
 		std::string domain;
@@ -120,7 +198,26 @@ class Factory {
 		return registerService<_Stub>(stub, participantId, serviceName, domain);
     }
 
+    /**
+     * \brief Unregister a service stub associated with a specified address
+     *
+     * Unregister a service stub associated with a specified address
+     *
+     * @param participantId The participant ID of the common API address (last part)
+     * @param serviceName The service name of the common API address (middle part)
+     * @param domain The domain of the common API address (first part)
+     * @return Was the deregistration successful
+     */
     virtual bool unregisterService(const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
+
+    /**
+     * \brief Unregister a service stub associated with a specified address
+     *
+     * Unregister a service stub associated with a specified address
+     *
+     * @param serviceAddress The common API address
+     * @return Was the deregistration successful
+     */
     inline bool unregisterService(const std::string& serviceAddress) {
 		std::string domain;
 		std::string serviceName;
@@ -131,9 +228,37 @@ class Factory {
 		return unregisterService(participantId, serviceName, domain);
     }
 
+    /**
+     * \brief Get all instances of a specific service name available. Synchronous call.
+     *
+     * Get all instances of a specific service name available. Synchronous call.
+     *
+     * @param serviceName The service name of the common API address (middle part)
+     * @param serviceDomainName The domain of the common API address (first part)
+     * @return A vector of strings containing the available complete common api addresses.
+     */
     virtual std::vector<std::string> getAvailableServiceInstances(const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
 
+    /**
+     * \brief Is a particular complete common api address available. Synchronous call.
+     *
+     * Is a particular complete common api address available. Synchronous call.
+     *
+     * @param serviceAddress The common API address
+     * @return Is alive
+     */
     virtual bool isServiceInstanceAlive(const std::string& serviceAddress) = 0;
+
+    /**
+     * \brief Is a particular complete common api address available. Synchronous call.
+     *
+     * Is a particular complete common api address available. Synchronous call.
+     *
+     * @param serviceInstanceID The participant ID of the common API address (last part)
+     * @param serviceName The service name of the common API address (middle part)
+     * @param serviceDomainName The domain of the common API address (first part)
+     * @return Is alive
+     */
     virtual bool isServiceInstanceAlive(const std::string& serviceInstanceID, const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
 
  protected:

@@ -19,7 +19,11 @@ enum class SubscriptionStatus {
 	CANCEL
 };
 
-
+/**
+ * \brief Class representing an event
+ *
+ * Class representing an event
+ */
 template <typename... _Arguments>
 class Event {
  public:
@@ -31,8 +35,34 @@ class Event {
 
 	class CancellableListenerWrapper;
 
+	/**
+	 * \brief Subscribe a listener to this event
+	 *
+	 * Subscribe a listener to this event
+	 *
+	 * @param listener A listener to be added
+	 * @return A token identifying this subscription
+	 */
 	inline Subscription subscribe(Listener listener);
+
+	/**
+     * \brief Subscribe a cancellable listener to this event
+     *
+     * Subscribe a cancellable listener to this event
+     *
+     * @param listener A cancellable listener to be added
+     * @return A token identifying this subscription
+     */
 	Subscription subscribeCancellableListener(CancellableListener listener);
+
+	/**
+     * \brief Remove a listener from this event
+     *
+     * Remove a listener from this event
+     * Note: Do not call this inside a listener notification callback it will deadlock! Use cancellable listeners instead.
+     *
+     * @param listenerSubscription A listener token to be removed
+     */
 	void unsubscribe(Subscription listenerSubscription);
 
 	virtual ~Event() {}
