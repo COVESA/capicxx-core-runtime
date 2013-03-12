@@ -1,6 +1,11 @@
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = LICENSE
 
+# Library interface (not package version!)
+LIBCOMMONAPI_CURRENT=2
+LIBCOMMONAPI_REVISION=0
+LIBCOMMONAPI_AGE=0
+
 # ------------------------------------------------------------------------------
 MAINTAINERCLEANFILES = \
 		Makefile.in \
@@ -41,6 +46,9 @@ CommonAPI_include_HEADERS = \
 		src/CommonAPI/types.h
 
 libCommonAPI_la_LIBADD = -ldl
+libCommonAPI_la_LDFLAGS = \
+		${AM_LDFLAGS} \
+		-version-info ${LIBCOMMONAPI_CURRENT}:${LIBCOMMONAPI_REVISION}:${LIBCOMMONAPI_AGE}
 
 pkgconfigdir = ${libdir}/pkgconfig
 pkgconfig_DATA = CommonAPI.pc
