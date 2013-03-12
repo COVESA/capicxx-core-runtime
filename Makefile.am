@@ -1,10 +1,16 @@
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = LICENSE
-
+MOSTLYCLEANFILES =
 # Library interface (not package version!)
 LIBCOMMONAPI_CURRENT=2
 LIBCOMMONAPI_REVISION=0
 LIBCOMMONAPI_AGE=0
+
+# ------------------------------------------------------------------------------
+# Doxygen
+include $(top_srcdir)/aminclude.am 
+EXTRA_DIST += doxygen.cfg
+MOSTLYCLEANFILES += ${DX_CLEANFILES}
 
 # ------------------------------------------------------------------------------
 MAINTAINERCLEANFILES = \

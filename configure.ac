@@ -26,6 +26,10 @@ AX_CXX_COMPILE_STDCXX_11([noext])
 LT_PREREQ(2.2)
 LT_INIT
 
+
+
+
+
 GTEST_MIN_VERSION="1.6.0"
 GTEST_URL="http://code.google.com/p/googletest"
 
@@ -54,13 +58,38 @@ AS_IF([test -f "${GTEST_CONFIG}"],
 
 AM_CONDITIONAL(ENABLE_TESTS, [test -f "${GTEST_CONFIG}"])
 
+# Doxygen support
+DX_HTML_FEATURE(ON)
+DX_CHM_FEATURE(OFF)
+DX_CHI_FEATURE(OFF)
+DX_MAN_FEATURE(OFF)
+DX_RTF_FEATURE(OFF)
+DX_XML_FEATURE(OFF)
+DX_PDF_FEATURE(OFF)
+DX_PS_FEATURE(OFF)
+DX_INIT_DOXYGEN(${PACKAGE_NAME}, doxygen.cfg, doc)
+
 AC_MSG_RESULT([
         $PACKAGE_NAME v$VERSION
+        
+        enable docs:       ${ENABLE_DOCS}
+		
+        GTEST_CONFIG:      ${GTEST_CONFIG}
+        GTEST_CPPFLAGS:    ${GTEST_CPPFLAGS}
+        GTEST_CXXFLAGS:    ${GTEST_CXXFLAGS}
+        GTEST_LDFLAGS:     ${GTEST_LDFLAGS}
+        GTEST_LIBS:        ${GTEST_LIBS}
+        GTEST_VERSION:     ${GTEST_VERSION}
 
         prefix:             ${prefix}
         CXXFLAGS:           ${CXXFLAGS}
         LDFLAGS:            ${LDFLAGS}
 ])
 
-AC_OUTPUT
 
+
+
+
+
+
+AC_OUTPUT
