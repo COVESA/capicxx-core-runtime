@@ -14,9 +14,9 @@ MOSTLYCLEANFILES += ${DX_CLEANFILES}
 
 # ------------------------------------------------------------------------------
 MAINTAINERCLEANFILES = \
-		Makefile.in \
-		aclocal.m4 \
-		configure
+        Makefile.in \
+        aclocal.m4 \
+        configure
 
 clean-local:
 	-rm -rf src-gen
@@ -27,34 +27,35 @@ maintainer-clean-local:
 	-rm -f m4/libtool*.m4
 	-rm -f m4/lt*.m4
 
-	
+
 lib_LTLIBRARIES = libCommonAPI.la
 
 libCommonAPI_la_SOURCES = \
-		src/CommonAPI/Runtime.cpp
+        src/CommonAPI/Runtime.cpp
 
 CommonAPI_includedir=$(includedir)/CommonAPI-${VERSION}/CommonAPI
 CommonAPI_include_HEADERS = \
-		src/CommonAPI/Attribute.h \
+        src/CommonAPI/Attribute.h \
         src/CommonAPI/AttributeExtension.h \
         src/CommonAPI/ByteBuffer.h \
         src/CommonAPI/Event.h \
         src/CommonAPI/Factory.h \
-		src/CommonAPI/InputStream.h \
+        src/CommonAPI/InputStream.h \
+        src/CommonAPI/MainLoopContext.h \
         src/CommonAPI/MiddlewareInfo.h \
-		src/CommonAPI/OutputStream.h \
+        src/CommonAPI/OutputStream.h \
         src/CommonAPI/Proxy.h \
-		src/CommonAPI/Runtime.h \
-		src/CommonAPI/SerializableStruct.h \
-		src/CommonAPI/SerializableVariant.h \
-		src/CommonAPI/SerializableVariant.hpp \
-		src/CommonAPI/Stub.h \
-		src/CommonAPI/types.h
+        src/CommonAPI/Runtime.h \
+        src/CommonAPI/SerializableStruct.h \
+        src/CommonAPI/SerializableVariant.h \
+        src/CommonAPI/SerializableVariant.hpp \
+        src/CommonAPI/Stub.h \
+        src/CommonAPI/types.h
 
 libCommonAPI_la_LIBADD = -ldl
 libCommonAPI_la_LDFLAGS = \
-		${AM_LDFLAGS} \
-		-version-info ${LIBCOMMONAPI_CURRENT}:${LIBCOMMONAPI_REVISION}:${LIBCOMMONAPI_AGE}
+        ${AM_LDFLAGS} \
+        -version-info ${LIBCOMMONAPI_CURRENT}:${LIBCOMMONAPI_REVISION}:${LIBCOMMONAPI_AGE}
 
 pkgconfigdir = ${libdir}/pkgconfig
 pkgconfig_DATA = CommonAPI.pc
@@ -63,7 +64,7 @@ pkgconfig_DATA = CommonAPI.pc
 if ENABLE_TESTS
 
 check_PROGRAMS = \
-		VariantTest
+        VariantTest
 
 
 TESTS =	${check_PROGRAMS}

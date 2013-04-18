@@ -53,4 +53,9 @@ std::shared_ptr<Runtime> Runtime::load(const std::string& middlewareName) {
 }
 
 
+std::shared_ptr<MainLoopContext> Runtime::getNewMainLoopContext() const {
+    return std::make_shared<MainLoopContext>();
 }
+
+
+} // namespace CommonAPI

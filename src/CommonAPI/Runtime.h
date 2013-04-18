@@ -10,6 +10,7 @@
 
 #include "MiddlewareInfo.h"
 #include "Factory.h"
+#include "MainLoopContext.h"
 
 #include <memory>
 #include <fstream>
@@ -25,6 +26,7 @@ namespace CommonAPI {
 
 class Factory;
 class Runtime;
+class MainLoopContext;
 
 /**
  * \brief Represents the CommonAPI runtime bindings available.
@@ -58,6 +60,17 @@ class Runtime {
     static void registerRuntimeLoader(std::string middlewareName, MiddlewareRuntimeLoadFunction middlewareRuntimeLoadFunction);
 
     virtual ~Runtime() {}
+
+    /**
+     * \brief Returns new MainLoopContext
+     *
+     * Creates and returns a new MainLoopContext object. This context can be used to take
+     * complete control over the order and time of execution of the abstract middleware
+     * dispatching mechanism.
+     *
+     * @return A new MainLoopContext object
+     */
+    std::shared_ptr<MainLoopContext> getNewMainLoopContext() const;
     /**
      * \brief Create a factory for the loaded runtime
      *
@@ -65,7 +78,7 @@ class Runtime {
      *
      * @return Factory object for the loaded runtime
      */
-    virtual std::shared_ptr<Factory> createFactory() = 0;
+    virtual std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> = std::shared_ptr<MainLoopContext>(NULL)) = 0;
 };
 
 
