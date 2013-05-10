@@ -74,7 +74,7 @@ class Runtime {
     /**
      * \brief Create a factory for the loaded runtime
      *
-     * Create a factory for the loaded runtime
+     * Create a factory for the loaded rluntime
      *
      * @return Factory object for the loaded runtime
      */
