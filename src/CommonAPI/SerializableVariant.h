@@ -218,9 +218,6 @@ public:
     }
 
 private:
-    inline bool hasValue() const {
-        return valueType_ <= TypesTupleSize::value;
-    }
 
     template<typename _U>
     void set( const _U& value, const bool clear);
@@ -228,7 +225,7 @@ private:
     template<typename _U>
     void set( _U&& value, const bool clear);
 
-    template<typename >
+    template<typename _FriendType>
     friend struct TypeWriter;
     template<typename ... _FriendTypes>
     friend struct AssignmentVisitor;
@@ -241,6 +238,10 @@ private:
     template<class Variant, typename ... _FTypes>
     friend struct ApplyVoidIndexVisitor;
 
+protected:
+    inline bool hasValue() const {
+        return valueType_ < TypesTupleSize::value;
+    }
     uint8_t valueType_;
     typename std::aligned_storage<maxSize>::type valueStorage_;
 };

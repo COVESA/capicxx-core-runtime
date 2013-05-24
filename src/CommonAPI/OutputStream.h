@@ -321,6 +321,8 @@ class OutputStream {
 	virtual void endWriteMap() = 0;
 	virtual void beginWriteMapElement() = 0;
 	virtual void endWriteMapElement() = 0;
+
+	virtual bool writeRawData(const char* rawDataPtr, const size_t sizeInByte) = 0;
 };
 
 

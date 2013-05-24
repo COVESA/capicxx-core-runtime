@@ -68,6 +68,8 @@ class InputStream {
 
     virtual void readSerializableVariant(SerializableVariant& serializableVariant) = 0;
 
+    virtual char* readRawData(const size_t numBytesToRead) = 0;
+
     virtual void beginReadBoolVector() = 0;
     virtual void beginReadInt8Vector() = 0;
     virtual void beginReadInt16Vector() = 0;
