@@ -33,6 +33,9 @@ TEST_F(VariantTest, VariantTestPack) {
     const int& myInt = myVariant.get<int>();
     std::cout << "myInt = " << myInt << "\n";
 
+    int vType = myVariant.getValueType();
+    std::cout << "myVariant value type = " << vType << ", should be 0 \n";
+
     Variant<int, double, std::string> myVariant2 = myVariant;
     const int& myInt2 = myVariant2.get<int>();
     std::cout << "myInt2 = " << myInt2 << "\n";
@@ -49,6 +52,15 @@ TEST_F(VariantTest, VariantTestPack) {
     std::cout << "myIntCopy = " << myIntCopy << "\n";
 
     std::cout << "myIntCopy equals myInt " << "(" << std::boolalpha << (myVariant == myVariantCopy) << ")\n";
+
+    Variant<int, double, std::string> myVariantCopy2;
+    myVariantCopy2 = myVariant;
+
+    const int& myIntCopy2 = myVariantCopy2.get<int>();
+    std::cout << "myIntCopy2 = " << myIntCopy << "\n";
+
+    std::cout << "myIntCopy2 equals myInt " << "(" << std::boolalpha << (myVariant == myVariantCopy2) << ")\n";
+
 
     EXPECT_ANY_THROW(const int& myFake = myVariant.get<double>());
 
