@@ -87,7 +87,7 @@ struct ApplyBoolVisitor<Visitor, Variant, _Type, _Types...> {
     }
 };
 
-template<uint8_t size>
+/*template<uint8_t size>
 struct DeleteVisitor {
 public:
     DeleteVisitor(typename std::aligned_storage<size>::type& storage) :
@@ -96,11 +96,31 @@ public:
 
     template<typename _Type>
     void operator()(const _Type&) const {
-        (reinterpret_cast<const _Type *>(&storage_))->~_Type();
+        _Type thing = (reinterpret_cast<const _Type&>(storage_));
+        thing.~_Type();
     }
 
 private:
     typename std::aligned_storage<size>::type& storage_;
+};*/
+
+template<uint8_t size, typename ... _Types>
+struct DeleteVisitor {
+public:
+    DeleteVisitor(Variant<_Types ...>& storage) :
+        storage_(storage)
+    {
+
+    }
+
+    template<typename _Type>
+    void operator()(const _Type& value) const {
+        value.~_Type();
+        //storage_.get<_Type>().~_Type();
+    }
+
+private:
+    Variant<_Types...>& storage_;
 };
 
 struct TypeOutputStreamWriteVisitor {
@@ -323,16 +343,16 @@ Variant<_Types...>::Variant(Variant&& fromVariant) {
 template<typename ... _Types>
 Variant<_Types...>::~Variant() {
     if (hasValue()) {
-        DeleteVisitor<maxSize> visitor(valueStorage_);
-        ApplyVoidVisitor<DeleteVisitor<maxSize>, Variant<_Types...>, _Types...>::visit(visitor, *this);
+        DeleteVisitor<maxSize, _Types...> visitor(*this);
+        ApplyVoidVisitor<DeleteVisitor<maxSize, _Types...>, Variant<_Types...>, _Types...>::visit(visitor, *this);
     }
 }
 
 template<typename ... _Types>
 void Variant<_Types...>::readFromInputStream(const uint8_t typeIndex, InputStream& inputStream) {
     if(hasValue()) {
-        DeleteVisitor<maxSize> visitor(valueStorage_);
-        ApplyVoidVisitor<DeleteVisitor<maxSize>, Variant<_Types...>, _Types...>::visit(visitor, *this);
+        DeleteVisitor<maxSize, _Types...> visitor(*this);
+        ApplyVoidVisitor<DeleteVisitor<maxSize, _Types...>, Variant<_Types...>, _Types...>::visit(visitor, *this);
     }
     valueType_ = typeIndex;
     InputStreamReadVisitor<_Types...> visitor(*this, inputStream);
@@ -355,7 +375,7 @@ void Variant<_Types...>::writeToTypeOutputStream(TypeOutputStream& typeOutputStr
 
 template<typename ... _Types>
 Variant<_Types...>& Variant<_Types...>::operator=(const Variant<_Types...>& rhs) {
-    AssignmentVisitor<_Types...> visitor(*this);
+    AssignmentVisitor<_Types...> visitor(*this, hasValue());
     ApplyVoidVisitor<AssignmentVisitor<_Types...>, Variant<_Types...>, _Types...>::visit(
                     visitor, rhs);
     return *this;
@@ -363,7 +383,7 @@ Variant<_Types...>& Variant<_Types...>::operator=(const Variant<_Types...>& rhs)
 
 template<typename ... _Types>
 Variant<_Types...>& Variant<_Types...>::operator=(Variant<_Types...>&& rhs) {
-    AssignmentVisitor<_Types...> visitor(*this);
+    AssignmentVisitor<_Types...> visitor(*this, hasValue());
     ApplyVoidVisitor<AssignmentVisitor<_Types...>, Variant<_Types...>, _Types...>::visit(visitor, rhs);
     return *this;
 }
@@ -427,8 +447,8 @@ void Variant<_Types...>::set(const _U& value, const bool clear) {
     typedef typename TypeSelector<_U, _Types...>::type selected_type_t;
 
     if (clear) {
-        DeleteVisitor<maxSize> visitor(valueStorage_);
-        ApplyVoidVisitor<DeleteVisitor<maxSize>, Variant<_Types...>, _Types...>::visit(visitor, *this);
+        DeleteVisitor<maxSize, _Types...> visitor(*this);
+        ApplyVoidVisitor<DeleteVisitor<maxSize, _Types...>, Variant<_Types...>, _Types...>::visit(visitor, *this);
     }
     new (&valueStorage_) selected_type_t(std::move(value));
     valueType_ = TypeIndex<_Types...>::template get<selected_type_t>();
@@ -442,8 +462,8 @@ void Variant<_Types...>::set(_U&& value, const bool clear) {
     selected_type_t&& any_container_value = std::move(value);
     if(clear)
     {
-        DeleteVisitor<maxSize> visitor(valueStorage_);
-        ApplyVoidVisitor<DeleteVisitor<maxSize>, Variant<_Types...>, _Types...>::visit(visitor, *this);
+        DeleteVisitor<maxSize, _Types...> visitor(*this);
+        ApplyVoidVisitor<DeleteVisitor<maxSize, _Types...>, Variant<_Types...>, _Types...>::visit(visitor, *this);
     } else {
         new (&valueStorage_) selected_type_t(std::move(any_container_value));
     }
