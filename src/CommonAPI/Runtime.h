@@ -76,6 +76,9 @@ class Runtime {
      *
      * Create a factory for the loaded rluntime
      *
+     * @param In case mainloop integration shall be used, a std::shared_ptr<MainLoopContext> can be passed in.
+     *        If no parameter is given, internal threading will handle sending and receiving of messages automatically.
+     *
      * @return Factory object for the loaded runtime
      */
     virtual std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> = std::shared_ptr<MainLoopContext>(NULL)) = 0;
