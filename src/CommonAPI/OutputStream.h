@@ -280,6 +280,9 @@ class OutputStream {
  	virtual void beginWriteSerializableStruct(const SerializableStruct& serializableStruct) = 0;
 	virtual void endWriteSerializableStruct(const SerializableStruct& serializableStruct) = 0;
 
+ 	virtual void beginWriteSerializablePolymorphicStruct(const std::shared_ptr<SerializablePolymorphicStruct>& serializableStruct) = 0;
+	virtual void endWriteSerializablePolymorphicStruct(const std::shared_ptr<SerializablePolymorphicStruct>& serializableStruct) = 0;
+
     virtual void beginWriteSerializableVariant(const SerializableVariant& serializableVariant) = 0;
     virtual void endWriteSerializableVariant(const SerializableVariant& serializableVariant) = 0;
 
@@ -371,6 +374,16 @@ inline OutputStream& operator<<(OutputStream& outputStream, const std::string& s
 
 inline OutputStream& operator<<(OutputStream& outputStream, const Version& versionValue) {
 	return outputStream.writeVersionValue(versionValue);
+}
+
+template <typename _SerializablePolymorphicStructType>
+typename std::enable_if<std::is_base_of<SerializablePolymorphicStruct, _SerializablePolymorphicStructType>::value, OutputStream>::type&
+operator<<(OutputStream& outputStream, const std::shared_ptr<_SerializablePolymorphicStructType>& serializablePolymorphicStruct) {
+    outputStream.beginWriteSerializablePolymorphicStruct(serializablePolymorphicStruct);
+    serializablePolymorphicStruct->writeToOutputStream(outputStream);
+    outputStream.endWriteSerializablePolymorphicStruct(serializablePolymorphicStruct);
+
+    return outputStream;
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const SerializableStruct& serializableStruct) {

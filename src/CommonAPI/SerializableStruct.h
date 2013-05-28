@@ -24,6 +24,11 @@ struct SerializableStruct {
 	virtual void writeToOutputStream(OutputStream& outputStream) const = 0;
 };
 
+struct SerializablePolymorphicStruct: SerializableStruct {
+	virtual uint32_t getSerialId() const = 0;
+	virtual void createTypeSignature(TypeOutputStream& typeOutputStream) const = 0;
+};
+
 } // namespace CommonAPI
 
 #endif // COMMONAPI_SERIALIZABLE_STRUCT_H_

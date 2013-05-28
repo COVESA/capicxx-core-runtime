@@ -63,6 +63,9 @@ class InputStream {
  	virtual void beginReadSerializableStruct(const SerializableStruct& serializableStruct) = 0;
  	virtual void endReadSerializableStruct(const SerializableStruct& serializableStruct) = 0;
 
+ 	virtual void beginReadSerializablePolymorphicStruct(uint32_t& serialId) = 0;
+ 	virtual void endReadSerializablePolymorphicStruct(const uint32_t& serialId) = 0;
+
     virtual void readSerializableVariant(SerializableVariant& serializableVariant) = 0;
 
     virtual void beginReadBoolVector() = 0;
@@ -173,6 +176,25 @@ inline InputStream& operator>>(InputStream& inputStream, SerializableStruct& ser
     inputStream.endReadSerializableStruct(serializableStruct);
 
     return inputStream;
+}
+
+template <typename _SerializablePolymorphicStructType>
+typename std::enable_if<std::is_base_of<SerializablePolymorphicStruct, _SerializablePolymorphicStructType>::value, InputStream>::type&
+operator>>(InputStream& inputStream, std::shared_ptr<_SerializablePolymorphicStructType>& serializablePolymorphicStruct) {
+	uint32_t serialId;
+
+	inputStream.beginReadSerializablePolymorphicStruct(serialId);
+	if (!inputStream.hasError()) {
+		_SerializablePolymorphicStructType* instancePtr = _SerializablePolymorphicStructType::createInstance(serialId);
+		serializablePolymorphicStruct.reset(instancePtr);
+		if (instancePtr != NULL) {
+			instancePtr->readFromInputStream(inputStream);
+		}
+
+		inputStream.endReadSerializablePolymorphicStruct(serialId);
+	}
+
+	return inputStream;
 }
 
 inline InputStream& operator>>(InputStream& inputStream, SerializableVariant& serializableVariant) {
