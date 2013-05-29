@@ -198,13 +198,18 @@ public:
                     typename std::enable_if<!std::is_reference<_Type>::value>::type* = 0,
                     typename std::enable_if<!std::is_same<_Type, Variant>::value>::type* = 0);
 
+    /**
+     * \brief Get value of variant, template to content type. Throws exception if type is not contained.
+     *
+     * Get value of variant, template to content type. Throws exception if type is not contained.
+     */
     template <typename _Type>
     const _Type& get() const;
 
     /**
-     * \brief Get index in template list of type actually contained
+     * \brief Get index in template list of type actually contained, starting at 1 at the end of the template list
      *
-     * Get index in template list of type actually contained
+     * Get index in template list of type actually contained, starting at 1 at the end of the template list
      *
      * @return Index of contained type
      */
@@ -214,7 +219,7 @@ public:
 
 private:
     inline bool hasValue() const {
-        return valueType_ < TypesTupleSize::value;
+        return valueType_ <= TypesTupleSize::value;
     }
 
     template<typename _U>
@@ -223,7 +228,7 @@ private:
     template<typename _U>
     void set( _U&& value, const bool clear);
 
-    template<typename _FriendType>
+    template<typename >
     friend struct TypeWriter;
     template<typename ... _FriendTypes>
     friend struct AssignmentVisitor;
@@ -233,6 +238,8 @@ private:
     friend struct PartialEqualsVisitor;
     template<typename ... _FriendTypes>
     friend struct InputStreamReadVisitor;
+    template<class Variant, typename ... _FTypes>
+    friend struct ApplyVoidIndexVisitor;
 
     uint8_t valueType_;
     typename std::aligned_storage<maxSize>::type valueStorage_;

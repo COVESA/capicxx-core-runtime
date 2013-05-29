@@ -15,6 +15,52 @@ class VariantTest: public ::testing::Test {
   }
 };
 
+
+struct test1: CommonAPI::SerializableStruct {
+    int a;
+    std::string b;
+
+    test1() = default;
+    test1(const int& a, const std::string& b) :
+    a(a), b(b) {
+    }
+
+    void readFromInputStream(CommonAPI::InputStream& inputStream) {
+
+    }
+
+    void writeToOutputStream(CommonAPI::OutputStream& outputStream) const {
+
+    }
+
+    static inline void writeToTypeOutputStream(CommonAPI::TypeOutputStream& typeOutputStream) {
+    }
+
+};
+
+struct test2: CommonAPI::SerializableStruct {
+    int a;
+    std::string b;
+
+    test2() = default;
+    test2(const int& a, const std::string& b) :
+    a(a), b(b) {
+    }
+
+    void readFromInputStream(CommonAPI::InputStream& inputStream) {
+
+    }
+
+    void writeToOutputStream(CommonAPI::OutputStream& outputStream) const {
+
+    }
+
+    static inline void writeToTypeOutputStream(CommonAPI::TypeOutputStream& typeOutputStream) {
+    }
+
+};
+
+
 TEST_F(VariantTest, VariantTestPack) {
 
     int fromInt = 5;
@@ -70,6 +116,11 @@ TEST_F(VariantTest, VariantTestPack) {
     std::cout << "myInt is std::string = " << "\n";
     EXPECT_FALSE(myVariant.isType<std::string>());
 
+    Variant<int, double, std::string> movedVariant = std::move(myVariant);
+    std::cout << "myMovedInt is int = " << " (" << std::boolalpha << movedVariant.isType<int>() << ")\n";
+    EXPECT_TRUE(movedVariant.isType<int>());
+    EXPECT_EQ(fromInt, movedVariant.get<int>());
+
     const double& myDouble = myVariantf.get<double>();
     std::cout << "myDouble = " << myDouble << "\n";
 
@@ -85,6 +136,14 @@ TEST_F(VariantTest, VariantTestPack) {
     std::cout << "myStringCopy = " << myStringCopy << "\n";
 
     delete myVariants;
+
+    test1 sourceStruct = {1, "a"};
+
+    Variant<test1, test2> complexSource = sourceStruct;
+
+    Variant<test1, test2> complexTarget = complexSource;
+    EXPECT_EQ(1, complexTarget.get<test1>().a);
+
 }
 
 int main(int argc, char** argv) {
