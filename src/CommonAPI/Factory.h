@@ -35,6 +35,7 @@ struct DefaultAttributeProxyFactoryHelper;
 template<template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
 std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t> createProxyWithDefaultAttributeExtension(Factory* specificFactory, const std::string& participantId, const std::string& domain);
 
+
 /**
  * \brief The main CommonAPI access class. A factory is responsible for creation and destruction of service objects.
  *
@@ -43,6 +44,8 @@ std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _Attrib
  */
 class Factory {
  public:
+    typedef std::function<void(std::vector<std::string>&) > GetAvailableServiceInstancesCallback;
+    typedef std::function<void(bool)> IsServiceInstanceAliveCallback;
 
     /**
      * \brief Creates factory. Don't call manually.
@@ -74,15 +77,15 @@ class Factory {
                const std::string& serviceName,
                const std::string& domain) {
 
-    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceId(), participantId, serviceName, domain);
-    	return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
+        std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceId(), participantId, serviceName, domain);
+        return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
     }
 
     /**
      * \brief Build a proxy for the specified address
      *
      * Build a proxy for the specified address.
-     * Template this method call for the desired proxy type and attribute extension.
+     * Template this method call for the desired proxy type and attribute extensions.
      *
      * @param serviceAddress The common API address
      * @return a shared pointer to the constructed proxy
@@ -91,21 +94,21 @@ class Factory {
     std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
     buildProxy(const std::string& serviceAddress) {
 
-		std::string domain;
-		std::string serviceName;
-		std::string participantId;
-		if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-			return false;
-		}
+        std::string domain;
+        std::string serviceName;
+        std::string participantId;
+        if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
+            return false;
+        }
 
-		return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, serviceName, domain);
+        return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, serviceName, domain);
     }
 
     /**
      * \brief Build a proxy for the specified address with one extension for all attributes
      *
      * Build a proxy for the specified address with one extension for all attributes
-     * Template this method call for the desired proxy type attribute extension.
+     * Template this method call for the desired proxy type and attribute extensions.
      *
      * @param participantId The participant ID of the common API address (last part)
      * @param serviceName The service name of the common API address (middle part)
@@ -118,8 +121,8 @@ class Factory {
                                             const std::string& serviceName,
                                             const std::string& domain) {
 
-    	std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t::getInterfaceId(), participantId, serviceName, domain);
-    	return std::make_shared<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>(abstractMiddlewareProxy);
+        std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t::getInterfaceId(), participantId, serviceName, domain);
+        return std::make_shared<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>(abstractMiddlewareProxy);
     }
 
     /**
@@ -135,14 +138,14 @@ class Factory {
     std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>
     buildProxyWithDefaultAttributeExtension(const std::string& serviceAddress) {
 
-		std::string domain;
-		std::string serviceName;
-		std::string participantId;
-		if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-			return false;
-		}
+        std::string domain;
+        std::string serviceName;
+        std::string participantId;
+        if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
+            return false;
+        }
 
-		return buildProxyWithDefaultAttributeExtension<_ProxyClass, _AttributeExtension>(participantId, serviceName, domain);
+        return buildProxyWithDefaultAttributeExtension<_ProxyClass, _AttributeExtension>(participantId, serviceName, domain);
     }
 
     /**
@@ -159,54 +162,72 @@ class Factory {
     /**
      * \brief Register a service stub under a specified address
      *
-     * Register a service stub under a specified address
+     * Register a service stub under a specified address. The service will be registered
+     * with the ServicePublisher that is provided by the runtime which you also retrieved
+     * this factory from. It is recommended to use the ServicePublisher for registering
+     * and unregistering purposes.
      *
      * @param stub The stub pointer
      * @param participantId The participant ID of the common API address (last part)
      * @param serviceName The service name of the common API address (middle part)
      * @param domain The domain of the common API address (first part)
      * @return Was the registration successful
+     *
+     * @deprecated Use CommonAPI::Runtime->getServicePublisher()->registerService() instead.
+     * Purpose for this change is to make service management (esp. deregistering) independent
+     * from factory instances.
      */
     template<typename _Stub>
     bool registerService(std::shared_ptr<_Stub> stub,
-    				     const std::string& participantId,
-    				     const std::string& serviceName,
-            			 const std::string& domain) {
+                         const std::string& participantId,
+                         const std::string& serviceName,
+                         const std::string& domain) {
 
-    	std::shared_ptr<StubBase> stubBase = std::dynamic_pointer_cast<StubBase>(stub);
-		return registerAdapter(stubBase, _Stub::StubAdapterType::getInterfaceId(), participantId, serviceName, domain);
+        std::shared_ptr<StubBase> stubBase = std::dynamic_pointer_cast<StubBase>(stub);
+        return registerAdapter(stubBase, _Stub::StubAdapterType::getInterfaceId(), participantId, serviceName, domain);
     }
 
     /**
      * \brief Register a service stub under a specified address
      *
-     * Register a service stub under a specified address
+     * Register a service stub under a specified address. The service will be registered
+     * with the ServicePublisher that is provided by the runtime which you also retrieved
+     * this factory from. It is recommended to use the ServicePublisher for registering
+     * and unregistering purposes.
      *
      * @param stub The stub pointer
      * @param serviceAddress The common API address
      * @return Was the registration successful
+     *
+     * @deprecated Use CommonAPI::Runtime->getServicePublisher()->registerService() instead.
+     * Purpose for this change is to make service management (esp. deregistering) independent
+     * from factory instances.
      */
     template<typename _Stub>
     bool registerService(std::shared_ptr<_Stub> stub, const std::string& serviceAddress) {
-		std::string domain;
-		std::string serviceName;
-		std::string participantId;
-		if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-			return false;
-		}
+        std::string domain;
+        std::string serviceName;
+        std::string participantId;
+        if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
+            return false;
+        }
 
-		return registerService<_Stub>(stub, participantId, serviceName, domain);
+        return registerService<_Stub>(stub, participantId, serviceName, domain);
     }
 
     /**
      * \brief Unregister a service stub associated with a specified address
      *
-     * Unregister a service stub associated with a specified address
+     * Unregister a service stub associated with a specified address.
      *
      * @param participantId The participant ID of the common API address (last part)
      * @param serviceName The service name of the common API address (middle part)
      * @param domain The domain of the common API address (first part)
      * @return Was the deregistration successful
+     *
+     * @deprecated Use CommonAPI::Runtime->getServicePublisher()->unregisterService() instead.
+     * Purpose for this change is to make service management (esp. deregistering) independent
+     * from factory instances.
      */
     virtual bool unregisterService(const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
 
@@ -217,15 +238,19 @@ class Factory {
      *
      * @param serviceAddress The common API address
      * @return Was the deregistration successful
+     *
+     * @deprecated Use CommonAPI::Runtime->getServicePublisher()->unregisterService() instead.
+     * Purpose for this change is to make service management (esp. deregistering) independent
+     * from factory instances.
      */
     inline bool unregisterService(const std::string& serviceAddress) {
-		std::string domain;
-		std::string serviceName;
-		std::string participantId;
-		if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-			return false;
-		}
-		return unregisterService(participantId, serviceName, domain);
+        std::string domain;
+        std::string serviceName;
+        std::string participantId;
+        if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
+            return false;
+        }
+        return unregisterService(participantId, serviceName, domain);
     }
 
     /**
@@ -261,9 +286,39 @@ class Factory {
      */
     virtual bool isServiceInstanceAlive(const std::string& serviceInstanceID, const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
 
+    /**
+     * \brief Get all instances of a specific service name available. Asynchronous call.
+     *
+     * Get all instances of a specific service name available. Asynchronous call.
+     *
+     * @param serviceName The service name of the common API address (middle part)
+     * @param serviceDomainName The domain of the common API address (first part)
+     */
+    virtual void getAvailableServiceInstancesAsync(GetAvailableServiceInstancesCallback callback, const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
+
+    /**
+     * \brief Tells whether a particular service instance is available. Asynchronous call.
+     *
+     * Tells whether a particular service instance is available. Asynchronous call.
+     *
+     * @param serviceAddress The common API address of the service
+     */
+    virtual void isServiceInstanceAliveAsync(IsServiceInstanceAliveCallback callback, const std::string& serviceAddress) = 0;
+
+    /**
+     * \brief Tells whether a particular service instance is available. Asynchronous call.
+     *
+     * Tells whether a particular service instance is available. Asynchronous call.
+     *
+     * @param serviceInstanceID The participant ID of the common API address (last part) of the service
+     * @param serviceName The service name of the common API address (middle part) of the service
+     * @param serviceDomainName The domain of the common API address (first part) of the service
+     */
+    virtual void isServiceInstanceAliveAsync(IsServiceInstanceAliveCallback callback, const std::string& serviceInstanceID, const std::string& serviceName, const std::string& serviceDomainName = "local") = 0;
+
  protected:
     virtual std::shared_ptr<Proxy> createProxy(const char* interfaceId, const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
-    virtual bool registerAdapter(std::shared_ptr<StubBase> stubBase, const char* interfaceId, const std::string& participantId, const std::string& serivceName, const std::string& domain) = 0;
+    virtual bool registerAdapter(std::shared_ptr<StubBase> stubBase, const char* interfaceId, const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
 
  private:
     std::shared_ptr<Runtime> runtime_;
@@ -271,20 +326,20 @@ class Factory {
     const MiddlewareInfo* middlewareInfo_;
 
     inline bool splitValidAddress(const std::string& serviceAddress, std::string& domain, std::string& serviceName, std::string& participantId) {
-    	std::istringstream addressStream(serviceAddress);
-		if(!std::getline(addressStream, domain, ':')) {
-			return false;
-		}
-		if(!std::getline(addressStream, serviceName, ':')) {
-			return false;
-		}
-		if(!std::getline(addressStream, participantId, ':')) {
-			return false;
-		}
-		if(std::getline(addressStream, participantId)) {
-			return false;
-		}
-		return true;
+        std::istringstream addressStream(serviceAddress);
+        if(!std::getline(addressStream, domain, ':')) {
+            return false;
+        }
+        if(!std::getline(addressStream, serviceName, ':')) {
+            return false;
+        }
+        if(!std::getline(addressStream, participantId, ':')) {
+            return false;
+        }
+        if(std::getline(addressStream, participantId)) {
+            return false;
+        }
+        return true;
     }
 };
 

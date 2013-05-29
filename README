@@ -51,7 +51,14 @@ Use autotools to build this package:
 # make
 # sudo make install (or alternative install process, eg. checkinstall on debian-based distributions, such as Ubuntu)
 ----
-If the environment variable GTEST_CONFIG is set to the path of the gtest-config script in a Gtest tree test will also be built.  
+If the environment variable GTEST_CONFIG is set to the path of the gtest-config script in a Gtest tree test will also be built.
+
+== Elements marked as deprecated
+
+All elements that are marked as deprecated on Common API level are considered to be redundant, and normally
+the other way of acchieving the same (the way pointed to by the marked elements) is the way we recommend to use.
+Elements marked as deprecated will be removed once we have reliable and comprehensive feedback telling us they
+are not used anymore by anybody, but they will remain in Common API for compatibility reasons at least until then.
 
 == Working on the code & contribution
 

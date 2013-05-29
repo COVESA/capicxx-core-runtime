@@ -49,6 +49,7 @@ CommonAPI_include_HEADERS = \
         src/CommonAPI/SerializableStruct.h \
         src/CommonAPI/SerializableVariant.h \
         src/CommonAPI/SerializableVariant.hpp \
+        src/CommonAPI/ServicePublisher.h \
         src/CommonAPI/Stub.h \
         src/CommonAPI/types.h
 
@@ -67,7 +68,7 @@ check_PROGRAMS = \
         VariantTest
 
 
-TESTS =	${check_PROGRAMS}
+TESTS = ${check_PROGRAMS}
 VariantTest_includedir=$(includedir)/CommonAPI-${VERSION}/CommonAPI
 VariantTest_SOURCES = src/test/VariantTest.cpp
 VariantTest_CPPFLAGS = ${AM_CPPFLAGS} ${GTEST_CPPFLAGS}

@@ -143,7 +143,6 @@ TEST_F(VariantTest, VariantTestPack) {
 
     Variant<test1, test2> complexTarget = complexSource;
     EXPECT_EQ(1, complexTarget.get<test1>().a);
-
 }
 
 typedef Variant<test1, test2, std::string, uint8_t> ComplexTestVariant;

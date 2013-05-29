@@ -9,7 +9,6 @@
 
 
 #include "MiddlewareInfo.h"
-#include "Factory.h"
 #include "MainLoopContext.h"
 
 #include <memory>
@@ -27,6 +26,7 @@ namespace CommonAPI {
 class Factory;
 class Runtime;
 class MainLoopContext;
+class ServicePublisher;
 
 /**
  * \brief Represents the CommonAPI runtime bindings available.
@@ -35,27 +35,30 @@ class MainLoopContext;
  */
 class Runtime {
  public:
-
     /**
-     * \brief Loads the default runtime
+     * \brief Loads the default runtime.
      *
-     * Loads the default runtime. This is the only one available, or the default as defined in configuration
+     * Loads the runtime for the default middleware binding. This either is the only binding available,
+     * or the one defined as default in the configuration.
      *
-     * @return The runtime object for this binding
+     * @return The runtime object for the default binding
      */
     static std::shared_ptr<Runtime> load();
+
     /**
-     * \brief Loads specified runtime
+     * \brief Loads specified runtime.
      *
-     * Loads specified runtime. This is specified by either the well known name defined by the binding, or configured
+     * Loads the runtime for the specified middleware binding. The given middleware ID can be either
+     * the well known name defined by a binding, or a configured alias for a binding.
      *
      * @return The runtime object for specified binding
      */
     static std::shared_ptr<Runtime> load(const std::string& middlewareId);
+
     /**
-     * \brief Called by bindings to register their methods. Do not call from applications.
+     * \brief Called by bindings to register their runtime loaders. Do not call from applications.
      *
-     * Called by bindings to register their methods. Do not call from applications.
+     * Called by bindings to register their runtime loaders. Do not call from applications.
      */
     static void registerRuntimeLoader(std::string middlewareName, MiddlewareRuntimeLoadFunction middlewareRuntimeLoadFunction);
 
@@ -71,17 +74,30 @@ class Runtime {
      * @return A new MainLoopContext object
      */
     std::shared_ptr<MainLoopContext> getNewMainLoopContext() const;
+
     /**
-     * \brief Create a factory for the loaded runtime
+     * \brief Create a factory for the loaded runtime.
      *
-     * Create a factory for the loaded rluntime
+     * Create a factory for the loaded runtime
      *
      * @param In case mainloop integration shall be used, a std::shared_ptr<MainLoopContext> can be passed in.
      *        If no parameter is given, internal threading will handle sending and receiving of messages automatically.
      *
-     * @return Factory object for the loaded runtime
+     * @return Factory object for this runtime
      */
     virtual std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> = std::shared_ptr<MainLoopContext>(NULL)) = 0;
+
+    /**
+     * \brief Returns the ServicePublisher object for this runtime.
+     *
+     * Returns the ServicePublisher object for this runtime. Use the interface
+     * provided by the ServicePublisher to publish and de-publish the services that
+     * your application will provide to the outside world over the middleware
+     * represented by this runtime. A ServicePublisher exists once per middleware.
+     *
+     * @return The ServicePublisher object for this runtime
+     */
+    virtual std::shared_ptr<ServicePublisher> getServicePublisher() = 0;
 };
 
 
