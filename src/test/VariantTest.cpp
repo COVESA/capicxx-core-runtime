@@ -146,6 +146,56 @@ TEST_F(VariantTest, VariantTestPack) {
 
 }
 
+typedef Variant<test1, test2, std::string, uint8_t> ComplexTestVariant;
+
+struct Container: CommonAPI::SerializableStruct {
+    ComplexTestVariant a;
+    std::string b;
+
+    Container() = default;
+    Container(const ComplexTestVariant& a, const std::string& b) :
+    a(a), b(b) {
+    }
+
+    void readFromInputStream(CommonAPI::InputStream& inputStream) {
+
+    }
+
+    void writeToOutputStream(CommonAPI::OutputStream& outputStream) const {
+
+    }
+
+    static inline void writeToTypeOutputStream(CommonAPI::TypeOutputStream& typeOutputStream) {
+    }
+
+};
+
+TEST_F(VariantTest, VariantMoveTest) {
+
+    ComplexTestVariant emptyTest;
+    Container cont(std::move(emptyTest), "Hello");
+
+    test1 assignStruct(1, "Assign");
+    ComplexTestVariant assignTest = assignStruct;
+    Container contAss(std::move(assignTest), "Hello");
+    EXPECT_EQ("Assign", contAss.a.get<test1>().b);
+
+    test1 constructStruct(1, "Construct");
+    ComplexTestVariant constructTest(constructStruct);
+    Container contCon(std::move(constructTest), "Hello");
+    EXPECT_EQ("Construct", contCon.a.get<test1>().b);
+
+    ComplexTestVariant rec;
+
+    rec = cont.a;
+
+    rec = contAss.a;
+    EXPECT_EQ("Assign", rec.get<test1>().b);
+
+    rec = contCon.a;
+    EXPECT_EQ("Construct", rec.get<test1>().b);
+}
+
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
