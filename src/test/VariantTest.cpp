@@ -147,6 +147,7 @@ TEST_F(VariantTest, VariantTestPack) {
 }
 
 typedef Variant<test1, test2, std::string, uint8_t> ComplexTestVariant;
+typedef Variant<ComplexTestVariant, test2, std::string, uint8_t> OuterTestVariant;
 
 struct Container: CommonAPI::SerializableStruct {
     ComplexTestVariant a;
@@ -154,6 +155,28 @@ struct Container: CommonAPI::SerializableStruct {
 
     Container() = default;
     Container(const ComplexTestVariant& a, const std::string& b) :
+    a(a), b(b) {
+    }
+
+    void readFromInputStream(CommonAPI::InputStream& inputStream) {
+
+    }
+
+    void writeToOutputStream(CommonAPI::OutputStream& outputStream) const {
+
+    }
+
+    static inline void writeToTypeOutputStream(CommonAPI::TypeOutputStream& typeOutputStream) {
+    }
+
+};
+
+struct ContainerOuter: CommonAPI::SerializableStruct {
+    OuterTestVariant a;
+    std::string b;
+
+    ContainerOuter() = default;
+    ContainerOuter(const OuterTestVariant& a, const std::string& b) :
     a(a), b(b) {
     }
 
@@ -193,6 +216,33 @@ TEST_F(VariantTest, VariantMoveTest) {
     EXPECT_EQ("Assign", rec.get<test1>().b);
 
     rec = contCon.a;
+    EXPECT_EQ("Construct", rec.get<test1>().b);
+}
+
+TEST_F(VariantTest, VariantInVariantMoveTest) {
+
+    OuterTestVariant emptyTest;
+    ContainerOuter cont(std::move(emptyTest), "Hello");
+
+    test1 assignStruct(1, "Assign");
+    ComplexTestVariant assignTest = assignStruct;
+    OuterTestVariant assignOuter = assignTest;
+    ContainerOuter contAss(std::move(assignOuter), "Hello");
+    EXPECT_EQ("Assign", contAss.a.get<ComplexTestVariant>().get<test1>().b);
+
+    test1 constructStruct(1, "Construct");
+    ComplexTestVariant constructTest(constructStruct);
+    OuterTestVariant constructOuter(constructTest);
+    ContainerOuter contCon(std::move(constructOuter), "Hello");
+    EXPECT_EQ("Construct", contCon.a.get<ComplexTestVariant>().get<test1>().b);
+
+    ComplexTestVariant rec;
+
+    rec = contAss.a.get<ComplexTestVariant>();
+    EXPECT_EQ("Assign", rec.get<test1>().b);
+
+
+    rec = contCon.a.get<ComplexTestVariant>();
     EXPECT_EQ("Construct", rec.get<test1>().b);
 }
 
