@@ -31,7 +31,7 @@ The current version can be taken from the git.
 == Common API Overview
 
 Common API and its mechanism specific bindings (e.g. Common API D-Bus) provide a set of libraries and tools to work with 
-RPC communication in a way independent of wich mechanism is used. It consist currently consists of four subprojects:
+RPC communication in a way independent of wich mechanism is used. It currently consists of four subprojects:
 ----
 CommonAPI - This is the base C++ library, which provides the application interface for users and can
             load runtime bindings such as dbus. (This is the current package.) 
@@ -80,6 +80,6 @@ Start working, best practice is to commit smaller, compilable pieces during the 
 .If you want to commit you changes, send them to the author, you can create a patch like this:
         git format-patch working_branch <your branch>
 
-This creates a set of patches that are published via the mailing list.The patches will be discussed and then merged & uploaded on the git by the maintainer.
+This creates a set of patches that are published via the mailing list. The patches will be discussed and then merged & uploaded on the git by the maintainer.
 
 Patches can be accepted either under GENIVI Cla or MPL 2.0 (see section License). Please be sure that the signed-off-by is set correctly. For more, check out http://gerrit.googlecode.com/svn/documentation/2.0/user-signedoffby.html

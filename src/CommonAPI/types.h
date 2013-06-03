@@ -10,6 +10,15 @@
 #include <cstdint>
 
 
+#if  __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
+#  define COMMONAPI_DEPRECATED __attribute__ ((__deprecated__))
+#elif defined(_MSC_VER) && (_MSC_VER >= 1300)
+#  define COMMONAPI_DEPRECATED __declspec(deprecated)
+#else
+#  define COMMONAPI_DEPRECATED
+#endif
+
+
 namespace CommonAPI {
 
 enum class AvailabilityStatus {

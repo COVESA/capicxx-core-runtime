@@ -178,7 +178,7 @@ class Factory {
      * from factory instances.
      */
     template<typename _Stub>
-    bool registerService(std::shared_ptr<_Stub> stub,
+    COMMONAPI_DEPRECATED bool registerService(std::shared_ptr<_Stub> stub,
                          const std::string& participantId,
                          const std::string& serviceName,
                          const std::string& domain) {
@@ -204,7 +204,7 @@ class Factory {
      * from factory instances.
      */
     template<typename _Stub>
-    bool registerService(std::shared_ptr<_Stub> stub, const std::string& serviceAddress) {
+    COMMONAPI_DEPRECATED bool registerService(std::shared_ptr<_Stub> stub, const std::string& serviceAddress) {
         std::string domain;
         std::string serviceName;
         std::string participantId;
@@ -229,7 +229,7 @@ class Factory {
      * Purpose for this change is to make service management (esp. deregistering) independent
      * from factory instances.
      */
-    virtual bool unregisterService(const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
+    COMMONAPI_DEPRECATED virtual bool unregisterService(const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
 
     /**
      * \brief Unregister a service stub associated with a specified address
@@ -243,7 +243,7 @@ class Factory {
      * Purpose for this change is to make service management (esp. deregistering) independent
      * from factory instances.
      */
-    inline bool unregisterService(const std::string& serviceAddress) {
+    COMMONAPI_DEPRECATED inline bool unregisterService(const std::string& serviceAddress) {
         std::string domain;
         std::string serviceName;
         std::string participantId;
