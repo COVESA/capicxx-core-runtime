@@ -16,7 +16,6 @@
 
 #include "MiddlewareInfo.h"
 #include "Proxy.h"
-#include "Runtime.h"
 #include "Stub.h"
 
 
@@ -24,8 +23,7 @@ namespace CommonAPI {
 
 
 class Factory;
-class Runtime;
-class MiddlewareInfo;
+class ServicePublisher;
 
 
 template<template<typename ...> class _ProxyType, template<typename> class _AttributeExtension>
@@ -75,11 +73,7 @@ class Factory {
     std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
     buildProxy(const std::string& participantId,
                const std::string& serviceName,
-               const std::string& domain) {
-
-        std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceId(), participantId, serviceName, domain);
-        return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
-    }
+               const std::string& domain);
 
     /**
      * \brief Build a proxy for the specified address
@@ -92,17 +86,7 @@ class Factory {
      */
     template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions >
     std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
-    buildProxy(const std::string& serviceAddress) {
-
-        std::string domain;
-        std::string serviceName;
-        std::string participantId;
-        if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-            return false;
-        }
-
-        return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, serviceName, domain);
-    }
+    buildProxy(const std::string& serviceAddress);
 
     /**
      * \brief Build a proxy for the specified address with one extension for all attributes
@@ -119,11 +103,7 @@ class Factory {
     std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>
     buildProxyWithDefaultAttributeExtension(const std::string& participantId,
                                             const std::string& serviceName,
-                                            const std::string& domain) {
-
-        std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t::getInterfaceId(), participantId, serviceName, domain);
-        return std::make_shared<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>(abstractMiddlewareProxy);
-    }
+                                            const std::string& domain);
 
     /**
      * \brief Build a proxy for the specified address with one extension for all attributes
@@ -136,17 +116,7 @@ class Factory {
      */
     template <template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
     std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>
-    buildProxyWithDefaultAttributeExtension(const std::string& serviceAddress) {
-
-        std::string domain;
-        std::string serviceName;
-        std::string participantId;
-        if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-            return false;
-        }
-
-        return buildProxyWithDefaultAttributeExtension<_ProxyClass, _AttributeExtension>(participantId, serviceName, domain);
-    }
+    buildProxyWithDefaultAttributeExtension(const std::string& serviceAddress);
 
     /**
      * \brief Get a pointer to the runtime of this factory.
@@ -155,9 +125,7 @@ class Factory {
      *
      * @return the Runtime
      */
-    inline std::shared_ptr<Runtime> getRuntime() {
-        return runtime_;
-    }
+    inline std::shared_ptr<Runtime> getRuntime();
 
     /**
      * \brief Register a service stub under a specified address
@@ -181,11 +149,7 @@ class Factory {
     COMMONAPI_DEPRECATED bool registerService(std::shared_ptr<_Stub> stub,
                          const std::string& participantId,
                          const std::string& serviceName,
-                         const std::string& domain) {
-
-        std::shared_ptr<StubBase> stubBase = std::dynamic_pointer_cast<StubBase>(stub);
-        return registerAdapter(stubBase, _Stub::StubAdapterType::getInterfaceId(), participantId, serviceName, domain);
-    }
+                         const std::string& domain);
 
     /**
      * \brief Register a service stub under a specified address
@@ -204,16 +168,7 @@ class Factory {
      * from factory instances.
      */
     template<typename _Stub>
-    COMMONAPI_DEPRECATED bool registerService(std::shared_ptr<_Stub> stub, const std::string& serviceAddress) {
-        std::string domain;
-        std::string serviceName;
-        std::string participantId;
-        if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-            return false;
-        }
-
-        return registerService<_Stub>(stub, participantId, serviceName, domain);
-    }
+    COMMONAPI_DEPRECATED bool registerService(std::shared_ptr<_Stub> stub, const std::string& serviceAddress);
 
     /**
      * \brief Unregister a service stub associated with a specified address
@@ -243,15 +198,7 @@ class Factory {
      * Purpose for this change is to make service management (esp. deregistering) independent
      * from factory instances.
      */
-    COMMONAPI_DEPRECATED inline bool unregisterService(const std::string& serviceAddress) {
-        std::string domain;
-        std::string serviceName;
-        std::string participantId;
-        if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-            return false;
-        }
-        return unregisterService(participantId, serviceName, domain);
-    }
+    COMMONAPI_DEPRECATED bool unregisterService(const std::string& serviceAddress);
 
     /**
      * \brief Get all instances of a specific service name available. Synchronous call.
@@ -341,9 +288,13 @@ class Factory {
         }
         return true;
     }
+
+    friend ServicePublisher;
 };
 
 
 } // namespace CommonAPI
+
+#include "Factory.hpp"
 
 #endif // COMMONAPI_FACTORY_H_

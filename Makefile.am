@@ -40,6 +40,7 @@ CommonAPI_include_HEADERS = \
         src/CommonAPI/ByteBuffer.h \
         src/CommonAPI/Event.h \
         src/CommonAPI/Factory.h \
+        src/CommonAPI/Factory.hpp \
         src/CommonAPI/InputStream.h \
         src/CommonAPI/MainLoopContext.h \
         src/CommonAPI/MiddlewareInfo.h \
@@ -50,6 +51,7 @@ CommonAPI_include_HEADERS = \
         src/CommonAPI/SerializableVariant.h \
         src/CommonAPI/SerializableVariant.hpp \
         src/CommonAPI/ServicePublisher.h \
+        src/CommonAPI/ServicePublisher.hpp \
         src/CommonAPI/Stub.h \
         src/CommonAPI/types.h
 

@@ -8,11 +8,12 @@
 #ifndef COMMONAPI_SERVICE_PUBLISHER_H_
 #define COMMONAPI_SERVICE_PUBLISHER_H_
 
-
-#include "Factory.h"
-
+#include <memory>
+#include <string>
 
 namespace CommonAPI {
+
+class Factory;
 
 /**
  * \brief Manages all services that shall be published by the application.
@@ -48,9 +49,7 @@ class ServicePublisher {
     template<typename _Stub>
     bool registerService(std::shared_ptr<_Stub> stub,
                          const std::string& serviceAddress,
-                         std::shared_ptr<Factory> factory) {
-        return factory->registerService<_Stub>(stub, serviceAddress);
-    }
+                         std::shared_ptr<Factory> factory);
 
     /**
      * \brief Registers and publishes a service.
@@ -80,10 +79,7 @@ class ServicePublisher {
                          const std::string& participantId,
                          const std::string& serviceName,
                          const std::string& domain,
-                         std::shared_ptr<Factory> factory) {
-
-        return factory->registerService<_Stub>(stub, participantId, serviceName, domain);
-    }
+                         std::shared_ptr<Factory> factory);
 
     /**
      * \brief Unregisters and depublishes the service that was published for the given address.
@@ -109,13 +105,16 @@ class ServicePublisher {
      * @return 'true' if there was a service for the given address and depublishing
      * was successful, 'false' otherwise
      */
-    virtual bool unregisterService(const std::string& participantId, const std::string& serviceName, const std::string& domain) {
-        std::string serviceAddress(participantId + ":" + serviceName + ":"+ domain);
+    bool unregisterService(const std::string& participantId,
+                           const std::string& serviceName,
+                           const std::string& domain) {
+        std::string serviceAddress(participantId + ":" + serviceName + ":" + domain);
         return unregisterService(serviceAddress);
     }
 };
 
 } // namespace CommonAPI
 
+#include "ServicePublisher.hpp"
 
 #endif /* COMMONAPI_SERVICE_PUBLISHER_H_ */
