@@ -30,7 +30,7 @@ Factory::buildProxy(const std::string& serviceAddress) {
     std::string serviceName;
     std::string participantId;
     if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-        return false;
+        return std::shared_ptr<_ProxyClass<_AttributeExtensions...> >();
     }
 
     return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, serviceName, domain);
@@ -54,7 +54,7 @@ Factory::buildProxyWithDefaultAttributeExtension(const std::string& serviceAddre
     std::string serviceName;
     std::string participantId;
     if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-        return false;
+        return std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>();
     }
 
     return buildProxyWithDefaultAttributeExtension<_ProxyClass, _AttributeExtension>(participantId, serviceName, domain);
