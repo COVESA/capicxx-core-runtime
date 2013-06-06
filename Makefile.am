@@ -38,6 +38,7 @@ CommonAPI_include_HEADERS = \
         src/CommonAPI/Attribute.h \
         src/CommonAPI/AttributeExtension.h \
         src/CommonAPI/ByteBuffer.h \
+        src/CommonAPI/CommonAPI.h \
         src/CommonAPI/Event.h \
         src/CommonAPI/Factory.h \
         src/CommonAPI/Factory.hpp \
