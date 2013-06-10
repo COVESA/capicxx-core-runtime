@@ -73,67 +73,60 @@ TEST_F(VariantTest, VariantTestPack) {
     Variant<int, double, std::string> myVariantf(fromDouble);
 
     std::string myString = myVariants->get<std::string>();
-    std::cout << "myString = " << myString << "\n";
+    EXPECT_EQ(fromString, myString);
 
 
     const int& myInt = myVariant.get<int>();
-    std::cout << "myInt = " << myInt << "\n";
+    EXPECT_EQ(myInt, fromInt);
 
     int vType = myVariant.getValueType();
-    std::cout << "myVariant value type = " << vType << ", should be 0 \n";
+    EXPECT_EQ(3, vType);
 
     Variant<int, double, std::string> myVariant2 = myVariant;
     const int& myInt2 = myVariant2.get<int>();
-    std::cout << "myInt2 = " << myInt2 << "\n";
+    EXPECT_EQ(myInt2, fromInt);
 
     Variant<int, double, std::string> myVariant3 = fromInt;
     const int& myInt3 = myVariant3.get<int>();
-    std::cout << "myInt3 = " << myInt3 << "\n"; "\n";
+    EXPECT_EQ(myInt3, fromInt);
 
     myString = myVariants->get<std::string>();
-    std::cout << "myString = " << myString << "\n";
+    EXPECT_EQ(myString, fromString);
 
     Variant<int, double, std::string> myVariantCopy(myVariant);
     const int& myIntCopy = myVariantCopy.get<int>();
-    std::cout << "myIntCopy = " << myIntCopy << "\n";
-
-    std::cout << "myIntCopy equals myInt " << "(" << std::boolalpha << (myVariant == myVariantCopy) << ")\n";
+    EXPECT_EQ(myIntCopy, fromInt);
 
     Variant<int, double, std::string> myVariantCopy2;
     myVariantCopy2 = myVariant;
 
     const int& myIntCopy2 = myVariantCopy2.get<int>();
-    std::cout << "myIntCopy2 = " << myIntCopy << "\n";
-
-    std::cout << "myIntCopy2 equals myInt " << "(" << std::boolalpha << (myVariant == myVariantCopy2) << ")\n";
+    EXPECT_EQ(myIntCopy2, fromInt);
 
 
     EXPECT_ANY_THROW(const int& myFake = myVariant.get<double>());
 
-    std::cout << "myInt is int = " << " (" << std::boolalpha << myVariant.isType<int>() << ")\n";
     EXPECT_TRUE(myVariant.isType<int>());
 
-    std::cout << "myInt is std::string = " << "\n";
     EXPECT_FALSE(myVariant.isType<std::string>());
 
     Variant<int, double, std::string> movedVariant = std::move(myVariant);
-    std::cout << "myMovedInt is int = " << " (" << std::boolalpha << movedVariant.isType<int>() << ")\n";
     EXPECT_TRUE(movedVariant.isType<int>());
     EXPECT_EQ(fromInt, movedVariant.get<int>());
 
     const double& myDouble = myVariantf.get<double>();
-    std::cout << "myDouble = " << myDouble << "\n";
+    EXPECT_EQ(myDouble, fromDouble);
 
     Variant<int, double, std::string> myVariantsCopy(*myVariants);
     std::string myStringCopy = myVariantsCopy.get<std::string>();
-    std::cout << "myStringCopy = " << myStringCopy << "\n";
+    EXPECT_EQ(myStringCopy, fromString);
 
     *myVariants = std::string("Hello World");
     myString = myVariants->get<std::string>();
-    std::cout << "myString = " << myString << "\n";
+    EXPECT_EQ(myString, "Hello World");
 
     myStringCopy = myVariantsCopy.get<std::string>();
-    std::cout << "myStringCopy = " << myStringCopy << "\n";
+    EXPECT_EQ(myStringCopy, fromString);
 
     delete myVariants;
 
