@@ -9,14 +9,14 @@
 #define COMMONAPI_H_
 
 
-#define COMMONAPI_COMPILATION
+#define COMMONAPI_INTERNAL_COMPILATION
 
 #include "Runtime.h"
 #include "Factory.h"
 #include "AttributeExtension.h"
 #include "types.h"
 
-#undef COMMONAPI_COMPILATION
+#undef COMMONAPI_INTERNAL_COMPILATION
 
 
 #endif /* COMMONAPI_H_ */

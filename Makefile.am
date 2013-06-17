@@ -6,6 +6,9 @@ LIBCOMMONAPI_CURRENT=2
 LIBCOMMONAPI_REVISION=0
 LIBCOMMONAPI_AGE=0
 
+AM_CPPFLAGS = \
+        -DCOMMONAPI_INTERNAL_COMPILATION
+
 # ------------------------------------------------------------------------------
 # Doxygen
 include $(top_srcdir)/aminclude.am 
