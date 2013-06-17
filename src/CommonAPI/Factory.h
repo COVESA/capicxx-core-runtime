@@ -22,6 +22,7 @@
 #include "MiddlewareInfo.h"
 #include "Proxy.h"
 #include "Stub.h"
+#include "types.h"
 
 
 namespace CommonAPI {
@@ -59,6 +60,19 @@ class Factory {
             const MiddlewareInfo* middlewareInfo):
                 runtime_(runtime),
                 middlewareInfo_(middlewareInfo) {
+    }
+
+    /**
+     * \brief Creates factory. Don't call manually.
+     *
+     * Creates factory. Don't call manually.
+     */
+    Factory(const std::shared_ptr<Runtime> runtime,
+            const MiddlewareInfo* middlewareInfo,
+            const std::string factoryName,
+            const bool nullOnInvalidName) :
+                    runtime_(runtime),
+                    middlewareInfo_(middlewareInfo) {
     }
 
     virtual ~Factory() {}

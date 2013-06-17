@@ -14,7 +14,6 @@
 
 #include <cstdint>
 
-
 #if  __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
 #  define COMMONAPI_DEPRECATED __attribute__ ((__deprecated__))
 #elif defined(_MSC_VER) && (_MSC_VER >= 1300)
@@ -27,32 +26,30 @@
 namespace CommonAPI {
 
 enum class AvailabilityStatus {
-	UNKNOWN,
-	AVAILABLE,
-	NOT_AVAILABLE
+    UNKNOWN,
+    AVAILABLE,
+    NOT_AVAILABLE
 };
 
-
 enum class CallStatus {
-	SUCCESS,
-	OUT_OF_MEMORY,
-	NOT_AVAILABLE,
-	CONNECTION_FAILED,
-	REMOTE_ERROR
+    SUCCESS,
+    OUT_OF_MEMORY,
+    NOT_AVAILABLE,
+    CONNECTION_FAILED,
+    REMOTE_ERROR
 };
 
 
 struct Version {
-	Version() = default;
+    Version() = default;
 
-	Version(const uint32_t& majorValue, const uint32_t& minorValue):
-			Major(majorValue),
-			Minor(minorValue) { }
+    Version(const uint32_t& majorValue, const uint32_t& minorValue):
+        Major(majorValue),
+        Minor(minorValue) {}
 
-	uint32_t Major;
-	uint32_t Minor;
+    uint32_t Major;
+    uint32_t Minor;
 };
-
 
 } // namespace CommonAPI
 

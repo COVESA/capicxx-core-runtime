@@ -90,7 +90,9 @@ class Runtime {
      *
      * @return Factory object for this runtime
      */
-    virtual std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> = std::shared_ptr<MainLoopContext>(NULL)) = 0;
+    virtual std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> = std::shared_ptr<MainLoopContext>(NULL),
+                                                   const std::string factoryName = "",
+                                                   const bool nullOnInvalidName = false) = 0;
 
     /**
      * \brief Returns the ServicePublisher object for this runtime.
