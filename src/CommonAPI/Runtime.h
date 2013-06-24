@@ -85,14 +85,24 @@ class Runtime {
      *
      * Create a factory for the loaded runtime
      *
-     * @param In case mainloop integration shall be used, a std::shared_ptr<MainLoopContext> can be passed in.
+     * @param mainLoopContext: In case mainloop integration shall be used, a std::shared_ptr<MainLoopContext> can be passed in.
      *        If no parameter is given, internal threading will handle sending and receiving of messages automatically.
+     *        If the mainloop context is not initialized, no factory will be returned. See documentation of
+     *        MainLoopContext::isInitialized().
+     *
+     * @param factoryName: If additional configuration parameters for the specific middleware factory shall be provided,
+     *        the appropriate set of parameters may be identified by this name. See accompanying documentation for
+     *        usage of configuration files.
+     *
+     * @param nullOnInvalidName: If a factoryName is provided, this parameter determines whether the standard configuration
+     *        for factories shall be used if the specific parameter set cannot be found, or if instead no factory
+     *        shall be returned in this case.
      *
      * @return Factory object for this runtime
      */
-    virtual std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> = std::shared_ptr<MainLoopContext>(NULL),
+    virtual std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> mainLoopContext = std::shared_ptr<MainLoopContext>(NULL),
                                                    const std::string factoryName = "",
-                                                   const bool nullOnInvalidName = false) = 0;
+                                                   const bool nullOnInvalidName = false);
 
     /**
      * \brief Returns the ServicePublisher object for this runtime.
@@ -105,6 +115,11 @@ class Runtime {
      * @return The ServicePublisher object for this runtime
      */
     virtual std::shared_ptr<ServicePublisher> getServicePublisher() = 0;
+
+ protected:
+    virtual std::shared_ptr<Factory> doCreateFactory(std::shared_ptr<MainLoopContext>,
+                                                     const std::string factoryName,
+                                                     const bool nullOnInvalidName) = 0;
 };
 
 

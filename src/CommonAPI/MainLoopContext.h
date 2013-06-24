@@ -314,6 +314,16 @@ class MainLoopContext {
         }
     }
 
+    /**
+     * \brief Will return true if at least one subscribe for DispatchSources or Watches has been called.
+     *
+     * This function will be used to prevent creation of a factory if a mainloop context is given, but
+     * no listeners have been registered. This is done in order to ensure correct use of the mainloop context.
+     */
+    inline bool isInitialized() {
+        return dispatchSourceListeners_.size() > 0 || watchListeners_.size() > 0;
+    }
+
  private:
     DispatchSourceListenerList dispatchSourceListeners_;
     WatchListenerList watchListeners_;

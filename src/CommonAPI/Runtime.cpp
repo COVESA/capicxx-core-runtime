@@ -57,5 +57,14 @@ std::shared_ptr<MainLoopContext> Runtime::getNewMainLoopContext() const {
     return std::make_shared<MainLoopContext>();
 }
 
+std::shared_ptr<Factory> Runtime::createFactory(std::shared_ptr<MainLoopContext> mainLoopContext,
+                                                const std::string factoryName,
+                                                const bool nullOnInvalidName) {
+    if(mainLoopContext && !mainLoopContext->isInitialized()) {
+        return std::shared_ptr<Factory>(NULL);
+    }
+    return doCreateFactory(mainLoopContext, factoryName, nullOnInvalidName);
+}
+
 
 } // namespace CommonAPI
