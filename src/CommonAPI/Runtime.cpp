@@ -57,6 +57,11 @@ std::shared_ptr<MainLoopContext> Runtime::getNewMainLoopContext() const {
     return std::make_shared<MainLoopContext>();
 }
 
+std::shared_ptr<Factory> Runtime::createFactory(const std::string factoryName,
+                                                const bool nullOnInvalidName) {
+    return createFactory(std::shared_ptr<MainLoopContext>(NULL), factoryName, nullOnInvalidName);
+}
+
 std::shared_ptr<Factory> Runtime::createFactory(std::shared_ptr<MainLoopContext> mainLoopContext,
                                                 const std::string factoryName,
                                                 const bool nullOnInvalidName) {

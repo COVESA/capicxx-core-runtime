@@ -105,6 +105,24 @@ class Runtime {
                                                    const bool nullOnInvalidName = false);
 
     /**
+     * \brief Create a factory for the loaded runtime.
+     *
+     * Create a factory for the loaded runtime
+     *
+     * @param factoryName: If additional configuration parameters for the specific middleware factory shall be provided,
+     *        the appropriate set of parameters may be identified by this name. See accompanying documentation for
+     *        usage of configuration files.
+     *
+     * @param nullOnInvalidName: If a factoryName is provided, this parameter determines whether the standard configuration
+     *        for factories shall be used if the specific parameter set cannot be found, or if instead no factory
+     *        shall be returned in this case.
+     *
+     * @return Factory object for this runtime
+     */
+    virtual std::shared_ptr<Factory> createFactory(const std::string factoryNamey,
+                                                   const bool nullOnInvalidName = false);
+
+    /**
      * \brief Returns the ServicePublisher object for this runtime.
      *
      * Returns the ServicePublisher object for this runtime. Use the interface
@@ -117,9 +135,9 @@ class Runtime {
     virtual std::shared_ptr<ServicePublisher> getServicePublisher() = 0;
 
  protected:
-    virtual std::shared_ptr<Factory> doCreateFactory(std::shared_ptr<MainLoopContext>,
+    virtual std::shared_ptr<Factory> doCreateFactory(std::shared_ptr<MainLoopContext> mainLoopContext,
                                                      const std::string factoryName,
-                                                     const bool nullOnInvalidName) = 0;
+                                                     const bool nullOnInvalidName = false) = 0;
 };
 
 
