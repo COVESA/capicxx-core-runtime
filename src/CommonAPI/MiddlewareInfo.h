@@ -23,31 +23,16 @@ namespace CommonAPI {
 class Runtime;
 
 
-inline int FNV1aHash(const char* s) {
-    const int FNV_offset_basis = 2166136261u;
-    const int FNV_prime = 16777619;
-
-    int hashValue = FNV_offset_basis;
-    for (unsigned int i = 0; i < strlen(s); i++) {
-        hashValue = (hashValue ^ s[i]) * FNV_prime;
-    }
-    return hashValue;
-}
-
-
 typedef std::shared_ptr<Runtime> (*MiddlewareRuntimeLoadFunction) ();
 
 
 struct MiddlewareInfo {
     const char* middlewareName_;
-    const int middlewareId_;
     MiddlewareRuntimeLoadFunction getInstance_;
 
     MiddlewareInfo(const char* middlewareName, MiddlewareRuntimeLoadFunction middlewareRuntimeLoadFunction):
         middlewareName_(middlewareName),
-        middlewareId_(FNV1aHash(middlewareName)),
-        getInstance_(middlewareRuntimeLoadFunction) {
-}
+        getInstance_(middlewareRuntimeLoadFunction) {}
 };
 
 

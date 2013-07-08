@@ -23,6 +23,7 @@
 #include "Proxy.h"
 #include "Stub.h"
 #include "types.h"
+#include "utils.h"
 
 
 namespace CommonAPI {

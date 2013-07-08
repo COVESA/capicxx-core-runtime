@@ -17,12 +17,11 @@
 #include "MainLoopContext.h"
 
 #include <memory>
-#include <fstream>
 #include <unordered_map>
-#include <dlfcn.h>
 #include <string>
 #include <cassert>
 #include <cstring>
+#include <mutex>
 
 
 namespace CommonAPI {
@@ -40,41 +39,90 @@ class ServicePublisher;
  */
 class Runtime {
  public:
+    enum class LoadState {
+        SUCCESS,
+        NO_LIBRARY_FOUND,
+        CONFIGURATION_ERROR,
+        BINDING_ERROR
+    };
+
+    virtual ~Runtime() {}
+
     /**
      * \brief Loads the default runtime.
      *
-     * Loads the runtime for the default middleware binding. This either is the only binding available,
-     * or the one defined as default in the configuration.
+     * Loads the runtime for the default middleware binding. This can be
+     *   * One of the middleware bindings that were linked at compile time
+     *   * The first middleware binding that is encountered when resolving bindings at runtime
+     *   * The middleware binding that was configured as default in the corresponding configuration
+     *     file (throws an error if no such binding exists)
      *
-     * @return The runtime object for the default binding
+     * @return The runtime object for the default binding, or null if any error occurred
      */
     static std::shared_ptr<Runtime> load();
 
     /**
+     * \brief Loads the default runtime and notifies the caller of any errors.
+     *
+     * Loads the runtime for the default middleware binding. This can be
+     *   * One of the middleware bindings that were linked at compile time
+     *   * The first middleware binding that is encountered when resolving bindings at runtime
+     *   * The middleware binding that was configured as default in the corresponding configuration
+     *     file (throws an error if no such binding exists)
+     *
+     * @param loadState: An enumeration that will be set appropriately after loading has finished or
+     *                   aborted. May be used for debugging purposes.
+     *
+     * @return The runtime object for the default binding, or null if any error occurred. In the latter
+     *         case, loadState will be set to an appropriate value.
+     */
+    static std::shared_ptr<Runtime> load(LoadState& loadState);
+
+    /**
      * \brief Loads specified runtime.
      *
-     * Loads the runtime for the specified middleware binding. The given middleware ID can be either
+     * Loads the runtime for the specified middleware binding. The given well known name can be either
      * the well known name defined by a binding, or a configured alias for a binding.
      *
-     * @return The runtime object for specified binding
+     * @param middlewareIdOrAlias A well known name or an alias for a binding
+     *
+     * @return The runtime object for specified binding, or null if any error occurred.
+     *
+     * @throw std::invalid_argument if a path for this middlewareId has been configured, but no appropriate library
+     *        could be found there.
      */
-    static std::shared_ptr<Runtime> load(const std::string& middlewareId);
+    static std::shared_ptr<Runtime> load(const std::string& middlewareIdOrAlias);
+
+    /**
+     * \brief Loads specified runtime.
+     *
+     * Loads the runtime for the specified middleware binding. The given well known name can be either
+     * the well known name defined by a binding, or a configured alias for a binding.
+     *
+     * @param middlewareIdOrAlias A well known name or an alias for a binding.
+     * @param loadState: An enumeration that will be set appropriately after loading has finished or
+     *                   aborted. May be used for debugging purposes.
+     *
+     * @return The runtime object for specified binding, or null if any error occurred. In the latter
+     *         case, loadState will be set to an appropriate value.
+     */
+    static std::shared_ptr<Runtime> load(const std::string& middlewareIdOrAlias, LoadState& loadState);
 
     /**
      * \brief Called by bindings to register their runtime loaders. Do not call from applications.
      *
      * Called by bindings to register their runtime loaders. Do not call from applications.
      */
-    static void registerRuntimeLoader(std::string middlewareName, MiddlewareRuntimeLoadFunction middlewareRuntimeLoadFunction);
-
-    virtual ~Runtime() {}
+    static void registerRuntimeLoader(const std::string& middlewareName, const MiddlewareRuntimeLoadFunction& middlewareRuntimeLoadFunction);
 
     /**
-     * \brief Returns new MainLoopContext
+     * \brief Returns new MainLoopContext.
      *
      * Creates and returns a new MainLoopContext object. This context can be used to take
      * complete control over the order and time of execution of the abstract middleware
-     * dispatching mechanism.
+     * dispatching mechanism. Make sure to register all callback functions before subsequently
+     * handing it to createFactory(), as during creation of the factory object the callbacks may
+     * already be called.
      *
      * @return A new MainLoopContext object
      */
@@ -100,9 +148,9 @@ class Runtime {
      *
      * @return Factory object for this runtime
      */
-    virtual std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> mainLoopContext = std::shared_ptr<MainLoopContext>(NULL),
-                                                   const std::string factoryName = "",
-                                                   const bool nullOnInvalidName = false);
+    std::shared_ptr<Factory> createFactory(std::shared_ptr<MainLoopContext> mainLoopContext = std::shared_ptr<MainLoopContext>(NULL),
+                                           const std::string factoryName = "",
+                                           const bool nullOnInvalidName = false);
 
     /**
      * \brief Create a factory for the loaded runtime.
@@ -119,8 +167,8 @@ class Runtime {
      *
      * @return Factory object for this runtime
      */
-    virtual std::shared_ptr<Factory> createFactory(const std::string factoryNamey,
-                                                   const bool nullOnInvalidName = false);
+    std::shared_ptr<Factory> createFactory(const std::string factoryNamey,
+                                           const bool nullOnInvalidName = false);
 
     /**
      * \brief Returns the ServicePublisher object for this runtime.
@@ -136,8 +184,20 @@ class Runtime {
 
  protected:
     virtual std::shared_ptr<Factory> doCreateFactory(std::shared_ptr<MainLoopContext> mainLoopContext,
-                                                     const std::string factoryName,
+                                                     const std::string& factoryName,
                                                      const bool nullOnInvalidName = false) = 0;
+
+ private:
+    static const std::vector<std::string> readDirectory(const std::string& path);
+
+    static std::shared_ptr<Runtime> checkDynamicLibraries(LoadState& loadState);
+    static std::shared_ptr<Runtime> checkDynamicLibraries(const std::string& middlewareName, LoadState& loadState);
+
+    static bool tryLoadLibrary(const std::string& libraryPath, void** sharedLibraryHandle, MiddlewareInfo** foundMiddlewareInfo);
+    static bool checkAndLoadLibrary(const std::string& libraryPath, const std::string& requestedMiddlewareName, bool keepLibrary);
+    static bool checkAndLoadDefaultLibrary(std::string& foundBindingName, const std::string& libraryPath);
+
+    static void closeHandle(void* libraryHandle);
 };
 
 

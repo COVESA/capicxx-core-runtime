@@ -14,6 +14,7 @@
 #include "Runtime.h"
 #include "Factory.h"
 #include "AttributeExtension.h"
+#include "ByteBuffer.h"
 #include "types.h"
 
 #undef COMMONAPI_INTERNAL_COMPILATION
