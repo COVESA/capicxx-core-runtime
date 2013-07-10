@@ -43,7 +43,12 @@ class Event {
 	/**
 	 * \brief Subscribe a listener to this event
 	 *
-	 * Subscribe a listener to this event
+	 * Subscribe a listener to this event.
+	 * ATTENTION: You should not build new proxies or register services in callbacks
+	 * from events. This can cause a deadlock or assert. Instead, you should set a
+	 * trigger for your application to do this on the next iteration of your event loop
+	 * if needed. The preferred solution is to build all proxies you need at the
+	 * beginning and react to events appropriatly for each.
 	 *
 	 * @param listener A listener to be added
 	 * @return A token identifying this subscription
@@ -54,6 +59,11 @@ class Event {
      * \brief Subscribe a cancellable listener to this event
      *
      * Subscribe a cancellable listener to this event
+     * ATTENTION: You should not build new proxies or register services in callbacks
+     * from events. This can cause a deadlock or assert. Instead, you should set a
+     * trigger for your application to do this on the next iteration of your event loop
+     * if needed. The preferred solution is to build all proxies you need at the
+     * beginning and react to events appropriatly for each.
      *
      * @param listener A cancellable listener to be added
      * @return A token identifying this subscription
