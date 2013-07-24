@@ -19,7 +19,10 @@ Factory::buildProxy(const std::string& participantId,
                     const std::string& domain) {
 
     std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceId(), participantId, serviceName, domain);
-    return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
+    if (abstractMiddlewareProxy) {
+        return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
+    }
+    return NULL;
 }
 
 template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions >
@@ -43,7 +46,10 @@ Factory::buildProxyWithDefaultAttributeExtension(const std::string& participantI
                                         const std::string& domain) {
 
     std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t::getInterfaceId(), participantId, serviceName, domain);
-    return std::make_shared<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>(abstractMiddlewareProxy);
+    if (abstractMiddlewareProxy) {
+        return std::make_shared<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>(abstractMiddlewareProxy);
+    }
+    return NULL;
 }
 
 template <template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>

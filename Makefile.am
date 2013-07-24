@@ -34,7 +34,8 @@ maintainer-clean-local:
 lib_LTLIBRARIES = libCommonAPI.la
 
 libCommonAPI_la_SOURCES = \
-        src/CommonAPI/Runtime.cpp
+        src/CommonAPI/Runtime.cpp \
+        src/CommonAPI/Configuration.cpp
 
 CommonAPI_includedir=$(includedir)/CommonAPI-${VERSION}/CommonAPI
 CommonAPI_include_HEADERS = \
@@ -57,7 +58,8 @@ CommonAPI_include_HEADERS = \
         src/CommonAPI/ServicePublisher.h \
         src/CommonAPI/ServicePublisher.hpp \
         src/CommonAPI/Stub.h \
-        src/CommonAPI/types.h
+        src/CommonAPI/types.h \
+        src/CommonAPI/utils.h
 
 libCommonAPI_la_LIBADD = -ldl
 libCommonAPI_la_LDFLAGS = \

@@ -60,6 +60,111 @@ the other way of acchieving the same (the way pointed to by the marked elements)
 Elements marked as deprecated will be removed once we have reliable and comprehensive feedback telling us they
 are not used anymore by anybody, but they will remain in Common API for compatibility reasons at least until then.
 
+
+== Fully Dynamic loading of middleware bindings
+
+CommonAPI supports the loading of middleware specific libraries at runtime, without even linking them to the executable beforehand.
+For this purpose, each middleware binding library provides a short well known name that can be used to identify the library.
+If such a well known name is passed as an argument to _CommonAPI::Runtime::load()_, CommonAPI will try to dynamically resolve the
+given name (i.e. find an appropriate library for it), if it is not already provided by a library that was linked at compile time.
+In order to resolve a middleware specific library, the default search paths _/usr/lib_ and _/usr/local/lib/_ will be searched for
+all libraries that match the name pattern "libCommonAPI-<arbitraryName>.so[.major[.minor.revision]]". This naming constraint
+exists in order to prevent too many libraries to be opened and closed again, as each of the libraries found will be searched for the
+presence of the identifying well known name.
+If there are more libraries for the same binding, the library with the higher version will take precedence.
+The resolution procedure can be extended by providing an environment variable with additonal search paths (see below),
+or by specifying a specific path for a specific binding using configuration files (see below). +
+NOTE: If you call _CommonAPI::Runtime::load()_ without an parameter when no middleware library has been linked at compile time,
+      CommonAPI will load the first middleware library it encounters on the default and specified search paths, regardless of
+      its version.
+
+
+== Configuring CommonAPI
+
+It is possible to provide additional configuration parameters to tailor CommonAPI to your specific system architecture.
+This can be done either by providing configuration files or by setting appropriate environment variables.
+
+
+=== Configuration Files
+
+Each CommonAPI configuration file will define additional parameters for specific categories.
+Which categories and which parameters for each of those categories are available will be detailed below.
+
+All parameters for all categories are optional. For each omitted parameter a reasonable default will be set. Because of
+this, it is not mandatory to provide a config file unless you want to alter any of the configurable default values.
+
+CommonAPI config files can be defined locally per binary, globally per binary or globally for all binaries.
+If more than one config file is defined for a given binary (e.g. one locally and one globally) and a given category
+is defined in several of these config files, for each parameter that may be provided for this category the value found
+in the most specific config file will take precedence. If a category is defined several times within the same config file,
+the first occurrence of each parameter will take precedence.
+
+All categories and all parameters are separated from each other by one or more newline characters.
+
+CommonAPI Config files have to be named this way:
+----
+# Binary local: "<FqnOfBinary>.conf", e.g. "/usr/bin/myBinary.conf" if the binary is "/usr/bin/myBinary"
+# Binary global: "/etc/CommonApi/<NameOfBinary>.conf", e.g. "/etc/CommonAPI/myBinary.conf"
+# Global: "/etc/CommonAPI/CommonAPI.conf"
+----
+
+==== Available categories
+
+.Well known names of specific middleware bindings
+Allows to set parameters that influence the loading procedure of specific middleware bindings.
+The syntax is:
+
+==========================
+{binding:<well known binding name>}
+libpath=<Fully qualified name of the library of the binding>
+alias=<One or more desired aliases for the binding, separated by ":">
+genpath=<One or more fully qualified names to libraries containing additional (generated) code for this binding, separated by ":">
+default
+==========================
+
+* *libpath*: Provides a fully qualified name that replaces the search path when trying to dynamically load the identified binding.
+  The library found at libpath will take precedence over all other dynamically discoverable libraries for this binding. +
+  NOTE: If a library for the specified middleware binding is linked to the binary already, this parameter will have no effect. +
+  WARNING: _Not_ finding an appropriate library at libpath is considered to be an error! In this case, no further attempts to resolve
+           the library will be made. If you want to have an explicit error state, call the overloaded _Runtime::load()_
+           functions and pass in an instance of _Runtime::LoadState_ as argument.
+* *alias*: In order to load a specific middleware binding, one normally has to know the well known name of the middleware
+  (e.g. "DBus" for the D-Bus middleware binding) and pass this name as parameter when calling _CommonAPI::Runtime::load("<name>")_.
+  _alias_ maps the well known name for this purpose to one or more arbitrary aliases, thereby decoupling the loading of a specific
+  middleware binding from its specific name. +
+  NOTE: You MAY specify this parameter more than once for a binding. The effect will be the same as if you had one alias parameter
+        specifying the exact same names separated by ":". +
+  NOTE: If the same alias is specified more than once, only the first occurrence of the alias will be considered. +
+  WARNING: As CommonAPI itself does not know about which well known middleware names there are, it is possible to specify the well known
+           name of an actual binding as an alias for any other middleware binding. In this case, the actual middleware binding will not
+           be accessible any longer, unless you specify another unique alias for it.
+* *genpath*: Specifies one or more paths at which a generic library containing additional (e.g. generated middleware and interface specific)
+             code for the middleware binding is to be found. This additional code will be injected when the specific middleware considers
+             it to be the right time to do so. +
+  NOTE: You MAY specify this parameter more than once for a binding. The effect will be the same as if you had one genpath parameter
+        specifying the exact same values separated by ":". +
+  NOTE: If _No_ such parameter is defined, the standard search paths "/usr/lib" and "/usr/local/lib" plus any additional paths defined in
+        the environment variable COMMONAPI_BINDING_PATH (see below) will be searched for any libraries that match the name pattern
+        "lib<wellKnownMiddlewareName>Gen-<arbitraryName>.so[.major[.minor.revision]]". All matching libraries will be loaded. +
+  WARNING: _Not_ finding an appropriate library at any single one of the defined genpaths may result in undefined behavior. +
+  NOTE FOR DEVELOPERS: The _genpath_ parameter will be parsed by the CommonAPI framework and stored in _CommonAPI::Configuration_. Actually loading the
+                       libraries and following the rules described here however is task of the specific middleware binding. You might want to use
+                       the convenience methods provided in <CommonAPI/utils.h> for this purpose. By taking control of the actual proceedings,
+                       you may introduce additional mechanisms of discovering and loading such libraries, and you can defer the loading of the
+                       libraries until you deem it to be the right time to do so.
+* *default*: Specifies the library for this binding as the default that is to be loaded if no parameter is given to _CommonAPI::Runtime::load()_. +
+  WARNING: _Not_ finding an appropriate library for a configured default binding at neither specified nor the default paths is considered to be an error!
+           In this case, no further attempts to find another default library will be made! If you want to have an explicit error state, call the
+           overloaded _Runtime::load()_ functions and pass in an instance of _Runtime::LoadState_ as argument.
+
+
+=== Environment Variables
+
+* COMMONAPI_BINDING_PATH: By default, the standard paths "/usr/lib" and "/usr/local/lib" will be searched for binding libraries that are
+  loaded dynamically (i.e. at runtime without linking them to the binary beforehand). All paths defined in this environment variable
+  will take precedence over those two default paths. Separator between several paths is ":".
+
+
 == Working on the code & contribution
 
 .First get the code from the git:
