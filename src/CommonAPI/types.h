@@ -51,6 +51,17 @@ struct Version {
     uint32_t Minor;
 };
 
+/**
+ * \brief Identifies a client sending a call to a stub.
+ *
+ * The ClientId is used to identify the caller within a stub.
+ * The ClientId is supposed to be added by the middleware and can be compared using the == operator.
+ */
+class ClientId {
+public:
+    virtual ~ClientId() { }
+    virtual bool operator==(ClientId& clientIdToCompare) = 0;
+};
 } // namespace CommonAPI
 
 #endif // COMMONAPI_TYPES_H_
