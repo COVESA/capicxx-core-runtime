@@ -19,8 +19,9 @@
 namespace CommonAPI {
 
 class StubAdapter {
- public:
-    virtual ~StubAdapter() { }
+public:
+    virtual ~StubAdapter() {
+    }
 
     virtual const std::string getAddress() const = 0;
     virtual const std::string& getDomain() const = 0;
@@ -29,19 +30,26 @@ class StubAdapter {
 };
 
 struct StubBase {
-	virtual ~StubBase() {}
+    virtual ~StubBase() {
+    }
 };
 
-template <typename _StubAdapter, typename _StubRemoteEventHandler>
-class Stub : public StubBase {
-	static_assert(std::is_base_of<StubAdapter, _StubAdapter>::value, "Invalid StubAdapter Class!");
- public:
-	typedef _StubAdapter StubAdapterType;
-	typedef _StubRemoteEventHandler RemoteEventHandlerType;
+template<typename _StubAdapter, typename _StubRemoteEventHandler>
+class Stub: public StubBase {
+    static_assert(std::is_base_of<StubAdapter, _StubAdapter>::value, "Invalid StubAdapter Class!");
+    public:
+    typedef _StubAdapter StubAdapterType;
+    typedef _StubRemoteEventHandler RemoteEventHandlerType;
 
-	virtual ~Stub() { }
+    virtual ~Stub() {
+    }
 
-	virtual _StubRemoteEventHandler* initStubAdapter(const std::shared_ptr<_StubAdapter>& stubAdapter) = 0;
+    virtual _StubRemoteEventHandler* initStubAdapter(const std::shared_ptr<_StubAdapter>& stubAdapter) = 0;
+};
+
+enum SelectiveBroadcastSubscriptionEvent {
+    SUBSCRIBED,
+    UNSUBSCRIBED
 };
 
 } // namespace CommonAPI

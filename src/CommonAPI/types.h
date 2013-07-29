@@ -13,6 +13,12 @@
 #define COMMONAPI_TYPES_H_
 
 #include <cstdint>
+#include <functional>
+#include <unordered_set>
+#include <memory>
+#include <tuple>
+#include "ContainerUtils.h"
+#include "Event.h"
 
 #if  __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
 #  define COMMONAPI_DEPRECATED __attribute__ ((__deprecated__))
@@ -61,7 +67,22 @@ class ClientId {
 public:
     virtual ~ClientId() { }
     virtual bool operator==(ClientId& clientIdToCompare) = 0;
+    virtual std::size_t hashCode() = 0;
 };
+
+template <typename ... Args>
+struct SelectiveBroadcastFunctorHelper {
+    typedef std::function<SubscriptionStatus(Args...)> SelectiveBroadcastFunctor;
+};
+
+
+typedef std::unordered_set<std::shared_ptr<CommonAPI::ClientId>, SharedPointerClientIdContentHash, SharedPointerClientIdContentEqual> ClientIdList;
+template <typename ... Args>
+struct SelectiveBroadcastSubscriptionResult {
+    typedef std::tuple<bool, typename CommonAPI::Event<Args...>::Subscription> SubscriptionResult;
+
+};
+
 } // namespace CommonAPI
 
 #endif // COMMONAPI_TYPES_H_
