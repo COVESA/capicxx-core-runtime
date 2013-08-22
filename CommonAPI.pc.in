@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: Common API C++
 Description: GENIVI Common API C++ Library
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lCommonAPI
+Libs: -L${libdir} -lCommonAPI 
 Cflags: -I${includedir}/CommonAPI-@PACKAGE_VERSION@

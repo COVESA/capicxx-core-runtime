@@ -53,6 +53,27 @@ Use autotools to build this package:
 ----
 If the environment variable GTEST_CONFIG is set to the path of the gtest-config script in a Gtest tree test will also be built.
 
+== Linking against CommonAPI
+
+CommonAPI bindings requires successful activation of all static initialization code on library load. Therefore it is 
+necessary to activate certain linker flags to ensure this is always the case. These should be specified in the 
+pkg-config files of the respective bindings, but are also listed here. In case of dynamic linking (.so) 
+--no-as-needed must be specified:
+----
+-Wl,--no-as-needed -lbindingLib -Wl,--as-needed 
+----
+
+In case of static linking --whole-archive must be specified:
+----
+-Wl,--whole-archive bindingLib.a -Wl,--no-whole-archive 
+----
+
+=== Linking generated proxies & stubs
+
+Generated proxies and stubs also require successful activation of all static initialization code on load.
+If they are provided in either a static or dynamic library to the application they must also be linked wrapped in the
+flags described above.
+
 == Elements marked as deprecated
 
 All elements that are marked as deprecated on Common API level are considered to be redundant, and normally
