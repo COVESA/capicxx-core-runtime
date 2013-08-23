@@ -29,18 +29,22 @@ static const char COMMONAPI_LIB_PREFIX[] = "libCommonAPI-";
 static const char MIDDLEWARE_INFO_SYMBOL_NAME[] = "middlewareInfo";
 
 
-inline bool Runtime::tryLoadLibrary(const std::string& libraryPath, void** sharedLibraryHandle, MiddlewareInfo** foundMiddlewareInfo) {
+inline bool Runtime::tryLoadLibrary(const std::string& libraryPath,
+                                    void** sharedLibraryHandle,
+                                    MiddlewareInfo** foundMiddlewareInfo) {
+
     //In case we find an already loaded library again while looking for another one,
     //there is no need to look at it
     if (dlopen(libraryPath.c_str(), RTLD_NOLOAD)) {
         return false;
     }
+
     //In order to place symbols of the newly loaded library ahead of already resolved symbols, we need
     //RTLD_DEEPBIND. This is necessary for this case: A library already is linked at compile time, but while
     //trying to resolve another library dynamically we might find the very same library again.
     //dlopen() doesn't know about the compile time linked library and will close it if dlclose() ever is
-    //called, thereby causing memory corruptions and the like. Therefore, we must be able to access the
-    //middlewareInfo of the newly dlopened library in order to determine whether it already has been linked.
+    //called, thereby causing memory corruptions. Therefore, we must be able to access the middlewareInfo
+    //of the newly dlopened library in order to determine whether it already has been linked.
     *sharedLibraryHandle = dlopen(libraryPath.c_str(), RTLD_LAZY | RTLD_LOCAL | RTLD_DEEPBIND);
     if (sharedLibraryHandle == NULL) {
         return false;
@@ -48,7 +52,7 @@ inline bool Runtime::tryLoadLibrary(const std::string& libraryPath, void** share
 
     *foundMiddlewareInfo = static_cast<MiddlewareInfo*>(dlsym(*sharedLibraryHandle, MIDDLEWARE_INFO_SYMBOL_NAME));
 
-    //In this context, a resolved value of NULL it is just as invalid as if dlerror() was set.
+    //In this context, a resolved value of NULL it is just as invalid as if dlerror() was set additionally.
     if (!*foundMiddlewareInfo) {
         dlclose(*sharedLibraryHandle);
         return false;
@@ -63,7 +67,10 @@ inline bool Runtime::tryLoadLibrary(const std::string& libraryPath, void** share
 }
 
 
-bool Runtime::checkAndLoadLibrary(const std::string& libraryPath, const std::string& requestedBindingIdentifier, bool keepLibrary) {
+bool Runtime::checkAndLoadLibrary(const std::string& libraryPath,
+                                  const std::string& requestedBindingIdentifier,
+                                  bool keepLibrary) {
+
     void* sharedLibraryHandle = NULL;
     MiddlewareInfo* foundMiddlewareInfo;
     if (!tryLoadLibrary(libraryPath, &sharedLibraryHandle, &foundMiddlewareInfo)) {
@@ -83,7 +90,7 @@ bool Runtime::checkAndLoadLibrary(const std::string& libraryPath, const std::str
     if (!keepLibrary) {
         dlclose(sharedLibraryHandle);
     } else {
-        //Extend visibility to make symbols available to all other libraries loaded afterwards,
+        //Extend visibility to make symbols available to all other libraries that are loaded afterwards,
         //e.g. libraries containing generated binding specific code.
         sharedLibraryHandle = dlopen(libraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
         if (!sharedLibraryHandle) {
@@ -214,7 +221,6 @@ std::shared_ptr<Runtime> Runtime::checkDynamicLibraries(const std::string& reque
             std::string versionString;
             LibraryVersion currentLibraryVersion = {-1, -1, -1};
 
-
             const char* fileNamePtr = fqnOfEntry.c_str();
             while ((fileNamePtr = strchr(fileNamePtr + 1, '.'))) {
                 if (strncmp(".so", fileNamePtr, 3) == 0) {
@@ -266,11 +272,6 @@ std::shared_ptr<Runtime> Runtime::checkDynamicLibraries(const std::string& reque
 
 
 std::shared_ptr<Runtime> Runtime::checkDynamicLibraries(LoadState& loadState) {
-    const std::string& defaultBindingIdentifier = Configuration::getInstance().getDefaultMiddlewareIdentifier();
-    if (defaultBindingIdentifier != "") {
-        return checkDynamicLibraries(defaultBindingIdentifier, loadState);
-    }
-
     const std::vector<std::string>& librarySearchPaths = Configuration::getInstance().getLibrarySearchPaths();
 
     for (const std::string& singleSearchPath : librarySearchPaths) {
@@ -318,13 +319,21 @@ std::shared_ptr<Runtime> Runtime::load(LoadState& loadState) {
         registeredRuntimeLoadFunctions_ = new std::unordered_map<std::string, MiddlewareRuntimeLoadFunction>();
     }
 
-    const auto defaultRuntimeLoader = registeredRuntimeLoadFunctions_->begin();
+    const std::string& defaultBindingIdentifier = Configuration::getInstance().getDefaultMiddlewareIdentifier();
+    if (defaultBindingIdentifier != "") {
+        const auto defaultRuntimeLoader = registeredRuntimeLoadFunctions_->find(defaultBindingIdentifier);
+        if (defaultRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
+            return (defaultRuntimeLoader->second)();
+        }
+        return checkDynamicLibraries(defaultBindingIdentifier, loadState);
 
-    if (defaultRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
-        return (defaultRuntimeLoader->second)();
+    } else {
+        const auto defaultRuntimeLoader = registeredRuntimeLoadFunctions_->begin();
+        if (defaultRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
+            return (defaultRuntimeLoader->second)();
+        }
+        return checkDynamicLibraries(loadState);
     }
-
-    return checkDynamicLibraries(loadState);
 }
 
 
