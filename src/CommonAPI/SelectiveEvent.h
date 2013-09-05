@@ -30,6 +30,21 @@ public:
         bool success;
         return subscribe(listener, success);
     }
+
+    /**
+     * \brief Subscribe a listener to this event and be notified of success
+     *
+     * Subscribe a listener to this event and be notified of success via the passed reference.
+     * ATTENTION: You should not build new proxies or register services in callbacks
+     * from events. This can cause a deadlock or assert. Instead, you should set a
+     * trigger for your application to do this on the next iteration of your event loop
+     * if needed. The preferred solution is to build all proxies you need at the
+     * beginning and react to events appropriatly for each.
+     *
+     * @param listener A listener to be added
+     * @param success Indicates whether subscription was accepted
+     * @return A token identifying this subscription
+     */
     virtual Subscription subscribe(Listener listener, bool& success) = 0;
 };
 
