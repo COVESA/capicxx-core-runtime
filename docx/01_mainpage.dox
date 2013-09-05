@@ -1,0 +1,33 @@
+/**
+ * Copyright (C) 2013 BMW AG
+ *
+ *
+ * This file is part of GENIVI Project CommonAPI.
+ *
+ * Contributions are licensed to the GENIVI Alliance under one or more
+ * Contribution License Agreements.
+ *
+ * \copyright
+ * This Source Code Form is subject to the terms of the
+ * Mozilla Public License, v. 2.0. If a  copy of the MPL was not distributed with
+ * this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * \author Juergen Gehring (juergen.gehring@bmw.de)
+ * \author Manfred Bathelt (manfred.bathelt@bmw.de)
+ *
+ */
+ 
+/*!
+\mainpage
+
+\par Usage information
+can be found in the README file in the source: http://git.projects.genivi.org/?p=ipc/common-api-runtime.git;a=blob;f=README;hb=HEAD
+
+\par More information
+can be found at https://collab.genivi.org/wiki/display/genivi/GENIVI+Home \n
+
+\par About CommonAPI-D-Bus
+CommonAPI C++ is an Inter Process Communication (IPC) API for C++, which enables applications to
+use different IPC middleware as backend without any changes to the application code.
+
+*/
