@@ -21,10 +21,10 @@
 \mainpage
 
 \par Usage information
-can be found in the README file in the source: http://git.projects.genivi.org/?p=ipc/common-api-runtime.git;a=blob;f=README;hb=HEAD
+can be found in the <a href="README.html">README file</a>. 
 
 \par More information
-can be found at https://collab.genivi.org/wiki/display/genivi/GENIVI+Home \n
+can be found at http://projects.genivi.org/commonapi/ \n
 
 \par About CommonAPI-D-Bus
 CommonAPI C++ is an Inter Process Communication (IPC) API for C++, which enables applications to
