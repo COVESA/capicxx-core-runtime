@@ -247,7 +247,7 @@ inline bool loadGenericLibrary(const std::string& wellKnownMiddlewareName, const
 
         const char* fileNamePtr = libraryName.c_str();
         while ((fileNamePtr = strchr(fileNamePtr + 1, '.'))) {
-            if (strncmp(".so", fileNamePtr, 3) == 0) {
+            if (strncmp(".so\0", fileNamePtr, 4) == 0 || strncmp(".so.", fileNamePtr, 4) == 0) {
                 break;
             }
         }

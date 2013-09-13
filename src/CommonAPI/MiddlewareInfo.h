@@ -15,6 +15,7 @@
 
 #include <memory>
 #include <cstring>
+#include "types.h"
 
 
 namespace CommonAPI {
@@ -29,10 +30,14 @@ typedef std::shared_ptr<Runtime> (*MiddlewareRuntimeLoadFunction) ();
 struct MiddlewareInfo {
     const char* middlewareName_;
     MiddlewareRuntimeLoadFunction getInstance_;
+    Version version_;
 
-    MiddlewareInfo(const char* middlewareName, MiddlewareRuntimeLoadFunction middlewareRuntimeLoadFunction):
+    MiddlewareInfo(const char* middlewareName,
+                   MiddlewareRuntimeLoadFunction middlewareRuntimeLoadFunction,
+                   Version version):
         middlewareName_(middlewareName),
-        getInstance_(middlewareRuntimeLoadFunction) {}
+        getInstance_(middlewareRuntimeLoadFunction),
+        version_(version) {}
 };
 
 
