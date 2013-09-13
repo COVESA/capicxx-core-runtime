@@ -11,11 +11,19 @@
 namespace CommonAPI {
 
 size_t SharedPointerClientIdContentHash::operator()(const std::shared_ptr<ClientId>& t) const {
-    return t->hashCode();
+    if (t) {
+        return t->hashCode();
+    } else {
+        return NULL;
+    }
 }
 
 bool SharedPointerClientIdContentEqual::operator()(const std::shared_ptr<ClientId>& a, const std::shared_ptr<ClientId>& b) const {
-    return *a==*b;
+    if (a && b) {
+        return *a==*b;
+    } else {
+        return false;
+    }
 }
 
 }  // namespace std
