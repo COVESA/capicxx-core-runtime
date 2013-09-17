@@ -9,7 +9,9 @@
 #define COMMONAPI_H_
 
 
+#ifndef COMMONAPI_INTERNAL_COMPILATION
 #define COMMONAPI_INTERNAL_COMPILATION
+#endif
 
 #include "Runtime.h"
 #include "Factory.h"

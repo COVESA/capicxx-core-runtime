@@ -42,6 +42,8 @@ class Proxy {
 
 	virtual bool isAvailable() const = 0;
 
+	virtual bool isAvailableBlocking() const = 0;
+
 	virtual ProxyStatusEvent& getProxyStatusEvent() = 0;
 
 	virtual InterfaceVersionAttribute& getInterfaceVersionAttribute() = 0;

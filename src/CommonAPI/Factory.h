@@ -285,7 +285,17 @@ class Factory {
 
  protected:
     virtual std::shared_ptr<Proxy> createProxy(const char* interfaceId, const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
-    virtual bool registerAdapter(std::shared_ptr<StubBase> stubBase, const char* interfaceId, const std::string& participantId, const std::string& serviceName, const std::string& domain) = 0;
+
+    /**
+     * @deprecated Use CommonAPI::ServicePublisher::registerService() instead.
+     */
+    COMMONAPI_DEPRECATED virtual bool registerAdapter(std::shared_ptr<StubBase> stubBase,
+                                                      const char* interfaceId,
+                                                      const std::string& participantId,
+                                                      const std::string& serviceName,
+                                                      const std::string& domain) {
+        return false;
+    }
 
  private:
     std::shared_ptr<Runtime> runtime_;

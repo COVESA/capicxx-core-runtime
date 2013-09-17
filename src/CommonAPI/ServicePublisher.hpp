@@ -20,7 +20,7 @@ bool ServicePublisher::registerService(std::shared_ptr<_Stub> stub,
                      std::shared_ptr<Factory> factory) {
 
     std::shared_ptr<StubBase> stubBase = std::dynamic_pointer_cast<StubBase>(stub);
-    return factory->registerAdapter(stubBase, _Stub::StubAdapterType::getInterfaceId(), participantId, serviceName, domain);
+    return registerService(stubBase, _Stub::StubAdapterType::getInterfaceId(), participantId, serviceName, domain, factory);
 }
 
 template<typename _Stub>

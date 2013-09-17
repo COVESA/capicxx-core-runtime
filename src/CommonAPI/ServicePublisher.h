@@ -17,6 +17,7 @@
 
 namespace CommonAPI {
 
+class StubBase;
 class Factory;
 
 /**
@@ -115,6 +116,21 @@ class ServicePublisher {
         std::string serviceAddress(participantId + ":" + serviceName + ":" + domain);
         return unregisterService(serviceAddress);
     }
+
+ protected:
+    /**
+     * Register stubBase service within a factory.
+     *
+     * This is a new API which deprecates the old Factory::registerAdapter() method.
+     * For compatibility reasons a default implementation is provided. New middleware
+     * implementations should override this method.
+     */
+    virtual bool registerService(const std::shared_ptr<StubBase>& stubBase,
+                                 const char* interfaceId,
+                                 const std::string& participantId,
+                                 const std::string& serviceName,
+                                 const std::string& domain,
+                                 const std::shared_ptr<Factory>& factory);
 };
 
 } // namespace CommonAPI

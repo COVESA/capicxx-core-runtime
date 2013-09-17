@@ -36,6 +36,7 @@ lib_LTLIBRARIES = libCommonAPI.la
 libCommonAPI_la_SOURCES = \
         src/CommonAPI/Runtime.cpp \
         src/CommonAPI/Configuration.cpp \
+        src/CommonAPI/ServicePublisher.cpp \
         src/CommonAPI/ContainerUtils.cpp
 
 CommonAPI_includedir=$(includedir)/CommonAPI-${VERSION}/CommonAPI
@@ -54,6 +55,7 @@ CommonAPI_include_HEADERS = \
         src/CommonAPI/MiddlewareInfo.h \
         src/CommonAPI/OutputStream.h \
         src/CommonAPI/Proxy.h \
+        src/CommonAPI/ProxyManager.h \
         src/CommonAPI/Runtime.h \
         src/CommonAPI/SelectiveEvent.h \
         src/CommonAPI/SerializableStruct.h \
