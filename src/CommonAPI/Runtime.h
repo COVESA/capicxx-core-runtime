@@ -87,9 +87,6 @@ class Runtime {
      * @param middlewareIdOrAlias A well known name or an alias for a binding
      *
      * @return The runtime object for specified binding, or null if any error occurred.
-     *
-     * @throw std::invalid_argument if a path for this middlewareId has been configured, but no appropriate library
-     *        could be found there.
      */
     static std::shared_ptr<Runtime> load(const std::string& middlewareIdOrAlias);
 

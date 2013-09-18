@@ -103,8 +103,9 @@ TEST_F(VariantTest, VariantTestPack) {
     const int& myIntCopy2 = myVariantCopy2.get<int>();
     EXPECT_EQ(myIntCopy2, fromInt);
 
-
+#ifdef __EXCEPTIONS
     EXPECT_ANY_THROW(const int& myFake = myVariant.get<double>());
+#endif
 
     EXPECT_TRUE(myVariant.isType<int>());
 
