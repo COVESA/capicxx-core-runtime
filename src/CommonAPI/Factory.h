@@ -52,6 +52,7 @@ class Factory {
     typedef std::function<void(std::vector<std::string>&) > GetAvailableServiceInstancesCallback;
     typedef std::function<void(bool)> IsServiceInstanceAliveCallback;
 
+
     /**
      * \brief Creates factory. Don't call manually.
      *
@@ -296,9 +297,8 @@ class Factory {
                                                       const std::string& domain) {
         return false;
     }
-
- private:
     std::shared_ptr<Runtime> runtime_;
+ private:
 
     const MiddlewareInfo* middlewareInfo_;
 
