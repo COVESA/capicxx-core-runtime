@@ -14,7 +14,7 @@ size_t SharedPointerClientIdContentHash::operator()(const std::shared_ptr<Client
     if (t) {
         return t->hashCode();
     } else {
-        return NULL;
+        return 0;
     }
 }
 
