@@ -109,6 +109,10 @@ inline void trim(std::string& toTrim) {
     );
 }
 
+inline bool notIsdigit(char c) {
+    return !std::isdigit(c);
+}
+
 /**
  * \brief Checks whether the given string contains nothing but digits.
  *
@@ -120,11 +124,13 @@ inline bool containsOnlyDigits(const std::string& toCheck) {
     auto firstNonDigitIt = std::find_if(
                     toCheck.begin(),
                     toCheck.end(),
-                    [](char c) {
-                        return !std::isdigit(c);
-                    });
+                    notIsdigit);
 
     return firstNonDigitIt == toCheck.end();
+}
+
+inline bool notIsalnum(char c) {
+    return !std::isalnum(c);
 }
 
 /**
@@ -138,9 +144,7 @@ inline bool containsOnlyAlphanumericCharacters(const std::string& toCheck) {
     auto firstNonAlphanumericCharacterIt = std::find_if(
                     toCheck.begin(),
                     toCheck.end(),
-                    [](char c) {
-                        return !std::isalnum(c);
-                    });
+                    notIsalnum);
 
     return firstNonAlphanumericCharacterIt == toCheck.end();
 }
