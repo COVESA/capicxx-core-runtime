@@ -39,7 +39,7 @@ libCommonAPI_la_SOURCES = \
         src/CommonAPI/ServicePublisher.cpp \
         src/CommonAPI/ContainerUtils.cpp
 
-CommonAPI_includedir=$(includedir)/CommonAPI-${VERSION}/CommonAPI
+CommonAPI_includedir=$(includedir)/CommonAPI-${COMMONAPI_API_HEADER_VERSION}/CommonAPI
 CommonAPI_include_HEADERS = \
         src/CommonAPI/Attribute.h \
         src/CommonAPI/AttributeExtension.h \
@@ -83,7 +83,7 @@ check_PROGRAMS = \
 
 
 TESTS = ${check_PROGRAMS}
-VariantTest_includedir=$(includedir)/CommonAPI-${VERSION}/CommonAPI
+VariantTest_includedir=$(includedir)/CommonAPI-${COMMONAPI_API_HEADER_VERSION}/CommonAPI
 VariantTest_SOURCES = src/test/VariantTest.cpp
 VariantTest_CPPFLAGS = ${AM_CPPFLAGS} ${GTEST_CPPFLAGS}
 VariantTest_CXXFLAGS = ${GTEST_CXXFLAGS} -Isrc

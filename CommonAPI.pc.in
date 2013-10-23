@@ -7,4 +7,4 @@ Name: Common API C++
 Description: GENIVI Common API C++ Library
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lCommonAPI 
-Cflags: -I${includedir}/CommonAPI-@PACKAGE_VERSION@
+Cflags: -I${includedir}/CommonAPI-@COMMONAPI_API_HEADER_VERSION@
