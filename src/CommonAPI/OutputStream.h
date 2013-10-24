@@ -31,9 +31,8 @@ namespace CommonAPI {
 class SerializableVariant;
 
 class TypeOutputStream {
-  public:
+public:
     virtual ~TypeOutputStream() {}
-
 
     virtual void writeBoolType() = 0;
 
@@ -47,7 +46,6 @@ class TypeOutputStream {
     virtual void writeUInt32Type() = 0;
     virtual void writeUInt64Type() = 0;
 
-
     virtual void writeInt8EnumType() = 0;
     virtual void writeInt16EnumType() = 0;
     virtual void writeInt32EnumType() = 0;
@@ -57,7 +55,6 @@ class TypeOutputStream {
     virtual void writeUInt16EnumType() = 0;
     virtual void writeUInt32EnumType() = 0;
     virtual void writeUInt64EnumType() = 0;
-
 
     virtual void writeFloatType() = 0;
     virtual void writeDoubleType() = 0;
@@ -80,154 +77,142 @@ class TypeOutputStream {
     virtual std::string retrieveSignature() = 0;
 };
 
-
 template<typename _Type>
 struct TypeWriter;
-
 
 template<typename _Type>
 struct BasicTypeWriter;
 
-
 template<>
 struct BasicTypeWriter<bool> {
-inline static void writeType(TypeOutputStream& typeStream) {
-    typeStream.writeBoolType();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeBoolType();
+    }
 };
-
 
 template<>
 struct BasicTypeWriter<int8_t> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeInt8Type();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeInt8Type();
+    }
 };
 
 template<>
 struct BasicTypeWriter<int16_t> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeInt16Type();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeInt16Type();
+    }
 };
 
 template<>
 struct BasicTypeWriter<int32_t> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeInt32Type();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeInt32Type();
+    }
 };
 
 template<>
 struct BasicTypeWriter<int64_t> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeInt64Type();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeInt64Type();
+    }
 };
-
 
 template<>
 struct BasicTypeWriter<uint8_t> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeUInt8Type();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeUInt8Type();
+    }
 };
 
 template<>
 struct BasicTypeWriter<uint16_t> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeUInt16Type();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeUInt16Type();
+    }
 };
 
 template<>
 struct BasicTypeWriter<uint32_t> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeUInt32Type();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeUInt32Type();
+    }
 };
 
 template<>
 struct BasicTypeWriter<uint64_t> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeUInt64Type();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeUInt64Type();
+    }
 };
-
 
 template<>
 struct BasicTypeWriter<float> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeFloatType();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeFloatType();
+    }
 };
 
 template<>
 struct BasicTypeWriter<double> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeDoubleType();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeDoubleType();
+    }
 };
-
 
 template<>
 struct BasicTypeWriter<std::string> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeStringType();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeStringType();
+    }
 };
 
 template<>
 struct BasicTypeWriter<CommonAPI::ByteBuffer> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeByteBufferType();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeByteBufferType();
+    }
 };
 
 template<>
 struct BasicTypeWriter<CommonAPI::Version> {
-inline static void writeType (TypeOutputStream& typeStream) {
-    typeStream.writeVersionType();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeVersionType();
+    }
 };
-
 
 template<typename _VectorElementType>
 struct BasicTypeWriter<std::vector<_VectorElementType>> {
-inline static void writeType(TypeOutputStream& typeStream) {
-    typeStream.beginWriteVectorType();
-    TypeWriter<_VectorElementType>::writeType(typeStream);
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.beginWriteVectorType();
+        TypeWriter<_VectorElementType>::writeType(typeStream);
+    }
 };
-
 
 template<typename _KeyType, typename _ValueType>
 struct BasicTypeWriter<std::unordered_map<_KeyType, _ValueType>> {
-inline static void writeType(TypeOutputStream& typeStream) {
-    typeStream.beginWriteMapType();
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.beginWriteMapType();
 
-    BasicTypeWriter<_KeyType>::writeType(typeStream);
-    BasicTypeWriter<_ValueType>::writeType(typeStream);
+        BasicTypeWriter<_KeyType>::writeType(typeStream);
+        BasicTypeWriter<_ValueType>::writeType(typeStream);
 
-    typeStream.endWriteMapType();
-}
+        typeStream.endWriteMapType();
+    }
 };
-
 
 template<typename _Type, bool _IsStructType = false>
 struct StructTypeWriter: public BasicTypeWriter<_Type> {
 };
 
-
 template<typename _Type>
 struct StructTypeWriter<_Type, true> {
-inline static void writeType(TypeOutputStream& typeStream) {
-    typeStream.beginWriteStructType();
-    _Type::writeToTypeOutputStream(typeStream);
-    typeStream.endWriteStructType();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.beginWriteStructType();
+        _Type::writeToTypeOutputStream(typeStream);
+        typeStream.endWriteStructType();
+    }
 };
-
 
 template<typename _Type, bool _IsVariantType = false>
 struct VariantTypeWriter: public StructTypeWriter<_Type, std::is_base_of<SerializableStruct, _Type>::value> {
@@ -235,57 +220,56 @@ struct VariantTypeWriter: public StructTypeWriter<_Type, std::is_base_of<Seriali
 
 template<typename _Type>
 struct VariantTypeWriter<_Type, true> {
-inline static void writeType(TypeOutputStream& typeStream) {
-    typeStream.writeVariantType();
-}
+    inline static void writeType(TypeOutputStream& typeStream) {
+        typeStream.writeVariantType();
+    }
 };
 
-
 template<typename _Type>
-struct TypeWriter: public VariantTypeWriter<_Type, std::is_base_of<SerializableVariant, _Type>::value>{};
-
-
+struct TypeWriter: public VariantTypeWriter<_Type, std::is_base_of<SerializableVariant, _Type>::value> {
+};
 
 class OutputStream {
- public:
-    virtual ~OutputStream() {}
+public:
+    virtual ~OutputStream() {
+    }
     virtual bool hasError() const = 0;
 
-	virtual OutputStream& writeValue(const bool& boolValue) = 0;
+    virtual OutputStream& writeValue(const bool& boolValue) = 0;
 
-	virtual OutputStream& writeValue(const int8_t& int8Value) = 0;
-	virtual OutputStream& writeValue(const int16_t& int16Value) = 0;
-	virtual OutputStream& writeValue(const int32_t& int32Value) = 0;
-	virtual OutputStream& writeValue(const int64_t& int64Value) = 0;
+    virtual OutputStream& writeValue(const int8_t& int8Value) = 0;
+    virtual OutputStream& writeValue(const int16_t& int16Value) = 0;
+    virtual OutputStream& writeValue(const int32_t& int32Value) = 0;
+    virtual OutputStream& writeValue(const int64_t& int64Value) = 0;
 
-	virtual OutputStream& writeValue(const uint8_t& uint8Value) = 0;
-	virtual OutputStream& writeValue(const uint16_t& uint16Value) = 0;
-	virtual OutputStream& writeValue(const uint32_t& uint32Value) = 0;
-	virtual OutputStream& writeValue(const uint64_t& uint64Value) = 0;
+    virtual OutputStream& writeValue(const uint8_t& uint8Value) = 0;
+    virtual OutputStream& writeValue(const uint16_t& uint16Value) = 0;
+    virtual OutputStream& writeValue(const uint32_t& uint32Value) = 0;
+    virtual OutputStream& writeValue(const uint64_t& uint64Value) = 0;
 
-	virtual OutputStream& writeValue(const float& floatValue) = 0;
-	virtual OutputStream& writeValue(const double& doubleValue) = 0;
+    virtual OutputStream& writeValue(const float& floatValue) = 0;
+    virtual OutputStream& writeValue(const double& doubleValue) = 0;
 
-	virtual OutputStream& writeValue(const std::string& stringValue) = 0;
+    virtual OutputStream& writeValue(const std::string& stringValue) = 0;
 
-	virtual OutputStream& writeValue(const ByteBuffer& byteBufferValue) = 0;
+    virtual OutputStream& writeValue(const ByteBuffer& byteBufferValue) = 0;
 
- 	virtual OutputStream& writeEnumValue(const int8_t& int8BackingTypeValue) = 0;
- 	virtual OutputStream& writeEnumValue(const int16_t& int16BackingTypeValue) = 0;
- 	virtual OutputStream& writeEnumValue(const int32_t& int32BackingTypeValue) = 0;
- 	virtual OutputStream& writeEnumValue(const int64_t& int64BackingTypeValue) = 0;
- 	virtual OutputStream& writeEnumValue(const uint8_t& uint8BackingTypeValue) = 0;
- 	virtual OutputStream& writeEnumValue(const uint16_t& uint16BackingTypeValue) = 0;
- 	virtual OutputStream& writeEnumValue(const uint32_t& uint32BackingTypeValue) = 0;
- 	virtual OutputStream& writeEnumValue(const uint64_t& uint64BackingTypeValue) = 0;
+    virtual OutputStream& writeEnumValue(const int8_t& int8BackingTypeValue) = 0;
+    virtual OutputStream& writeEnumValue(const int16_t& int16BackingTypeValue) = 0;
+    virtual OutputStream& writeEnumValue(const int32_t& int32BackingTypeValue) = 0;
+    virtual OutputStream& writeEnumValue(const int64_t& int64BackingTypeValue) = 0;
+    virtual OutputStream& writeEnumValue(const uint8_t& uint8BackingTypeValue) = 0;
+    virtual OutputStream& writeEnumValue(const uint16_t& uint16BackingTypeValue) = 0;
+    virtual OutputStream& writeEnumValue(const uint32_t& uint32BackingTypeValue) = 0;
+    virtual OutputStream& writeEnumValue(const uint64_t& uint64BackingTypeValue) = 0;
 
- 	virtual OutputStream& writeVersionValue(const Version& versionValue) = 0;
+    virtual OutputStream& writeVersionValue(const Version& versionValue) = 0;
 
- 	virtual void beginWriteSerializableStruct(const SerializableStruct& serializableStruct) = 0;
-	virtual void endWriteSerializableStruct(const SerializableStruct& serializableStruct) = 0;
+    virtual void beginWriteSerializableStruct(const SerializableStruct& serializableStruct) = 0;
+    virtual void endWriteSerializableStruct(const SerializableStruct& serializableStruct) = 0;
 
- 	virtual void beginWriteSerializablePolymorphicStruct(const std::shared_ptr<SerializablePolymorphicStruct>& serializableStruct) = 0;
-	virtual void endWriteSerializablePolymorphicStruct(const std::shared_ptr<SerializablePolymorphicStruct>& serializableStruct) = 0;
+    virtual void beginWriteSerializablePolymorphicStruct(const std::shared_ptr<SerializablePolymorphicStruct>& serializableStruct) = 0;
+    virtual void endWriteSerializablePolymorphicStruct(const std::shared_ptr<SerializablePolymorphicStruct>& serializableStruct) = 0;
 
     virtual void beginWriteSerializableVariant(const SerializableVariant& serializableVariant) = 0;
     virtual void endWriteSerializableVariant(const SerializableVariant& serializableVariant) = 0;
@@ -319,72 +303,75 @@ class OutputStream {
     virtual void beginWriteVectorOfVectors(uint32_t sizeOfVector) = 0;
     virtual void beginWriteVectorOfMaps(uint32_t sizeOfVector) = 0;
 
+    virtual void beginWriteVectorOfSerializablePolymorphicStructs(uint32_t sizeOfVector) = 0;
+
     virtual void endWriteVector() = 0;
 
-	virtual void beginWriteMap(size_t elementCount) = 0;
-	virtual void endWriteMap() = 0;
-	virtual void beginWriteMapElement() = 0;
-	virtual void endWriteMapElement() = 0;
+    virtual void beginWriteMap(size_t elementCount) = 0;
+    virtual void endWriteMap() = 0;
+    virtual void beginWriteMapElement() = 0;
+    virtual void endWriteMapElement() = 0;
 
-	virtual bool writeRawData(const char* rawDataPtr, const size_t sizeInByte) = 0;
+    virtual bool writeRawData(const char* rawDataPtr, const size_t sizeInByte) = 0;
 };
 
-
 inline OutputStream& operator<<(OutputStream& outputStream, const bool& boolValue) {
-	return outputStream.writeValue(boolValue);
+    return outputStream.writeValue(boolValue);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const int8_t& int8Value) {
-	return outputStream.writeValue(int8Value);
+    return outputStream.writeValue(int8Value);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const int16_t& int16Value) {
-	return outputStream.writeValue(int16Value);
+    return outputStream.writeValue(int16Value);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const int32_t& int32Value) {
-	return outputStream.writeValue(int32Value);
+    return outputStream.writeValue(int32Value);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const int64_t& int64Value) {
-	return outputStream.writeValue(int64Value);
+    return outputStream.writeValue(int64Value);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const uint8_t& uint8Value) {
-	return outputStream.writeValue(uint8Value);
+    return outputStream.writeValue(uint8Value);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const uint16_t& uint16Value) {
-	return outputStream.writeValue(uint16Value);
+    return outputStream.writeValue(uint16Value);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const uint32_t& uint32Value) {
-	return outputStream.writeValue(uint32Value);
+    return outputStream.writeValue(uint32Value);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const uint64_t& uint64Value) {
-	return outputStream.writeValue(uint64Value);
+    return outputStream.writeValue(uint64Value);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const float& floatValue) {
-	return outputStream.writeValue(floatValue);
+    return outputStream.writeValue(floatValue);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const double& doubleValue) {
-	return outputStream.writeValue(doubleValue);
+    return outputStream.writeValue(doubleValue);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const std::string& stringValue) {
-	return outputStream.writeValue(stringValue);
+    return outputStream.writeValue(stringValue);
 }
 
 inline OutputStream& operator<<(OutputStream& outputStream, const Version& versionValue) {
-	return outputStream.writeVersionValue(versionValue);
+    return outputStream.writeVersionValue(versionValue);
 }
 
-template <typename _SerializablePolymorphicStructType>
-typename std::enable_if<std::is_base_of<SerializablePolymorphicStruct, _SerializablePolymorphicStructType>::value, OutputStream>::type&
-operator<<(OutputStream& outputStream, const std::shared_ptr<_SerializablePolymorphicStructType>& serializablePolymorphicStruct) {
+template<typename _SerializablePolymorphicStructType>
+typename std::enable_if<std::is_base_of<SerializablePolymorphicStruct, _SerializablePolymorphicStructType>::value,
+                OutputStream>::type&
+operator<<(OutputStream& outputStream,
+           const std::shared_ptr<_SerializablePolymorphicStructType>& serializablePolymorphicStruct) {
     outputStream.beginWriteSerializablePolymorphicStruct(serializablePolymorphicStruct);
     serializablePolymorphicStruct->writeToOutputStream(outputStream);
     outputStream.endWriteSerializablePolymorphicStruct(serializablePolymorphicStruct);
@@ -408,15 +395,14 @@ inline OutputStream& operator<<(OutputStream& outputStream, const SerializableVa
     return outputStream;
 }
 
-
-template <typename _VectorElementType>
+template<typename _VectorElementType>
 class OutStreamGenericVectorHelper {
- public:
+public:
     static void beginWriteVector(OutputStream& outputStream, const std::vector<_VectorElementType>& vectorValue) {
         doBeginWriteVector(outputStream, vectorValue);
     }
 
- private:
+private:
     static inline void doBeginWriteVector(OutputStream& outputStream, const std::vector<bool>& vectorValue) {
         outputStream.beginWriteBoolVector(vectorValue.size());
     }
@@ -460,48 +446,55 @@ class OutStreamGenericVectorHelper {
         outputStream.beginWriteVersionVector(vectorValue.size());
     }
 
+    template<typename _PointerType,
+             typename = typename std::enable_if<
+                                    std::is_base_of<SerializablePolymorphicStruct, _PointerType>::value>::type>
+    static inline void doBeginWriteVector(OutputStream& outputStream,
+                                          const std::vector<std::shared_ptr<_PointerType>>& vectorValue) {
+        outputStream.beginWriteVectorOfSerializablePolymorphicStructs(vectorValue.size());
+    }
+
     template<typename _InnerVectorElementType>
-    static inline void doBeginWriteVector(OutputStream& outputStream, const std::vector<std::vector<_InnerVectorElementType>>& vectorValue) {
+    static inline void doBeginWriteVector(OutputStream& outputStream,
+                                          const std::vector<std::vector<_InnerVectorElementType>>& vectorValue) {
         outputStream.beginWriteVectorOfVectors(vectorValue.size());
     }
 
     template<typename _InnerKeyType, typename _InnerValueType>
-    static inline void doBeginWriteVector(OutputStream& outputStream, const std::vector<std::unordered_map<_InnerKeyType, _InnerValueType>>& vectorValue) {
+    static inline void doBeginWriteVector(OutputStream& outputStream,
+                                          const std::vector<std::unordered_map<_InnerKeyType, _InnerValueType>>& vectorValue) {
         outputStream.beginWriteVectorOfMaps(vectorValue.size());
     }
 };
 
-
-template <typename _VectorElementType, bool _IsSerializableStruct = false>
+template<typename _VectorElementType, bool _IsSerializableStruct = false>
 struct OutputStreamSerializableStructVectorHelper: public OutStreamGenericVectorHelper<_VectorElementType> {
 };
 
-template <typename _VectorElementType>
+template<typename _VectorElementType>
 struct OutputStreamSerializableStructVectorHelper<_VectorElementType, true> {
     static void beginWriteVector(OutputStream& outputStream, const std::vector<_VectorElementType>& vectorValue) {
         outputStream.beginWriteVectorOfSerializableStructs(vectorValue.size());
     }
 };
 
-
-template <typename _VectorElementType, bool _IsSerializableVariant = false>
-struct OutputStreamSerializableVariantVectorHelper: public OutputStreamSerializableStructVectorHelper<_VectorElementType,
-                                                                                                      std::is_base_of<SerializableStruct, _VectorElementType>::value> {
+template<typename _VectorElementType, bool _IsSerializableVariant = false>
+struct OutputStreamSerializableVariantVectorHelper: public OutputStreamSerializableStructVectorHelper<
+                _VectorElementType,
+                std::is_base_of<SerializableStruct, _VectorElementType>::value> {
 };
 
-template <typename _VectorElementType>
+template<typename _VectorElementType>
 struct OutputStreamSerializableVariantVectorHelper<_VectorElementType, true> {
     static void beginWriteVector(OutputStream& outputStream, const std::vector<_VectorElementType>& vectorValue) {
         outputStream.beginWriteVectorOfSerializableVariants(vectorValue.size());
     }
 };
 
-
-template <typename _VectorElementType>
+template<typename _VectorElementType>
 struct OutputStreamVectorHelper: OutputStreamSerializableVariantVectorHelper<_VectorElementType,
-                                                                             std::is_base_of<SerializableVariant, _VectorElementType>::value> {
+                std::is_base_of<SerializableVariant, _VectorElementType>::value> {
 };
-
 
 /**
  * Handles all writing of vectors to a given #OutputStream. The given vector may contain any types that are
@@ -548,7 +541,6 @@ OutputStream& operator<<(OutputStream& outputStream,
     }
 
     outputStream.endWriteMap();
-
     return outputStream;
 }
 
