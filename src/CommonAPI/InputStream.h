@@ -332,30 +332,29 @@ InputStream& operator>>(InputStream& inputStream, std::vector<_VectorElementType
     return inputStream;
 }
 
+template<typename _KeyType, typename _ValueType, typename _HasherType>
+InputStream& operator>>(InputStream& inputStream, std::unordered_map<_KeyType, _ValueType, _HasherType>& mapValue) {
+    typedef typename std::unordered_map<_KeyType, _ValueType, _HasherType>::value_type MapValueType;
 
-template<typename _KeyType, typename _ValueType>
-InputStream& operator>>(InputStream& inputStream, std::unordered_map<_KeyType, _ValueType>& mapValue) {
-	typedef typename std::unordered_map<_KeyType, _ValueType>::value_type MapValueType;
+    inputStream.beginReadMap();
 
-	inputStream.beginReadMap();
+    while (inputStream.hasMoreMapElements()) {
+        _KeyType elementKey;
+        _ValueType elementValue;
 
-	while (inputStream.hasMoreMapElements()) {
-		_KeyType elementKey;
-		_ValueType elementValue;
+        inputStream.beginReadMapElement();
+        inputStream >> elementKey >> elementValue;
+        inputStream.endReadMapElement();
 
-		inputStream.beginReadMapElement();
-		inputStream >> elementKey >> elementValue;
-		inputStream.endReadMapElement();
+        if (inputStream.hasError())
+            break;
 
-		if (inputStream.hasError())
-			break;
+        mapValue.insert(MapValueType(std::move(elementKey), std::move(elementValue)));
+    }
 
-		mapValue.insert(MapValueType(std::move(elementKey), std::move(elementValue)));
-	}
+    inputStream.endReadMap();
 
-	inputStream.endReadMap();
-
-	return inputStream;
+    return inputStream;
 }
 
 } // namespace CommonAPI

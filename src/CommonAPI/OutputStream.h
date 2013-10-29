@@ -528,30 +528,29 @@ OutputStream& operator<<(OutputStream& outputStream, const std::vector<_VectorEl
     }
 
     outputStream.endWriteVector();
-	return outputStream;
+    return outputStream;
 }
 
+template<typename _KeyType, typename _ValueType, typename _HasherType>
+OutputStream& operator<<(OutputStream& outputStream,
+                         const std::unordered_map<_KeyType, _ValueType, _HasherType>& mapValue) {
+    typedef typename std::unordered_map<_KeyType, _ValueType, _HasherType>::const_iterator MapConstIterator;
 
-template<typename _KeyType, typename _ValueType>
-OutputStream& operator<<(OutputStream& outputStream, const std::unordered_map<_KeyType, _ValueType>& mapValue) {
-	typedef typename std::unordered_map<_KeyType, _ValueType>::const_iterator MapConstIterator;
+    const size_t elementCount = mapValue.size();
+    outputStream.beginWriteMap(elementCount);
 
-	const size_t elementCount = mapValue.size();
-	outputStream.beginWriteMap(elementCount);
+    for (MapConstIterator iter = mapValue.cbegin(); iter != mapValue.cend(); iter++) {
+        outputStream.beginWriteMapElement();
+        outputStream << iter->first << iter->second;
+        if (outputStream.hasError())
+            return outputStream;
+        outputStream.endWriteMapElement();
+    }
 
-	for (MapConstIterator iter = mapValue.cbegin(); iter != mapValue.cend(); iter++) {
-	    outputStream.beginWriteMapElement();
-		outputStream << iter->first << iter->second;
-		if (outputStream.hasError())
-			return outputStream;
-		outputStream.endWriteMapElement();
-	}
+    outputStream.endWriteMap();
 
-	outputStream.endWriteMap();
-
-	return outputStream;
+    return outputStream;
 }
-
 
 } // namespace CommonAPI
 
