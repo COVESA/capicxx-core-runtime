@@ -460,11 +460,17 @@ private:
         outputStream.beginWriteVectorOfVectors(vectorValue.size());
     }
 
-    template<typename _InnerKeyType, typename _InnerValueType>
+    template<typename _InnerKeyType, typename _InnerValueType, typename _InnerHashType>
     static inline void doBeginWriteVector(OutputStream& outputStream,
-                                          const std::vector<std::unordered_map<_InnerKeyType, _InnerValueType>>& vectorValue) {
+                                          const std::vector<std::unordered_map<_InnerKeyType, _InnerValueType, _InnerHashType>>& vectorValue) {
         outputStream.beginWriteVectorOfMaps(vectorValue.size());
     }
+
+    template<typename _InnerKeyType, typename _InnerValueType>
+        static inline void doBeginWriteVector(OutputStream& outputStream,
+                                              const std::vector<std::unordered_map<_InnerKeyType, _InnerValueType>>& vectorValue) {
+            outputStream.beginWriteVectorOfMaps(vectorValue.size());
+        }
 };
 
 template<typename _VectorElementType, bool _IsSerializableStruct = false>
