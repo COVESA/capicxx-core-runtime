@@ -35,7 +35,7 @@ struct StubBase {
 };
 
 template<typename _StubAdapter, typename _StubRemoteEventHandler>
-class Stub: public StubBase {
+class Stub: public virtual StubBase {
     static_assert(std::is_base_of<StubAdapter, _StubAdapter>::value, "Invalid StubAdapter Class!");
     public:
     typedef _StubAdapter StubAdapterType;
@@ -45,6 +45,12 @@ class Stub: public StubBase {
     }
 
     virtual _StubRemoteEventHandler* initStubAdapter(const std::shared_ptr<_StubAdapter>& stubAdapter) = 0;
+    virtual const std::shared_ptr<_StubAdapter> getStubAdapter() {
+        return stubAdapter_;
+    }
+    protected:
+    std::shared_ptr<_StubAdapter> stubAdapter_;
+
 };
 
 enum SelectiveBroadcastSubscriptionEvent {

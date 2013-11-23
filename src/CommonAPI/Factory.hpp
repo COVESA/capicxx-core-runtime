@@ -18,7 +18,7 @@ Factory::buildProxy(const std::string& participantId,
                     const std::string& serviceName,
                     const std::string& domain) {
 
-    std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceId(), participantId, serviceName, domain);
+    std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::InterfaceType::getInterfaceId(), participantId, serviceName, domain);
     if (abstractMiddlewareProxy) {
         return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
     }
