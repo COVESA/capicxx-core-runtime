@@ -2,7 +2,7 @@
  * Copyright (C) 2013 BMW AG
  *
  *
- * This file is part of GENIVI Project CommonAPI.
+ * This file is part of GENIVI project IPC CommonAPI C++.
  *
  * Contributions are licensed to the GENIVI Alliance under one or more
  * Contribution License Agreements.
@@ -23,11 +23,16 @@
 \par Usage information
 can be found in the <a href="README.html">README file</a>. 
 
-\par More information
-can be found at http://projects.genivi.org/commonapi/ \n
+\par About IPC CommonAPI C++
+IPC CommonAPI C++ is a C++ based abstraction API for communication stacks, which enables applications to
+use different communication middleware - so called language bindings - as backend without any changes to the application code.
 
-\par About CommonAPI-D-Bus
-CommonAPI C++ is an Inter Process Communication (IPC) API for C++, which enables applications to
-use different IPC middleware as backend without any changes to the application code.
+\par More information
+can be found at the <a href="http://projects.genivi.org/commonapi/">project homepage</a> \n
+Please see the <a href="http://projects.genivi.org/commonapi/download">project download section</a> for available language bindings.
+
+\par IPC CommonAPI C++ Specification
+The specification IPC CommonAPI C++ is maintained within the GENIVI System Infrastructure Exper Group (EG-SI). 
+A copy of the specification can be found <a href="genivi-SysInfraEGCppCommonAPISpecification.pdf">here</a>.
 
 */

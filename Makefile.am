@@ -92,4 +92,5 @@ VariantTest_LDADD = ${LDADD} ${GTEST_LIBS} libCommonAPI.la
 endif
 
 doc: doxygen-doc
-	 asciidoc -b html -o doc/html/README.html README
+	asciidoc -b html -o doc/html/README.html README
+	cp docx/genivi-SysInfraEGCppCommonAPISpecification.pdf doc/html
