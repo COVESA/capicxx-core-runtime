@@ -1,0 +1,54 @@
+Name:               @PROJECT_NAME@
+Version:            @GENIVI_PROJECT_VERSION@
+Release:            @GENIVI_RPM_RELEASE@
+Summary:            CommonAPI
+Group:              Applications/BMW
+License:            @LICENSE@
+Vendor:             BMW Group
+URL:            	http://www.bmw.de
+Source:             @PROJECT_NAME@-@GENIVI_RPM_RELEASE@.tar.gz
+BuildRoot:          %{_tmppath}/%{name}-%{version}-%{release}-root
+#Requires:           
+
+%description
+CAPI middleware for IPC
+
+%prep
+%setup
+
+%build
+mkdir -p build
+cd build
+#../configure --host=@HOST_TYPE@ --prefix=%{_usr}
+../configure --host=@GENIVI_HOST_ARCHITECTURE@ --prefix=%{_usr}
+
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+cd build
+make install DESTDIR=$RPM_BUILD_ROOT
+
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+mkdir -p $RPM_BUILD_ROOT/etc/init.d
+
+/usr/bin/install -c -m 755 ../src/shm-daemon $RPM_BUILD_ROOT%{_bindir} 
+/usr/bin/install -c -m 755 ../Config/shm.conf $RPM_BUILD_ROOT%{_sysconfdir}
+/usr/bin/install -c -m 755 ../CommonAPI.pc $RPM_BUILD_ROOT/usr/lib/pkgconfig
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root,-)
+%{_libdir}/libCommonAPI.so.0
+%{_libdir}/libCommonAPI.so.3.0.0
+%{_libdir}/libCommonAPI.so
+#%{_includedir}/shm/shm_swwd.h 
+%{_libdir}/pkgconfig/CommonAPI.pc
+
+%changelog
+* Mon Jan 27 2014 Gernot Wirschal <Gernot.Wirschal@bmw.de> @GENIVI_PROJECT_VERSION@
+- Initial packaging for GPT
+
