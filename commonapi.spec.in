@@ -42,7 +42,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%{_libdir}/libCommonAPI.so.0
+%{_libdir}/libCommonAPI.so.3
 %{_libdir}/libCommonAPI.so.3.0.0
 %{_libdir}/libCommonAPI.so
 #%{_includedir}/shm/shm_swwd.h 

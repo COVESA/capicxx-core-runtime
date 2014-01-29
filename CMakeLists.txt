@@ -33,14 +33,12 @@ FIND_PACKAGE(Threads REQUIRED)
 ##############################################################################
 # general stuff
 
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -DDEBUG -g -Wall -DCOMMONAPI_INTERNAL_COMPILATION")
 
 OPTION(BUILD_SHARED_LIBS "Set to OFF to build static libraries" ON )
 OPTION(ENABLE_BUILD_DOC "Set to ON to build Documentation" OFF)
 
 ADD_SUBDIRECTORY( src/CommonAPI )
-#ADD_SUBDIRECTORY( Test/Implementation )
-#ADD_SUBDIRECTORY( src )
 
 
 ##############################################################################
@@ -51,17 +49,11 @@ INSTALL(FILES CommonAPI.pc
 	COMPONENT base)
 
 
-#INSTALL(FILES Config/shm.conf
-#	DESTINATION /etc
-#	PERMISSIONS OWNER_WRITE OWNER_READ
-#	GROUP_READ GROUP_EXECUTE
-#	WORLD_READ WORLD_EXECUTE 
-#)
 
 CONFIGURE_FILE(commonapi.spec.in commonapi.spec)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/CommonAPI.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/CommonAPI.pc)
 CONFIGURE_FILE(CommonAPI-uninstalled.pc.in CommonAPI-uninstalled.pc)
-CONFIGURE_FILE(doxygen.cfg.in doxygen.cfg)
+CONFIGURE_FILE(doxygen.cfg Doxygen)
 #CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in  ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
 
