@@ -1,6 +1,6 @@
 Name:               @PROJECT_NAME@
-Version:            @GENIVI_PROJECT_VERSION@
-Release:            @GENIVI_RPM_RELEASE@
+Version:            @PACKAGE_VERSION@
+Release:            @PACKAGE_VERSION@
 Summary:            CommonAPI
 Group:              Applications/BMW
 License:            @LICENSE@
@@ -12,6 +12,13 @@ BuildRoot:          %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 CAPI middleware for IPC
+
+%package dev
+Summary:            CommonAPI header files
+#Requires:           libcommonapi we have in comment as we first have to align packet names
+
+%description dev
+CAPI middleware headers for IPC development
 
 %prep
 %setup
@@ -27,14 +34,13 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 cd build
+cmake ..
 make install DESTDIR=$RPM_BUILD_ROOT
-
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
-/usr/bin/install -c -m 755 ../src/shm-daemon $RPM_BUILD_ROOT%{_bindir} 
-/usr/bin/install -c -m 755 ../Config/shm.conf $RPM_BUILD_ROOT%{_sysconfdir}
-/usr/bin/install -c -m 755 ../CommonAPI.pc $RPM_BUILD_ROOT/usr/lib/pkgconfig
+#/usr/bin/install -c -m 755 ../src/shm-daemon $RPM_BUILD_ROOT%{_bindir} 
+#/usr/bin/install -c -m 755 ../Config/shm.conf $RPM_BUILD_ROOT%{_sysconfdir}
+#/usr/bin/install -c -m 755 ../CommonAPI.pc $RPM_BUILD_ROOT/usr/lib/pkgconfig
 
 
 %clean
@@ -45,10 +51,42 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libCommonAPI.so.3
 %{_libdir}/libCommonAPI.so.3.0.0
 %{_libdir}/libCommonAPI.so
-#%{_includedir}/shm/shm_swwd.h 
-%{_libdir}/pkgconfig/CommonAPI.pc
 
+
+%files dev
+%defattr(-,root,root,-)
+%{_libdir}/pkgconfig/CommonAPI.pc
+%{_libdir}/libCommonAPI.so
+#%{_libdir}/libCommonAPI.la
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/Attribute.h 
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/AttributeExtension.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/ByteBuffer.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/CommonAPI.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/Configuration.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/ContainerUtils.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/Event.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/Factory.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/Factory.hpp
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/InputStream.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/MainLoopContext.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/MiddlewareInfo.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/OutputStream.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/Proxy.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/ProxyManager.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/Runtime.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/SelectiveEvent.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/SerializableStruct.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/SerializableVariant.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/SerializableVariant.hpp
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/ServicePublisher.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/ServicePublisher.hpp
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/Stub.h 
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/types.h
+%{_includedir}/CommonAPI-@PACKAGE_VERSION@/CommonAPI/utils.h
+        
 %changelog
+* Wed Jan 29 2014 Gernot Wirschal <Gernot.Wirschal@bmw.de> @GENIVI_PROJECT_VERSION@
+- Add dev packet configuration
 * Mon Jan 27 2014 Gernot Wirschal <Gernot.Wirschal@bmw.de> @GENIVI_PROJECT_VERSION@
 - Initial packaging for GPT
 

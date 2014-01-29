@@ -4,9 +4,33 @@ set(CAPI_LIB_SRCS Runtime.cpp Configuration.cpp ServicePublisher.cpp ContainerUt
 add_library(CommonAPI ${CAPI_LIB_SRCS})
 set_target_properties(CommonAPI PROPERTIES VERSION 3.0.0 SOVERSION 3 LINKER_LANGUAGE C)
 
-set(CAPI_DEV_INCL *.h )
+install(TARGETS CommonAPI LIBRARY DESTINATION /usr/lib 	ARCHIVE DESTINATION lib/static	COMPONENT base)	
 
-install(TARGETS CommonAPI
-	LIBRARY DESTINATION /usr/lib
-	ARCHIVE DESTINATION lib/static
-	COMPONENT base)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Factory.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Attribute.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/AttributeExtension.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CommonAPI.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ByteBuffer.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Configuration.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ContainerUtils.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Event.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Factory.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Factory.hpp DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/InputStream.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/MainLoopContext.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/OutputStream.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/MiddlewareInfo.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Proxy.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ProxyManager.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Runtime.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/SelectiveEvent.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/SerializableStruct.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/SerializableVariant.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/SerializableVariant.hpp DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ServicePublisher.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ServicePublisher.hpp DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Stub.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/types.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/utils.h DESTINATION /usr/include/CommonAPI-${PACKAGE_VERSION}/CommonAPI)	
+
+
