@@ -185,7 +185,7 @@ class Factory {
      *
      * @return the Runtime
      */
-    inline std::shared_ptr<Runtime> getRuntime();
+    std::shared_ptr<Runtime> getRuntime();
 
     /**
      * \brief Register a service stub under a specified address

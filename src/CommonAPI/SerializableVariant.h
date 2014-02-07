@@ -218,8 +218,8 @@ public:
      *
      * @return Index of contained type
      */
-    inline uint8_t getValueType() const {
-    	return valueType_;
+    uint8_t getValueType() const {
+        return valueType_;
     }
 
 private:

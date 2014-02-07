@@ -25,7 +25,7 @@ namespace CommonAPI {
 template<typename _AttributeType>
 class AttributeExtension {
  public:
-    inline _AttributeType& getBaseAttribute() {
+    _AttributeType& getBaseAttribute() {
         return baseAttribute_;
     }
 

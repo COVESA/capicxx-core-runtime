@@ -31,7 +31,7 @@ static const char COMMONAPI_LIB_PREFIX[] = "libCommonAPI-";
 static const char MIDDLEWARE_INFO_SYMBOL_NAME[] = "middlewareInfo";
 
 #ifndef WIN32
-inline bool Runtime::tryLoadLibrary(const std::string& libraryPath,
+bool Runtime::tryLoadLibrary(const std::string& libraryPath,
                                     void** sharedLibraryHandle,
                                     MiddlewareInfo** foundMiddlewareInfo) {
 

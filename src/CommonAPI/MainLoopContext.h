@@ -31,11 +31,7 @@
 #include <list>
 #include <functional>
 
-
 namespace CommonAPI {
-
-
-
 
 enum class DispatchPriority {
     VERY_HIGH,
@@ -46,9 +42,7 @@ enum class DispatchPriority {
 };
 
 
-inline int64_t getCurrentTimeInMs() {
-   return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-}
+int64_t getCurrentTimeInMs();
 
 
 /**
@@ -206,125 +200,77 @@ class MainLoopContext {
     /**
      * \brief Registers for all DispatchSources that are added or removed.
      */
-    inline DispatchSourceListenerSubscription subscribeForDispatchSources(DispatchSourceAddedCallback dispatchAddedCallback, DispatchSourceRemovedCallback dispatchRemovedCallback) {
-        dispatchSourceListeners_.emplace_front(dispatchAddedCallback, dispatchRemovedCallback);
-        return dispatchSourceListeners_.begin();
-    }
+    DispatchSourceListenerSubscription subscribeForDispatchSources(DispatchSourceAddedCallback dispatchAddedCallback, DispatchSourceRemovedCallback dispatchRemovedCallback);
 
     /**
      * \brief Registers for all Watches that are added or removed.
      */
-    inline WatchListenerSubscription subscribeForWatches(WatchAddedCallback watchAddedCallback, WatchRemovedCallback watchRemovedCallback) {
-        watchListeners_.emplace_front(watchAddedCallback, watchRemovedCallback);
-        return watchListeners_.begin();
-    }
+    WatchListenerSubscription subscribeForWatches(WatchAddedCallback watchAddedCallback, WatchRemovedCallback watchRemovedCallback);
 
     /**
      * \brief Registers for all Timeouts that are added or removed.
      */
-    inline TimeoutSourceListenerSubscription subscribeForTimeouts(TimeoutSourceAddedCallback timeoutAddedCallback, TimeoutSourceRemovedCallback timeoutRemovedCallback) {
-        timeoutSourceListeners_.emplace_front(timeoutAddedCallback, timeoutRemovedCallback);
-        return timeoutSourceListeners_.begin();
-    }
+    TimeoutSourceListenerSubscription subscribeForTimeouts(TimeoutSourceAddedCallback timeoutAddedCallback, TimeoutSourceRemovedCallback timeoutRemovedCallback);
 
     /**
      * \brief Registers for all Wakeup-Events that need to interrupt a call to "poll".
      */
-    inline WakeupListenerSubscription subscribeForWakeupEvents(WakeupCallback wakeupCallback) {
-        wakeupListeners_.emplace_front(wakeupCallback);
-        return wakeupListeners_.begin();
-    }
+    WakeupListenerSubscription subscribeForWakeupEvents(WakeupCallback wakeupCallback);
 
     /**
      * \brief Unsubscribes your listeners for DispatchSources.
      */
-    inline void unsubscribeForDispatchSources(DispatchSourceListenerSubscription subscription) {
-        dispatchSourceListeners_.erase(subscription);
-    }
+    void unsubscribeForDispatchSources(DispatchSourceListenerSubscription subscription);
 
     /**
      * \brief Unsubscribes your listeners for Watches.
      */
-    inline void unsubscribeForWatches(WatchListenerSubscription subscription) {
-        watchListeners_.erase(subscription);
-    }
+    void unsubscribeForWatches(WatchListenerSubscription subscription);
 
     /**
      * \brief Unsubscribes your listeners for Timeouts.
      */
-    inline void unsubscribeForTimeouts(TimeoutSourceListenerSubscription subscription) {
-        timeoutSourceListeners_.erase(subscription);
-    }
+    void unsubscribeForTimeouts(TimeoutSourceListenerSubscription subscription);
 
     /**
      * \brief Unsubscribes your listeners for Wakeup-Events.
      */
-    inline void unsubscribeForWakeupEvents(WakeupListenerSubscription subscription) {
-        wakeupListeners_.erase(subscription);
-    }
+    void unsubscribeForWakeupEvents(WakeupListenerSubscription subscription);
 
     /**
      * \brief Notifies all listeners about a new DispatchSource.
      */
-    inline void registerDispatchSource(DispatchSource* dispatchSource, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT) {
-        for(auto listener = dispatchSourceListeners_.begin(); listener != dispatchSourceListeners_.end(); ++listener) {
-            listener->first(dispatchSource, dispatchPriority);
-        }
-    }
+    void registerDispatchSource(DispatchSource* dispatchSource, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
 
     /**
      * \brief Notifies all listeners about the removal of a DispatchSource.
      */
-    inline void deregisterDispatchSource(DispatchSource* dispatchSource) {
-        for(auto listener = dispatchSourceListeners_.begin(); listener != dispatchSourceListeners_.end(); ++listener) {
-            listener->second(dispatchSource);
-        }
-    }
+    void deregisterDispatchSource(DispatchSource* dispatchSource);
 
     /**
      * \brief Notifies all listeners about a new Watch.
      */
-    inline void registerWatch(Watch* watch, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT) {
-        for(auto listener = watchListeners_.begin(); listener != watchListeners_.end(); ++listener) {
-            listener->first(watch, dispatchPriority);
-        }
-    }
+    void registerWatch(Watch* watch, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
 
     /**
      * \brief Notifies all listeners about the removal of a Watch.
      */
-    inline void deregisterWatch(Watch* watch) {
-        for(auto listener = watchListeners_.begin(); listener != watchListeners_.end(); ++listener) {
-            listener->second(watch);
-        }
-    }
+    void deregisterWatch(Watch* watch);
 
     /**
      * \brief Notifies all listeners about a new Timeout.
      */
-    inline void registerTimeoutSource(Timeout* timeoutEvent, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT) {
-        for(auto listener = timeoutSourceListeners_.begin(); listener != timeoutSourceListeners_.end(); ++listener) {
-            listener->first(timeoutEvent, dispatchPriority);
-        }
-    }
+    void registerTimeoutSource(Timeout* timeoutEvent, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
 
     /**
      * \brief Notifies all listeners about the removal of a Timeout.
      */
-    inline void deregisterTimeoutSource(Timeout* timeoutEvent) {
-        for(auto listener = timeoutSourceListeners_.begin(); listener != timeoutSourceListeners_.end(); ++listener) {
-            listener->second(timeoutEvent);
-        }
-    }
+    void deregisterTimeoutSource(Timeout* timeoutEvent);
 
     /**
      * \brief Notifies all listeners about a wakeup event that just happened.
      */
-    inline void wakeup() {
-        for(auto listener = wakeupListeners_.begin(); listener != wakeupListeners_.end(); ++listener) {
-            (*listener)();
-        }
-    }
+    void wakeup();
 
     /**
      * \brief Will return true if at least one subscribe for DispatchSources or Watches has been called.
@@ -332,9 +278,7 @@ class MainLoopContext {
      * This function will be used to prevent creation of a factory if a mainloop context is given, but
      * no listeners have been registered. This is done in order to ensure correct use of the mainloop context.
      */
-    inline bool isInitialized() {
-        return dispatchSourceListeners_.size() > 0 || watchListeners_.size() > 0;
-    }
+    bool isInitialized();
 
  private:
     DispatchSourceListenerList dispatchSourceListeners_;

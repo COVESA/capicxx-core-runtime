@@ -48,27 +48,7 @@ namespace CommonAPI {
  *
  * @return The name of the currently executing binary.
  */
-inline std::string getCurrentBinaryFileFQN() {
-#ifdef WIN32
-    TCHAR result[MAX_PATH];
-    std::basic_string<TCHAR> resultString(result, GetModuleFileName(NULL, result, MAX_PATH));
-    return std::string(resultString.begin(), resultString.end());
-#else
-    char fqnOfBinary[FILENAME_MAX];
-    char pathToProcessImage[FILENAME_MAX];
-
-    sprintf(pathToProcessImage, "/proc/%d/exe", getpid());
-    const ssize_t lengthOfFqn = readlink(pathToProcessImage, fqnOfBinary, sizeof(fqnOfBinary) - 1);
-
-    if (lengthOfFqn != -1) {
-        fqnOfBinary[lengthOfFqn] = '\0';
-        return std::string(std::move(fqnOfBinary));
-    }
-    else {
-        return std::string("");
-    }
-#endif
-}
+std::string getCurrentBinaryFileFQN();
 
 /**
  * \brief Splits a std::string according to the given delim-char.
@@ -82,14 +62,7 @@ inline std::string getCurrentBinaryFileFQN() {
  *
  * @return A reference to the vector you passed in (elems)
  */
-inline std::vector<std::string>& split(const std::string& s, char delim, std::vector<std::string>& elems) {
-    std::istringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
+std::vector<std::string>& split(const std::string& s, char delim, std::vector<std::string>& elems);
 
 /**
  * \brief Splits a std::string according to the given delim-char.
@@ -102,10 +75,7 @@ inline std::vector<std::string>& split(const std::string& s, char delim, std::ve
  *
  * @return A vector containing the splitted string elements.
  */
-inline std::vector<std::string> split(const std::string& s, char delim) {
-    std::vector<std::string> elems;
-    return split(s, delim, elems);
-}
+std::vector<std::string> split(const std::string& s, char delim);
 
 inline bool isspace(char c) {
     return std::isspace(c, std::locale());
@@ -116,24 +86,9 @@ inline bool isspace(char c) {
  *
  * @param toTrim: The string that is to be trimmed.
  */
-inline void trim(std::string& toTrim) {
-    toTrim.erase(
-                    toTrim.begin(),
-                    std::find_if(toTrim.begin(),
-                                 toTrim.end(),
-                                 std::not1(std::ptr_fun(isspace)))
-                                                    );
-    toTrim.erase(
-                    std::find_if(toTrim.rbegin(),
-                                 toTrim.rend(),
-                                 std::not1(std::ptr_fun(isspace))).base(),
-                                 toTrim.end()
-                    );
-}
+void trim(std::string& toTrim);
 
-inline bool notIsdigit(char c) {
-    return !std::isdigit(c, std::locale());
-}
+bool notIsdigit(char c);
 
 /**
  * \brief Checks whether the given string contains nothing but digits.
@@ -142,18 +97,9 @@ inline bool notIsdigit(char c) {
  *
  * @return true if toCheck contains nothing but digits, false otherwise.
  */
-inline bool containsOnlyDigits(const std::string& toCheck) {
-    auto firstNonDigitIt = std::find_if(
-                    toCheck.begin(),
-                    toCheck.end(),
-                    notIsdigit);
+bool containsOnlyDigits(const std::string& toCheck);
 
-    return firstNonDigitIt == toCheck.end();
-}
-
-inline bool notIsalnum(char c) {
-    return !std::isalnum(c, std::locale());
-}
+bool notIsalnum(char c);
 
 /**
  * \brief Checks whether the given string contains nothing but alphanumeric characters.
@@ -162,14 +108,7 @@ inline bool notIsalnum(char c) {
  *
  * @return true if toCheck contains nothing but alphanumeric characters, false otherwise.
  */
-inline bool containsOnlyAlphanumericCharacters(const std::string& toCheck) {
-    auto firstNonAlphanumericCharacterIt = std::find_if(
-                    toCheck.begin(),
-                    toCheck.end(),
-                    notIsalnum);
-
-    return firstNonAlphanumericCharacterIt == toCheck.end();
-}
+bool containsOnlyAlphanumericCharacters(const std::string& toCheck);
 
 /**
  * \brief Checks whether the given std::string is a valid CommonAPI domain name.
@@ -178,9 +117,7 @@ inline bool containsOnlyAlphanumericCharacters(const std::string& toCheck) {
  *
  * @return true if domainName is a valid CommonAPI domainName, false otherwise.
  */
-inline bool isValidDomainName(const std::string& domainName) {
-    return containsOnlyAlphanumericCharacters(domainName);
-}
+bool isValidDomainName(const std::string& domainName);
 
 /**
  * \brief Checks whether the given std::string is a valid CommonAPI service name.
@@ -189,21 +126,7 @@ inline bool isValidDomainName(const std::string& domainName) {
  *
  * @return true if serviceName is a valid CommonAPI serviceName, false otherwise.
  */
-inline bool isValidServiceName(const std::string& serviceName) {
-    bool isValid = serviceName[0] != '.' && serviceName[serviceName.size() - 1] != '.';
-
-    if (isValid) {
-        std::vector<std::string> splittedServiceName = split(serviceName, '.');
-
-        for (auto serviceNameElementIt = splittedServiceName.begin();
-                        serviceNameElementIt != splittedServiceName.end() && isValid;
-                        ++serviceNameElementIt) {
-            isValid &= containsOnlyAlphanumericCharacters(*serviceNameElementIt);
-        }
-    }
-
-    return isValid;
-}
+bool isValidServiceName(const std::string& serviceName);
 
 /**
  * \brief Checks whether the given std::string is a valid CommonAPI instance ID.
@@ -212,10 +135,7 @@ inline bool isValidServiceName(const std::string& serviceName) {
  *
  * @return true if instanceId is a valid CommonAPI instance ID, false otherwise.
  */
-inline bool isValidInstanceId(const std::string& instanceId) {
-    //Validation rules for ServiceName and InstanceID are equivalent
-    return isValidServiceName(instanceId);
-}
+bool isValidInstanceId(const std::string& instanceId);
 
 /**
  * \brief Checks whether the given std::string is a valid CommonAPI address.
@@ -224,13 +144,7 @@ inline bool isValidInstanceId(const std::string& instanceId) {
  *
  * @return true if commonApiAddress is a valid CommonAPI address, false otherwise.
  */
-inline bool isValidCommonApiAddress(const std::string& commonApiAddress) {
-    std::vector<std::string> splittedAddress = split(commonApiAddress, ':');
-    if (splittedAddress.size() != 3) {
-        return false;
-    }
-    return isValidDomainName(splittedAddress[0]) && isValidServiceName(splittedAddress[1]) && isValidInstanceId(splittedAddress[2]);
-}
+bool isValidCommonApiAddress(const std::string& commonApiAddress);
 
 #ifndef WIN32
 /**
@@ -255,37 +169,7 @@ inline bool isValidCommonApiAddress(const std::string& commonApiAddress) {
  *       only by specific middlewares. This name however will only be taken into consideration during name checking
  *       if the checkStandardNamePattern flag is set to true.
  */
-inline bool loadGenericLibrary(const std::string& wellKnownMiddlewareName, const std::string& libraryName, const std::string& path, bool checkStandardNamePattern = true) {
-    std::string fqnOfLibrary = path + libraryName;
-    struct stat filestat;
-    if (stat(fqnOfLibrary.c_str(), &filestat)) {
-        return false;
-    }
-    if (S_ISDIR(filestat.st_mode)) {
-        return false;
-    }
-
-    if (checkStandardNamePattern) {
-        const std::string generatedLibPrefix = "lib" + wellKnownMiddlewareName + "Gen-";
-        if (strncmp(generatedLibPrefix.c_str(), libraryName.c_str(), generatedLibPrefix.length()) != 0) {
-            return false;
-        }
-
-        const char* fileNamePtr = libraryName.c_str();
-        while ((fileNamePtr = strchr(fileNamePtr + 1, '.'))) {
-            if (strncmp(".so\0", fileNamePtr, 4) == 0 || strncmp(".so.", fileNamePtr, 4) == 0) {
-                break;
-            }
-        }
-
-        if (!fileNamePtr) {
-            return false;
-        }
-    }
-
-    dlopen(fqnOfLibrary.c_str(), RTLD_NOW | RTLD_GLOBAL);
-    return true;
-}
+bool loadGenericLibrary(const std::string& wellKnownMiddlewareName, const std::string& libraryName, const std::string& path, bool checkStandardNamePattern = true);
 
 /**
  * \brief Loads a specific generic library at runtime.
@@ -307,15 +191,9 @@ inline bool loadGenericLibrary(const std::string& wellKnownMiddlewareName, const
  *       only by specific middlewares. This name however will only be taken into consideration during name checking
  *       if the checkStandardNamePattern flag is set to true.
  */
-inline bool loadGenericLibrary(const std::string& wellKnownMiddlewareName,
+bool loadGenericLibrary(const std::string& wellKnownMiddlewareName,
                                const std::string& fqnOfLibrary,
-                               bool checkStandardNamePattern = true) {
-    uint32_t position = fqnOfLibrary.find_last_of("/\\");
-    std::string path = fqnOfLibrary.substr(0, position + 1);
-    std::string file = fqnOfLibrary.substr(position + 1);
-    return loadGenericLibrary(wellKnownMiddlewareName, file, path, checkStandardNamePattern);
-}
-
+                               bool checkStandardNamePattern = true);
 
 /**
  * \brief Searches the given path for additional generic CommonAPI libraries and loads them.
@@ -329,17 +207,7 @@ inline bool loadGenericLibrary(const std::string& wellKnownMiddlewareName,
  *                                 be used to perform the name check.
  * @param singleSearchPath: The directory that is to be searched for libraries.
  */
-inline void findAndLoadGenericLibraries(const std::string& requestedMiddlewareName, const std::string& singleSearchPath) {
-    DIR *directory = opendir(singleSearchPath.c_str());
-
-    if (directory != NULL) {
-        struct dirent* entry;
-
-        while ((entry = readdir(directory))) {
-            loadGenericLibrary(requestedMiddlewareName, entry->d_name, singleSearchPath, true);
-        }
-    }
-}
+void findAndLoadGenericLibraries(const std::string& requestedMiddlewareName, const std::string& singleSearchPath);
 
 /**
  * \brief Searches the given paths for additional generic CommonAPI libraries and loads them.
@@ -353,11 +221,7 @@ inline void findAndLoadGenericLibraries(const std::string& requestedMiddlewareNa
  *                                 be used to perform the name check.
  * @param searchPaths: The directories that are to be searched for libraries.
  */
-inline void findAndLoadGenericLibraries(const std::string& requestedMiddlewareName, const std::vector<std::string>& searchPaths) {
-    for (const std::string& singleSearchPath : searchPaths) {
-        findAndLoadGenericLibraries(requestedMiddlewareName, singleSearchPath.c_str());
-    }
-}
+void findAndLoadGenericLibraries(const std::string& requestedMiddlewareName, const std::vector<std::string>& searchPaths);
 #endif
 
 } //namespace CommonAPI

@@ -53,7 +53,7 @@ public:
      * @param listener A listener to be added
      * @return A token identifying this subscription
      */
-    virtual inline Subscription subscribe(Listener listener);
+    virtual Subscription subscribe(Listener listener);
 
     /**
      * \brief Subscribe a cancellable listener to this event

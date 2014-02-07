@@ -61,7 +61,7 @@ public:
     virtual InputStream& readEnumValue(uint64_t& uint64BackingTypeValue) = 0;
 
     template<typename _EnumBackingType, typename _EnumType>
-    inline InputStream& readEnumValue(_EnumType& enumValue);
+    InputStream& readEnumValue(_EnumType& enumValue);
 
     virtual InputStream& readVersionValue(Version& versionValue) = 0;
 
@@ -126,65 +126,33 @@ InputStream& InputStream::readEnumValue(_EnumType& enumValue) {
     return *this;
 }
 
-inline InputStream& operator>>(InputStream& inputStream, bool& boolValue) {
-    return inputStream.readValue(boolValue);
-}
+InputStream& operator>>(InputStream& inputStream, bool& boolValue);
 
-inline InputStream& operator>>(InputStream& inputStream, int8_t& int8Value) {
-    return inputStream.readValue(int8Value);
-}
+InputStream& operator>>(InputStream& inputStream, int8_t& int8Value);
 
-inline InputStream& operator>>(InputStream& inputStream, int16_t& int16Value) {
-    return inputStream.readValue(int16Value);
-}
+InputStream& operator>>(InputStream& inputStream, int16_t& int16Value);
 
-inline InputStream& operator>>(InputStream& inputStream, int32_t& int32Value) {
-    return inputStream.readValue(int32Value);
-}
+InputStream& operator>>(InputStream& inputStream, int32_t& int32Value);
 
-inline InputStream& operator>>(InputStream& inputStream, int64_t& int64Value) {
-    return inputStream.readValue(int64Value);
-}
+InputStream& operator>>(InputStream& inputStream, int64_t& int64Value);
 
-inline InputStream& operator>>(InputStream& inputStream, uint8_t& uint8Value) {
-    return inputStream.readValue(uint8Value);
-}
+InputStream& operator>>(InputStream& inputStream, uint8_t& uint8Value);
 
-inline InputStream& operator>>(InputStream& inputStream, uint16_t& uint16Value) {
-    return inputStream.readValue(uint16Value);
-}
+InputStream& operator>>(InputStream& inputStream, uint16_t& uint16Value);
 
-inline InputStream& operator>>(InputStream& inputStream, uint32_t& uint32Value) {
-    return inputStream.readValue(uint32Value);
-}
+InputStream& operator>>(InputStream& inputStream, uint32_t& uint32Value);
 
-inline InputStream& operator>>(InputStream& inputStream, uint64_t& uint64Value) {
-    return inputStream.readValue(uint64Value);
-}
+InputStream& operator>>(InputStream& inputStream, uint64_t& uint64Value);
 
-inline InputStream& operator>>(InputStream& inputStream, float& floatValue) {
-    return inputStream.readValue(floatValue);
-}
+InputStream& operator>>(InputStream& inputStream, float& floatValue);
 
-inline InputStream& operator>>(InputStream& inputStream, double& doubleValue) {
-    return inputStream.readValue(doubleValue);
-}
+InputStream& operator>>(InputStream& inputStream, double& doubleValue);
 
-inline InputStream& operator>>(InputStream& inputStream, std::string& stringValue) {
-    return inputStream.readValue(stringValue);
-}
+InputStream& operator>>(InputStream& inputStream, std::string& stringValue);
 
-inline InputStream& operator>>(InputStream& inputStream, Version& versionValue) {
-    return inputStream.readVersionValue(versionValue);
-}
+InputStream& operator>>(InputStream& inputStream, Version& versionValue);
 
-inline InputStream& operator>>(InputStream& inputStream, SerializableStruct& serializableStruct) {
-    inputStream.beginReadSerializableStruct(serializableStruct);
-    serializableStruct.readFromInputStream(inputStream);
-    inputStream.endReadSerializableStruct(serializableStruct);
-
-    return inputStream;
-}
+InputStream& operator>>(InputStream& inputStream, SerializableStruct& serializableStruct);
 
 template<typename _SerializablePolymorphicStructType>
 typename std::enable_if<std::is_base_of<SerializablePolymorphicStruct, _SerializablePolymorphicStructType>::value,
@@ -207,10 +175,7 @@ operator>>(InputStream& inputStream,
     return inputStream;
 }
 
-inline InputStream& operator>>(InputStream& inputStream, SerializableVariant& serializableVariant) {
-    inputStream.readSerializableVariant(serializableVariant);
-    return inputStream;
-}
+InputStream& operator>>(InputStream& inputStream, SerializableVariant& serializableVariant);
 
 template<typename _VectorElementType>
 class InputStreamGenericTypeVectorHelper {

@@ -39,10 +39,6 @@ Factory::buildProxyWithDefaultAttributeExtension(const std::string& serviceAddre
     return buildProxyWithDefaultAttributeExtension<_ProxyClass, _AttributeExtension>(participantId, serviceName, domain);
 }
 
-inline std::shared_ptr<Runtime> Factory::getRuntime() {
-    return runtime_;
-}
-
 template<typename _Stub>
 COMMONAPI_DEPRECATED bool Factory::registerService(std::shared_ptr<_Stub> stub,
                      const std::string& participantId,

@@ -105,7 +105,7 @@ struct SelectiveBroadcastSubscriptionResult {
 template<typename _EnumType>
 class EnumHasher {
 public:
-    inline size_t operator()(const _EnumType& testEnum) const {
+    size_t operator()(const _EnumType& testEnum) const {
         return static_cast<int32_t>(testEnum);
     }
 
