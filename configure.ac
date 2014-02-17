@@ -1,6 +1,6 @@
 AC_PREREQ(2.61)
-AC_INIT([GENIVI Common API C++ Library],
-        [2.1.5],
+AC_INIT([GENIVI IPC Common API C++],
+        [2.1.6],
         [],
         [CommonAPI])
 
@@ -9,9 +9,9 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([build-aux/config.h])
 AC_CONFIG_FILES([
-		Makefile
-		CommonAPI.pc
-		CommonAPI-uninstalled.pc])
+        Makefile
+        CommonAPI.pc
+        CommonAPI-uninstalled.pc])
 
 AC_CANONICAL_SYSTEM
 
