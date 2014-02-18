@@ -211,7 +211,6 @@ std::shared_ptr<Runtime> Runtime::checkDynamicLibraries(const std::string& reque
 
     LibraryVersion highestVersionFound = {0, 0, 0};
     std::string fqnOfHighestVersion = "";
-    struct stat filestat;
 
     for (const std::string& singleSearchPath: librarySearchPaths) {
         std::vector<std::string> orderedLibraries = readDirectory(singleSearchPath);

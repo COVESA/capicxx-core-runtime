@@ -65,7 +65,6 @@ const std::string& Configuration::getDefaultMiddlewareIdentifier() const {
 
 void Configuration::readConfigFile(std::ifstream& addressConfigFile) {
     std::string currentlyParsedBindingIdentifier = "";
-    bool endFile = false;
 
     std::string readLine;
 
