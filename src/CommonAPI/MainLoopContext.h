@@ -14,14 +14,27 @@
 
 
 #include <stdint.h>
+
+#ifdef WIN32
+#include <WinSock2.h>
+#else
 #include <poll.h>
+#endif
+
+#ifdef WIN32
+#undef max
+#endif
+
 #include <limits>
 #include <vector>
 #include <chrono>
 #include <list>
+#include <functional>
 
 
 namespace CommonAPI {
+
+
 
 
 enum class DispatchPriority {
@@ -114,9 +127,8 @@ struct Watch {
     virtual const std::vector<DispatchSource*>& getDependentDispatchSources() = 0;
 };
 
-
-constexpr int64_t TIMEOUT_INFINITE = std::numeric_limits<int64_t>::max();
-constexpr int64_t TIMEOUT_NONE = 0;
+const int64_t TIMEOUT_INFINITE = std::numeric_limits<int64_t>::max();
+const int64_t TIMEOUT_NONE = 0;
 
 
 /**

@@ -24,6 +24,7 @@
 #include "Stub.h"
 #include "types.h"
 #include "utils.h"
+#include "AttributeExtension.h"
 
 
 namespace CommonAPI {
@@ -91,10 +92,33 @@ class Factory {
      * @return a shared pointer to the constructed proxy
      */
     template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions>
-    std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
+    std::shared_ptr<
+        _ProxyClass<
+#ifdef WIN32
+        CommonAPI::WINDummyAttributeExtension<WINDummyAttribute>,
+#endif
+        _AttributeExtensions...>
+    >
     buildProxy(const std::string& participantId,
                const std::string& serviceName,
-               const std::string& domain);
+               const std::string& domain) {
+        std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::getInterfaceId(), participantId, serviceName, domain);
+
+        if(abstractMiddlewareProxy) {
+            auto returnProxy = std::make_shared<
+                _ProxyClass<
+#ifdef WIN32
+                CommonAPI::WINDummyAttributeExtension<WINDummyAttribute>,
+#endif
+                _AttributeExtensions...>
+            >(abstractMiddlewareProxy);
+
+            return returnProxy;
+        }
+        else {
+            return NULL;
+        }
+    }
 
     /**
      * \brief Build a proxy for the specified address
@@ -106,8 +130,23 @@ class Factory {
      * @return a shared pointer to the constructed proxy
      */
     template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions >
-    std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
-    buildProxy(const std::string& serviceAddress);
+    std::shared_ptr<
+        _ProxyClass<
+#ifdef WIN32
+        CommonAPI::WINDummyAttributeExtension<WINDummyAttribute>,
+#endif
+        _AttributeExtensions...>
+    >
+    buildProxy(const std::string& serviceAddress) {
+        std::string domain;
+        std::string serviceName;
+        std::string participantId;
+        if (!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
+            return false;
+        }
+
+        return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, serviceName, domain);
+    }
 
     /**
      * \brief Build a proxy for the specified address with one extension for all attributes

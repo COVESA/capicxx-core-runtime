@@ -126,6 +126,12 @@ template <typename _ValueType>
 struct ObservableAttribute: _ObservableAttributeImpl< Attribute<_ValueType> > {
 };
 
+#ifdef WIN32
+struct WINDummyAttribute {
+    WINDummyAttribute() {}
+};
+#endif
+
 } // namespace CommonAPI
 
 #endif // COMMONAPI_ATTRIBUTE_H_

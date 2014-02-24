@@ -51,14 +51,26 @@ class ProxyManager {
     virtual InstanceAvailabilityStatusChangedEvent& getInstanceAvailabilityStatusChangedEvent() = 0;
 
     template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions>
-    std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
+    std::shared_ptr<
+    _ProxyClass<
+#ifdef WIN32
+        CommonAPI::WINDummyAttributeExtension<WINDummyAttribute>,
+#endif
+        _AttributeExtensions...>
+    >
     buildProxy(const std::string& instanceName) {
         std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(instanceName);
         if (abstractMiddlewareProxy) {
-            return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
+            auto returnProxy = std::make_shared<
+                _ProxyClass<
+#ifdef WIN32
+                CommonAPI::WINDummyAttributeExtension<WINDummyAttribute>,
+#endif
+                _AttributeExtensions...>
+            >(abstractMiddlewareProxy);
+            return returnProxy;
         }
         return NULL;
-
     }
 
     template <template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>

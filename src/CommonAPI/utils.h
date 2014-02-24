@@ -7,9 +7,10 @@
 #ifndef COMMONAPI_UTILS_H_
 #define COMMONAPI_UTILS_H_
 
-#include <unistd.h>
+#ifndef WIN32
 #include <dirent.h>
 #include <dlfcn.h>
+#endif
 #include <sys/stat.h>
 
 #include <cstring>
@@ -19,6 +20,16 @@
 #include <algorithm>
 #include <iostream>
 
+#include <locale>
+#include <functional>
+
+#ifdef WIN32
+#include <xfunctional>
+#define WIN32_LEAN_AND_MEAN // this prevents windows.h from including winsock.h, which causes duplicate definitions with winsock2.h
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 namespace CommonAPI {
 
@@ -38,6 +49,11 @@ namespace CommonAPI {
  * @return The name of the currently executing binary.
  */
 inline std::string getCurrentBinaryFileFQN() {
+#ifdef WIN32
+    TCHAR result[MAX_PATH];
+    std::basic_string<TCHAR> resultString(result, GetModuleFileName(NULL, result, MAX_PATH));
+    return std::string(resultString.begin(), resultString.end());
+#else
     char fqnOfBinary[FILENAME_MAX];
     char pathToProcessImage[FILENAME_MAX];
 
@@ -47,9 +63,11 @@ inline std::string getCurrentBinaryFileFQN() {
     if (lengthOfFqn != -1) {
         fqnOfBinary[lengthOfFqn] = '\0';
         return std::string(std::move(fqnOfBinary));
-    } else {
+    }
+    else {
         return std::string("");
     }
+#endif
 }
 
 /**
@@ -89,6 +107,10 @@ inline std::vector<std::string> split(const std::string& s, char delim) {
     return split(s, delim, elems);
 }
 
+inline bool isspace(char c) {
+    return std::isspace(c, std::locale());
+}
+
 /**
  * \brief Trims whitespaces from beginning and end of a std::string.
  *
@@ -99,18 +121,18 @@ inline void trim(std::string& toTrim) {
                     toTrim.begin(),
                     std::find_if(toTrim.begin(),
                                  toTrim.end(),
-                                 std::not1(std::ptr_fun<int, int>(std::isspace)))
-    );
+                                 std::not1(std::ptr_fun(isspace)))
+                                                    );
     toTrim.erase(
                     std::find_if(toTrim.rbegin(),
                                  toTrim.rend(),
-                                 std::not1(std::ptr_fun<int, int>(std::isspace))).base(),
-                    toTrim.end()
-    );
+                                 std::not1(std::ptr_fun(isspace))).base(),
+                                 toTrim.end()
+                    );
 }
 
 inline bool notIsdigit(char c) {
-    return !std::isdigit(c);
+    return !std::isdigit(c, std::locale());
 }
 
 /**
@@ -130,7 +152,7 @@ inline bool containsOnlyDigits(const std::string& toCheck) {
 }
 
 inline bool notIsalnum(char c) {
-    return !std::isalnum(c);
+    return !std::isalnum(c, std::locale());
 }
 
 /**
@@ -210,7 +232,7 @@ inline bool isValidCommonApiAddress(const std::string& commonApiAddress) {
     return isValidDomainName(splittedAddress[0]) && isValidServiceName(splittedAddress[1]) && isValidInstanceId(splittedAddress[2]);
 }
 
-
+#ifndef WIN32
 /**
  * \brief Loads a specific generic library at runtime.
  *
@@ -336,7 +358,7 @@ inline void findAndLoadGenericLibraries(const std::string& requestedMiddlewareNa
         findAndLoadGenericLibraries(requestedMiddlewareName, singleSearchPath.c_str());
     }
 }
-
+#endif
 
 } //namespace CommonAPI
 

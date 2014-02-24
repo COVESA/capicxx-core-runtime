@@ -12,33 +12,6 @@
 
 namespace CommonAPI {
 
-template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions>
-std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
-Factory::buildProxy(const std::string& participantId,
-                    const std::string& serviceName,
-                    const std::string& domain) {
-
-    std::shared_ptr<Proxy> abstractMiddlewareProxy = createProxy(_ProxyClass<_AttributeExtensions...>::InterfaceType::getInterfaceId(), participantId, serviceName, domain);
-    if (abstractMiddlewareProxy) {
-        return std::make_shared<_ProxyClass<_AttributeExtensions...>>(abstractMiddlewareProxy);
-    }
-    return NULL;
-}
-
-template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions >
-std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
-Factory::buildProxy(const std::string& serviceAddress) {
-
-    std::string domain;
-    std::string serviceName;
-    std::string participantId;
-    if(!splitValidAddress(serviceAddress, domain, serviceName, participantId)) {
-        return std::shared_ptr<_ProxyClass<_AttributeExtensions...> >();
-    }
-
-    return buildProxy<_ProxyClass, _AttributeExtensions...>(participantId, serviceName, domain);
-}
-
 template <template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
 std::shared_ptr<typename DefaultAttributeProxyFactoryHelper<_ProxyClass, _AttributeExtension>::class_t>
 Factory::buildProxyWithDefaultAttributeExtension(const std::string& participantId,

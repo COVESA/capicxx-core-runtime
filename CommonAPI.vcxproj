@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C18FDEDE-810E-405D-9100-57A1CC5C78A9}</ProjectGuid>
+    <RootNamespace>CommonAPI</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>WIN32;COMMONAPI_INTERNAL_COMPILATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>C:\work\bmw\2.0\gtest-1.7.0\msvc\gtest\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Verbose>true</Verbose>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\CommonAPI\Attribute.h" />
+    <ClInclude Include="src\CommonAPI\AttributeExtension.h" />
+    <ClInclude Include="src\CommonAPI\ByteBuffer.h" />
+    <ClInclude Include="src\CommonAPI\CommonAPI.h" />
+    <ClInclude Include="src\CommonAPI\Configuration.h" />
+    <ClInclude Include="src\CommonAPI\ContainerUtils.h" />
+    <ClInclude Include="src\CommonAPI\Event.h" />
+    <ClInclude Include="src\CommonAPI\Factory.h" />
+    <ClInclude Include="src\CommonAPI\Factory.hpp" />
+    <ClInclude Include="src\CommonAPI\InputStream.h" />
+    <ClInclude Include="src\CommonAPI\MainLoopContext.h" />
+    <ClInclude Include="src\CommonAPI\MiddlewareInfo.h" />
+    <ClInclude Include="src\CommonAPI\OutputStream.h" />
+    <ClInclude Include="src\CommonAPI\Proxy.h" />
+    <ClInclude Include="src\CommonAPI\ProxyManager.h" />
+    <ClInclude Include="src\CommonAPI\Runtime.h" />
+    <ClInclude Include="src\CommonAPI\SelectiveEvent.h" />
+    <ClInclude Include="src\CommonAPI\SerializableStruct.h" />
+    <ClInclude Include="src\CommonAPI\SerializableVariant.h" />
+    <ClInclude Include="src\CommonAPI\SerializableVariant.hpp" />
+    <ClInclude Include="src\CommonAPI\ServicePublisher.h" />
+    <ClInclude Include="src\CommonAPI\ServicePublisher.hpp" />
+    <ClInclude Include="src\CommonAPI\Stub.h" />
+    <ClInclude Include="src\CommonAPI\types.h" />
+    <ClInclude Include="src\CommonAPI\utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\CommonAPI\Configuration.cpp" />
+    <ClCompile Include="src\CommonAPI\ContainerUtils.cpp" />
+    <ClCompile Include="src\CommonAPI\Runtime.cpp" />
+    <ClCompile Include="src\CommonAPI\ServicePublisher.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

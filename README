@@ -52,6 +52,8 @@ Use autotools to build this package:
 # sudo make install (or alternative install process, eg. checkinstall on debian-based distributions, such as Ubuntu)
 ----
 If the environment variable GTEST_CONFIG is set to the path of the gtest-config script in a Gtest tree test will also be built.
+----
+To build the Windows version of CommonAPI with Visual Studio, you can use the solution file CommonAPI.sln. It is configured to build CommonAPI as a static library.
 
 == Linking against CommonAPI
 
@@ -185,6 +187,13 @@ default
   loaded dynamically (i.e. at runtime without linking them to the binary beforehand). All paths defined in this environment variable
   will take precedence over those two default paths. Separator between several paths is ":".
 
+
+== Remarks on Windows version
+
+Due to a compiler bug in Visual Studio 2013, which is not able to call constructors of variadic template packs, if they contain zero elements, the factory’s buildProxy method does not return a proxy without AttributeExtensions, but implicitly adds a WINDummyAttributeExtension. So to assign such a proxy use the auto keyword or the typedef ***ProxyDefault in the generated ***Proxy.h.
+This restriction does only affect the windows port. The typedef is cross platform compatible as it points to a proxy with empty template list on Linux.
+
+The Windows version does not support dynamic loading.
 
 == Working on the code & contribution
 
