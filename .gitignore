@@ -5,6 +5,7 @@
 *.lo
 *.o
 *.gz
+*~
 /.autotools
 /.cproject
 /.project

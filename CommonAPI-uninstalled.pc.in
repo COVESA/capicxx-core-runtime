@@ -1,7 +1,9 @@
 abs_top_builddir=@abs_top_builddir@
 abs_top_srcdir=@abs_top_srcdir@
-prefix=
-exec_prefix=
+prefix=${abs_top_srcdir}
+exec_prefix=${prefix}
+includedir=${prefix}/src
+libdir=${exec_prefix}/.libs
 
 Name: Common API C++
 Description: GENIVI Common API C++ Library (uninstalled copy)

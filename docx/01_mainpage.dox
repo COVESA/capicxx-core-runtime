@@ -32,7 +32,6 @@ can be found at the <a href="http://projects.genivi.org/commonapi/">project home
 Please see the <a href="http://projects.genivi.org/commonapi/download">project download section</a> for available language bindings.
 
 \par IPC CommonAPI C++ Specification
-The specification IPC CommonAPI C++ is maintained within the GENIVI System Infrastructure Exper Group (EG-SI). 
-A copy of the specification can be found <a href="genivi-SysInfraEGCppCommonAPISpecification.pdf">here</a>.
-
+The specification IPC CommonAPI C++ is maintained within the GENIVI System Infrastructure Expert Group (EG-SI).
+The specification document can be found inside the CommonAPI-Tools project.
 */
