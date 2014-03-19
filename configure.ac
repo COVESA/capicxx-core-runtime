@@ -19,6 +19,8 @@ AM_INIT_AUTOMAKE([foreign 1.11 silent-rules subdir-objects -Wall -Werror])
 AM_SILENT_RULES
 AM_MAINTAINER_MODE
 
+AS_IF([test -z "${CXXFLAGS}"], [CXXFLAGS='-O0'], [])
+
 AC_PROG_CXX
 AC_LANG([C++])
 AX_CXX_COMPILE_STDCXX_11([noext])
