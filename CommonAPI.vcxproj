@@ -107,8 +107,12 @@
   <ItemGroup>
     <ClCompile Include="src\CommonAPI\Configuration.cpp" />
     <ClCompile Include="src\CommonAPI\ContainerUtils.cpp" />
+    <ClCompile Include="src\CommonAPI\Factory.cpp" />
+    <ClCompile Include="src\CommonAPI\InputStream.cpp" />
+    <ClCompile Include="src\CommonAPI\MainLoopContext.cpp" />
     <ClCompile Include="src\CommonAPI\Runtime.cpp" />
     <ClCompile Include="src\CommonAPI\ServicePublisher.cpp" />
+    <ClCompile Include="src\CommonAPI\utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
