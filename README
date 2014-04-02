@@ -53,7 +53,9 @@ Use autotools to build this package:
 ----
 If the environment variable GTEST_CONFIG is set to the path of the gtest-config script in a Gtest tree test will also be built.
 
-To build the Windows version of CommonAPI with Visual Studio, you can use the solution file CommonAPI.sln. It is configured to build CommonAPI as a static library.
+To build the Windows version of CommonAPI with Visual Studio, you can use the solution file CommonAPI.sln. It is configured to build CommonAPI as a static library. 
+To build the Tests project you have to set an environment variable called GTEST pointing to your gtest directory (e.g. C:\gtest-1.7.0), and if applicable restart your
+Visual Studio.
 
 == Linking against CommonAPI
 
