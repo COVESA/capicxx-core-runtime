@@ -1,9 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.20827.3
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Tests.vcxproj", "{872A0F1D-2EB9-443D-9869-B7F699CC0DE2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C18FDEDE-810E-405D-9100-57A1CC5C78A9} = {C18FDEDE-810E-405D-9100-57A1CC5C78A9}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommonAPI", "CommonAPI.vcxproj", "{C18FDEDE-810E-405D-9100-57A1CC5C78A9}"
 EndProject
