@@ -96,4 +96,4 @@ VariantTest_LDADD = ${LDADD} ${GTEST_LIBS} libCommonAPI.la
 endif
 
 doc: doxygen-doc
-	asciidoc -b html -o doc/html/README.html README
+	asciidoc -a version=@PACKAGE_VERSION@ -b html -o doc/html/README.html README
