@@ -1,37 +1,23 @@
 /**
- * Copyright (C) 2013 BMW AG
- *
+ * \copyright
+ * 
+ * Copyright (C) 2015 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
  *
  * This file is part of GENIVI project IPC CommonAPI C++.
  *
- * Contributions are licensed to the GENIVI Alliance under one or more
- * Contribution License Agreements.
- *
- * \copyright
- * This Source Code Form is subject to the terms of the
- * Mozilla Public License, v. 2.0. If a  copy of the MPL was not distributed with
- * this file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
- * \author Juergen Gehring (juergen.gehring@bmw.de)
- * \author Manfred Bathelt (manfred.bathelt@bmw.de)
+ * Contributions are licensed to the GENIVI Alliance under one or more Contribution License Agreements.
  *
  */
  
 /*!
 \mainpage
 
-\par Usage information
-can be found in the <a href="README.html">README file</a>. 
+\par License
+This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-\par About IPC CommonAPI C++
-IPC CommonAPI C++ is a C++ based abstraction API for communication stacks, which enables applications to
-use different communication middleware - so called language bindings - as backend without any changes to the application code.
+\par CommonAPI C++ Specification and User Guide
+The specification and the user guide can be found in the CommonAPI documentation directory of the CommonAPI Tools project.
 
-\par More information
-can be found at the <a href="http://projects.genivi.org/commonapi/">project homepage</a> \n
-Please see the <a href="http://projects.genivi.org/commonapi/download">project download section</a> for available language bindings.
-
-\par IPC CommonAPI C++ Specification
-The specification IPC CommonAPI C++ is maintained within the GENIVI System Infrastructure Expert Group (EG-SI).
-The specification document can be found inside the CommonAPI-Tools project.
+\par Build instructions
+can be found in the README file of this project.
 */

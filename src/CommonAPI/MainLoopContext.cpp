@@ -1,17 +1,18 @@
-/* Copyright (C) 2013 BMW Group
- * Author: Manfred Bathelt (manfred.bathelt@bmw.de)
- * Author: Juergen Gehring (juergen.gehring@bmw.de)
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// Copyright (C) 2013-2015 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "MainLoopContext.h"
-
+#include <CommonAPI/MainLoopContext.hpp>
 
 namespace CommonAPI {
 
 int64_t getCurrentTimeInMs() {
    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+}
+
+const std::string &MainLoopContext::getName() const {
+	return name_;
 }
 
 DispatchSourceListenerSubscription MainLoopContext::subscribeForDispatchSources(DispatchSourceAddedCallback dispatchAddedCallback, DispatchSourceRemovedCallback dispatchRemovedCallback) {
@@ -96,4 +97,4 @@ bool MainLoopContext::isInitialized() {
     return dispatchSourceListeners_.size() > 0 || watchListeners_.size() > 0;
 }
 
-} //Namespace CommonAPI
+} // namespace CommonAPI

@@ -10,6 +10,47 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\CommonAPI\Address.cpp" />
+    <ClCompile Include="src\CommonAPI\ContainerUtils.cpp" />
+    <ClCompile Include="src\CommonAPI\IniFileReader.cpp" />
+    <ClCompile Include="src\CommonAPI\MainLoopContext.cpp" />
+    <ClCompile Include="src\CommonAPI\Proxy.cpp" />
+    <ClCompile Include="src\CommonAPI\ProxyManager.cpp" />
+    <ClCompile Include="src\CommonAPI\Runtime.cpp" />
+    <ClCompile Include="src\CommonAPI\Types.cpp" />
+    <ClCompile Include="src\CommonAPI\Utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\CommonAPI\Address.hpp" />
+    <ClInclude Include="include\CommonAPI\Attribute.hpp" />
+    <ClInclude Include="include\CommonAPI\AttributeExtension.hpp" />
+    <ClInclude Include="include\CommonAPI\ByteBuffer.hpp" />
+    <ClInclude Include="include\CommonAPI\CommonAPI.hpp" />
+    <ClInclude Include="include\CommonAPI\ContainerUtils.hpp" />
+    <ClInclude Include="include\CommonAPI\Deployable.hpp" />
+    <ClInclude Include="include\CommonAPI\Deployment.hpp" />
+    <ClInclude Include="include\CommonAPI\Enumeration.hpp" />
+    <ClInclude Include="include\CommonAPI\Event.hpp" />
+    <ClInclude Include="include\CommonAPI\Factory.hpp" />
+    <ClInclude Include="include\CommonAPI\IniFileReader.hpp" />
+    <ClInclude Include="include\CommonAPI\InputStream.hpp" />
+    <ClInclude Include="include\CommonAPI\Logger.hpp" />
+    <ClInclude Include="include\CommonAPI\MainLoopContext.hpp" />
+    <ClInclude Include="include\CommonAPI\OutputStream.hpp" />
+    <ClInclude Include="include\CommonAPI\Proxy.hpp" />
+    <ClInclude Include="include\CommonAPI\ProxyManager.hpp" />
+    <ClInclude Include="include\CommonAPI\Runtime.hpp" />
+    <ClInclude Include="include\CommonAPI\SelectiveEvent.hpp" />
+    <ClInclude Include="include\CommonAPI\SerializableArguments.hpp" />
+    <ClInclude Include="include\CommonAPI\Struct.hpp" />
+    <ClInclude Include="include\CommonAPI\Stub.hpp" />
+    <ClInclude Include="include\CommonAPI\TypeOutputStream.hpp" />
+    <ClInclude Include="include\CommonAPI\Types.hpp" />
+    <ClInclude Include="include\CommonAPI\Utils.hpp" />
+    <ClInclude Include="include\CommonAPI\Variant.hpp" />
+    <ClInclude Include="include\CommonAPI\Version.hpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C18FDEDE-810E-405D-9100-57A1CC5C78A9}</ProjectGuid>
     <RootNamespace>CommonAPI</RootNamespace>
@@ -49,10 +90,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>WIN32;COMMONAPI_INTERNAL_COMPILATION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;COMMONAPI_INTERNAL_COMPILATION;__EXCEPTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <MinimalRebuild>false</MinimalRebuild>
+      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -83,43 +125,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="src\CommonAPI\Attribute.h" />
-    <ClInclude Include="src\CommonAPI\AttributeExtension.h" />
-    <ClInclude Include="src\CommonAPI\ByteBuffer.h" />
-    <ClInclude Include="src\CommonAPI\CommonAPI.h" />
-    <ClInclude Include="src\CommonAPI\Configuration.h" />
-    <ClInclude Include="src\CommonAPI\ContainerUtils.h" />
-    <ClInclude Include="src\CommonAPI\Event.h" />
-    <ClInclude Include="src\CommonAPI\Factory.h" />
-    <ClInclude Include="src\CommonAPI\Factory.hpp" />
-    <ClInclude Include="src\CommonAPI\InputStream.h" />
-    <ClInclude Include="src\CommonAPI\MainLoopContext.h" />
-    <ClInclude Include="src\CommonAPI\MiddlewareInfo.h" />
-    <ClInclude Include="src\CommonAPI\OutputStream.h" />
-    <ClInclude Include="src\CommonAPI\Proxy.h" />
-    <ClInclude Include="src\CommonAPI\ProxyManager.h" />
-    <ClInclude Include="src\CommonAPI\Runtime.h" />
-    <ClInclude Include="src\CommonAPI\SelectiveEvent.h" />
-    <ClInclude Include="src\CommonAPI\SerializableStruct.h" />
-    <ClInclude Include="src\CommonAPI\SerializableVariant.h" />
-    <ClInclude Include="src\CommonAPI\SerializableVariant.hpp" />
-    <ClInclude Include="src\CommonAPI\ServicePublisher.h" />
-    <ClInclude Include="src\CommonAPI\ServicePublisher.hpp" />
-    <ClInclude Include="src\CommonAPI\Stub.h" />
-    <ClInclude Include="src\CommonAPI\types.h" />
-    <ClInclude Include="src\CommonAPI\utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\CommonAPI\Configuration.cpp" />
-    <ClCompile Include="src\CommonAPI\ContainerUtils.cpp" />
-    <ClCompile Include="src\CommonAPI\Factory.cpp" />
-    <ClCompile Include="src\CommonAPI\InputStream.cpp" />
-    <ClCompile Include="src\CommonAPI\MainLoopContext.cpp" />
-    <ClCompile Include="src\CommonAPI\Runtime.cpp" />
-    <ClCompile Include="src\CommonAPI\ServicePublisher.cpp" />
-    <ClCompile Include="src\CommonAPI\utils.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,393 +1,409 @@
-/* Copyright (C) 2013 BMW Group
- * Author: Manfred Bathelt (manfred.bathelt@bmw.de)
- * Author: Juergen Gehring (juergen.gehring@bmw.de)
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifndef WIN32
-#include <dirent.h>
+// Copyright (C) 2013-2015 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#ifdef WIN32
+#include <Windows.h>
+#else
 #include <dlfcn.h>
+#include <unistd.h>
 #endif
 
+#include <sys/stat.h>
+
 #include <algorithm>
-#include <iostream>
-#include <unordered_map>
-#include <stdexcept>
 
-#include "Runtime.h"
-#include "Configuration.h"
-#include "utils.h"
-
+#include <CommonAPI/Factory.hpp>
+#include <CommonAPI/IniFileReader.hpp>
+#include <CommonAPI/Logger.hpp>
+#include <CommonAPI/Runtime.hpp>
 
 namespace CommonAPI {
 
+const char *COMMONAPI_DEFAULT_BINDING = "dbus";
+const char *COMMONAPI_DEFAULT_FOLDER = "/usr/local/lib/commonapi";
+const char *COMMONAPI_DEFAULT_CONFIG_FILE = "commonapi.ini";
+const char *COMMONAPI_DEFAULT_CONFIG_FOLDER = "/etc";
 
-static std::unordered_map<std::string, MiddlewareRuntimeLoadFunction>* registeredRuntimeLoadFunctions_;
-static bool isDynamic_ = false;
+std::map<std::string, std::string> properties__;
+std::shared_ptr<Runtime> Runtime::theRuntime__ = std::make_shared<Runtime>();
 
-static const char COMMONAPI_LIB_PREFIX[] = "libCommonAPI-";
-static const char MIDDLEWARE_INFO_SYMBOL_NAME[] = "middlewareInfo";
+std::string
+Runtime::getProperty(const std::string &_name) {
+	auto foundProperty = properties__.find(_name);
+	if (foundProperty != properties__.end())
+		return foundProperty->second;
+	return "";
+}
 
+void
+Runtime::setProperty(const std::string &_name, const std::string &_value) {
+	properties__[_name] = _value;
+}
+
+std::shared_ptr<Runtime> Runtime::get() {
+	theRuntime__->init();
+	return theRuntime__;
+}
+
+Runtime::Runtime()
+	: defaultBinding_(COMMONAPI_DEFAULT_BINDING),
+	  defaultFolder_(COMMONAPI_DEFAULT_FOLDER) {
+}
+
+Runtime::~Runtime() {
+	// intentionally left empty
+}
+
+bool
+Runtime::registerFactory(const std::string &_binding, std::shared_ptr<Factory> _factory) {
+	COMMONAPI_DEBUG("Registering factory for binding=", _binding);
+	bool isRegistered(false);
 #ifndef WIN32
-bool Runtime::tryLoadLibrary(const std::string& libraryPath,
-                                    void** sharedLibraryHandle,
-                                    MiddlewareInfo** foundMiddlewareInfo) {
-
-    //In case we find an already loaded library again while looking for another one,
-    //there is no need to look at it
-    if (dlopen(libraryPath.c_str(), RTLD_NOLOAD)) {
-        return false;
-    }
-
-    //In order to place symbols of the newly loaded library ahead of already resolved symbols, we need
-    //RTLD_DEEPBIND. This is necessary for this case: A library already is linked at compile time, but while
-    //trying to resolve another library dynamically we might find the very same library again.
-    //dlopen() doesn't know about the compile time linked library and will close it if dlclose() ever is
-    //called, thereby causing memory corruptions. Therefore, we must be able to access the middlewareInfo
-    //of the newly dlopened library in order to determine whether it already has been linked.
-    *sharedLibraryHandle = dlopen(libraryPath.c_str(), RTLD_LAZY | RTLD_LOCAL | RTLD_DEEPBIND);
-    if (*sharedLibraryHandle == NULL) {
-        return false;
-    }
-
-    *foundMiddlewareInfo = static_cast<MiddlewareInfo*>(dlsym(*sharedLibraryHandle, MIDDLEWARE_INFO_SYMBOL_NAME));
-
-    //In this context, a resolved value of NULL it is just as invalid as if dlerror() was set additionally.
-    if (!*foundMiddlewareInfo) {
-        dlclose(*sharedLibraryHandle);
-        return false;
-    }
-
-    if (!(*foundMiddlewareInfo)->middlewareName_ || !(*foundMiddlewareInfo)->getInstance_) {
-        dlclose(sharedLibraryHandle);
-        return false;
-    }
-
-    return true;
-}
-
-bool Runtime::checkAndLoadLibrary(const std::string& libraryPath,
-                                  const std::string& requestedBindingIdentifier,
-                                  bool keepLibrary) {
-
-    void* sharedLibraryHandle = NULL;
-    MiddlewareInfo* foundMiddlewareInfo;
-    if (!tryLoadLibrary(libraryPath, &sharedLibraryHandle, &foundMiddlewareInfo)) {
-        return false;
-    }
-
-    if (foundMiddlewareInfo->middlewareName_ != requestedBindingIdentifier) {
-        //If library was linked at compile time (and therefore an appropriate runtime loader is registered),
-        //the library must not be closed!
-        auto foundRegisteredRuntimeLoader = registeredRuntimeLoadFunctions_->find(foundMiddlewareInfo->middlewareName_);
-        if (foundRegisteredRuntimeLoader == registeredRuntimeLoadFunctions_->end()) {
-            dlclose(sharedLibraryHandle);
-        }
-        return false;
-    }
-
-    if (!keepLibrary) {
-        dlclose(sharedLibraryHandle);
-    } else {
-        //Extend visibility to make symbols available to all other libraries that are loaded afterwards,
-        //e.g. libraries containing generated binding specific code.
-        sharedLibraryHandle = dlopen(libraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
-        if (!sharedLibraryHandle) {
-            return false;
-        }
-        registeredRuntimeLoadFunctions_->insert( {foundMiddlewareInfo->middlewareName_, foundMiddlewareInfo->getInstance_} );
-    }
-
-    return true;
-}
-
-bool Runtime::checkAndLoadDefaultLibrary(std::string& foundBindingIdentifier, const std::string& libraryPath) {
-    void* sharedLibraryHandle = NULL;
-    MiddlewareInfo* foundMiddlewareInfo;
-    if (!tryLoadLibrary(libraryPath, &sharedLibraryHandle, &foundMiddlewareInfo)) {
-        return false;
-    }
-
-    //Extend visibility to make symbols available to all other linked libraries,
-    //e.g. libraries containing generated binding specific code
-    sharedLibraryHandle = dlopen(libraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
-    if (!sharedLibraryHandle) {
-        return false;
-    }
-    registeredRuntimeLoadFunctions_->insert( {foundMiddlewareInfo->middlewareName_, foundMiddlewareInfo->getInstance_} );
-    foundBindingIdentifier = foundMiddlewareInfo->middlewareName_;
-
-    return true;
-}
-
-const std::vector<std::string> Runtime::readDirectory(const std::string& path) {
-    std::vector<std::string> result;
-    struct stat filestat;
-
-    DIR *directory = opendir(path.c_str());
-
-    if (!directory) {
-        return std::vector<std::string>();
-    }
-
-    struct dirent* entry;
-
-    while ((entry = readdir(directory))) {
-        const std::string fqnOfEntry = path + entry->d_name;
-
-        if (stat(fqnOfEntry.c_str(), &filestat)) {
-            continue;
-        }
-        if (S_ISDIR(filestat.st_mode)) {
-            continue;
-        }
-
-        if (strncmp(COMMONAPI_LIB_PREFIX, entry->d_name, strlen(COMMONAPI_LIB_PREFIX)) != 0) {
-            continue;
-        }
-
-        const char* fileNamePtr = entry->d_name;
-        while ((fileNamePtr = strchr(fileNamePtr + 1, '.'))) {
-            if (strncmp(".so", fileNamePtr, 3) == 0) {
-                break;
-            }
-        }
-
-        if (fileNamePtr) {
-            result.push_back(fqnOfEntry);
-        }
-    }
-
-    closedir (directory);
-
-    std::sort( result.begin(), result.end() );
-
-    return result;
-}
+	std::lock_guard<std::mutex> itsLock(factoriesMutex_);
 #endif
-
-struct LibraryVersion {
-    int32_t major;
-    int32_t minor;
-    int32_t revision;
-};
-
-bool operator<(LibraryVersion const& lhs, LibraryVersion const& rhs) {
-    if (lhs.major == rhs.major) {
-        if (lhs.minor == rhs.minor) {
-            return lhs.revision < rhs.revision;
-        }
-        return lhs.minor < rhs.minor;
-    }
-    return lhs.major < rhs.major;
+	if (_binding == defaultBinding_) {
+		defaultFactory_ = _factory;
+	} else {
+		auto foundFactory = factories_.find(_binding);
+		if (foundFactory == factories_.end()) {
+			factories_[_binding] = _factory;
+			isRegistered = true;
+		}
+	}
+	return isRegistered;
 }
 
+bool
+Runtime::unregisterFactory(const std::string &_binding) {
+	COMMONAPI_DEBUG("Unregistering factory for binding=", _binding);
 #ifndef WIN32
-std::shared_ptr<Runtime> Runtime::checkDynamicLibraries(const std::string& requestedMiddlewareName, LoadState& loadState) {
-    const std::string& middlewareLibraryPath = Configuration::getInstance().getMiddlewareLibraryPath(requestedMiddlewareName);
-
-    if (middlewareLibraryPath != "") {
-        if (!checkAndLoadLibrary(middlewareLibraryPath, requestedMiddlewareName, true)) {
-            //A path for requestedMiddlewareName was configured, but no corresponding library was found
-            loadState = LoadState::CONFIGURATION_ERROR;
-            return std::shared_ptr<Runtime>(NULL);
-        } else {
-            const std::string currentBinaryFQN = getCurrentBinaryFileFQN();
-            const uint32_t lastPathSeparatorPosition = currentBinaryFQN.find_last_of("/\\");
-            const std::string currentBinaryPath = currentBinaryFQN.substr(0, lastPathSeparatorPosition + 1);
-            auto foundRuntimeLoader = registeredRuntimeLoadFunctions_->find(requestedMiddlewareName);
-            if (foundRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
-                return (foundRuntimeLoader->second)();
-            }
-            //One should not get here
-            loadState = LoadState::BINDING_ERROR;
-            return std::shared_ptr<Runtime>(NULL);
-        }
-    }
-
-    const std::vector<std::string>& librarySearchPaths = Configuration::getInstance().getLibrarySearchPaths();
-
-    LibraryVersion highestVersionFound = {0, 0, 0};
-    std::string fqnOfHighestVersion = "";
-
-    for (const std::string& singleSearchPath: librarySearchPaths) {
-        std::vector<std::string> orderedLibraries = readDirectory(singleSearchPath);
-
-        for (const std::string& fqnOfEntry : orderedLibraries) {
-            std::string versionString;
-            LibraryVersion currentLibraryVersion = {-1, -1, -1};
-
-            const char* fileNamePtr = fqnOfEntry.c_str();
-            while ((fileNamePtr = strchr(fileNamePtr + 1, '.'))) {
-                if (strncmp(".so", fileNamePtr, 3) == 0) {
-                    break;
-                }
-            }
-
-            const char* positionOfFirstDot = strchr(fileNamePtr + 1, '.');
-            if (positionOfFirstDot) {
-                versionString = positionOfFirstDot + 1;
-            }
-
-            std::vector<std::string> versionElements = split(versionString, '.');
-            if (versionElements.size() >= 1 && containsOnlyDigits(versionElements[0])) {
-                currentLibraryVersion.major = strtol(versionElements[0].c_str(), NULL, 0);
-            }
-            if (versionElements.size() >= 3 && containsOnlyDigits(versionElements[2])) {
-                currentLibraryVersion.minor = strtol(versionElements[1].c_str(), NULL, 0);
-                currentLibraryVersion.revision = strtol(versionElements[2].c_str(), NULL, 0);
-            }
-
-            if (highestVersionFound < currentLibraryVersion) {
-                if (!checkAndLoadLibrary(fqnOfEntry, requestedMiddlewareName, false)) {
-                    continue;
-                }
-                highestVersionFound = currentLibraryVersion;
-                fqnOfHighestVersion = fqnOfEntry;
-            }
-        }
-    }
-
-    if (fqnOfHighestVersion != "") {
-        checkAndLoadLibrary(fqnOfHighestVersion, requestedMiddlewareName, true);
-
-        auto foundRuntimeLoader = registeredRuntimeLoadFunctions_->find(requestedMiddlewareName);
-        if (foundRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
-            std::shared_ptr<Runtime> loadedRuntime = foundRuntimeLoader->second();
-            if (!loadedRuntime) {
-                loadState = LoadState::BINDING_ERROR;
-            }
-            return loadedRuntime;
-        }
-    }
-
-    loadState = LoadState::NO_LIBRARY_FOUND;
-
-    return std::shared_ptr<Runtime>();
-}
-
-
-std::shared_ptr<Runtime> Runtime::checkDynamicLibraries(LoadState& loadState) {
-    const std::vector<std::string>& librarySearchPaths = Configuration::getInstance().getLibrarySearchPaths();
-
-    for (const std::string& singleSearchPath : librarySearchPaths) {
-        std::vector<std::string> orderedLibraries = readDirectory(singleSearchPath);
-
-        for (const std::string& fqnOfEntry: orderedLibraries) {
-            std::string foundBindingName;
-            if (!checkAndLoadDefaultLibrary(foundBindingName, fqnOfEntry)) {
-                continue;
-            }
-
-            auto foundRuntimeLoader = registeredRuntimeLoadFunctions_->find(foundBindingName);
-            if (foundRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
-                return (foundRuntimeLoader->second)();
-            }
-        }
-    }
-
-    loadState = LoadState::NO_LIBRARY_FOUND;
-
-    return std::shared_ptr<Runtime>();
-}
+	std::lock_guard<std::mutex> itsLock(factoriesMutex_);
 #endif
-
-void Runtime::registerRuntimeLoader(const std::string& middlewareName, const MiddlewareRuntimeLoadFunction& middlewareRuntimeLoadFunction) {
-    if (!registeredRuntimeLoadFunctions_) {
-        registeredRuntimeLoadFunctions_ = new std::unordered_map<std::string, MiddlewareRuntimeLoadFunction>();
-    }
-    if (!isDynamic_) {
-        registeredRuntimeLoadFunctions_->insert( {middlewareName, middlewareRuntimeLoadFunction});
-    }
+	if (_binding == defaultBinding_) {
+		defaultFactory_.reset();
+	} else {
+		factories_.erase(_binding);
+	}
+	return true;
 }
 
+/*
+ * Private
+ */
+void Runtime::init() {
+	static bool isInitialized(false);
+#ifndef WIN32
+	std::lock_guard<std::mutex> itsLock(mutex_);
+#endif
+	if (!isInitialized) {
+		// Determine default configuration file
+		const char *config = getenv("COMMONAPI_CONFIG");
+		if (config) {
+			defaultConfig_ = config;
+		} else {
+			defaultConfig_ = COMMONAPI_DEFAULT_CONFIG_FOLDER;
+			defaultConfig_ += "/";
+			defaultConfig_ += COMMONAPI_DEFAULT_CONFIG_FILE;
+		}
 
-std::shared_ptr<Runtime> Runtime::load() {
-    LoadState dummyState;
-    return load(dummyState);
+		// TODO: evaluate return parameter and decide what to do
+		(void)readConfiguration();
+
+		// Determine default ipc & shared library folder
+		const char *binding = getenv("COMMONAPI_DEFAULT_BINDING");
+		if (binding)
+			defaultBinding_ = binding;
+
+		const char *folder = getenv("COMMONAPI_DEFAULT_FOLDER");
+		if (folder)
+			defaultFolder_ = folder;
+
+		// Log settings
+		COMMONAPI_INFO("Using default binding \'", defaultBinding_, "\'");
+		COMMONAPI_INFO("Using default shared library folder \'", defaultFolder_, "\'");
+		COMMONAPI_INFO("Using default configuration file \'", defaultConfig_, "\'");
+
+		isInitialized = true;
+	}
 }
 
-
-std::shared_ptr<Runtime> Runtime::load(LoadState& loadState) {
-    isDynamic_ = true;
-    loadState = LoadState::SUCCESS;
-    if(!registeredRuntimeLoadFunctions_) {
-        registeredRuntimeLoadFunctions_ = new std::unordered_map<std::string, MiddlewareRuntimeLoadFunction>();
-    }
-
-    const std::string& defaultBindingIdentifier = Configuration::getInstance().getDefaultMiddlewareIdentifier();
-    if (defaultBindingIdentifier != "") {
-        const auto defaultRuntimeLoader = registeredRuntimeLoadFunctions_->find(defaultBindingIdentifier);
-        if (defaultRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
-            return (defaultRuntimeLoader->second)();
-        }
-
+bool
+Runtime::readConfiguration() {
+#define MAX_PATH_LEN 255
+	std::string config;
+	char currentDirectory[MAX_PATH_LEN];
 #ifdef WIN32
-        return std::shared_ptr<Runtime>();
+	if (GetCurrentDirectory(MAX_PATH_LEN, currentDirectory)) {
 #else
-        return checkDynamicLibraries(defaultBindingIdentifier, loadState);
+	if (getcwd(currentDirectory, MAX_PATH_LEN)) {
 #endif
+		config = currentDirectory;
+		config += "/";
+		config += COMMONAPI_DEFAULT_CONFIG_FILE;
 
-    } else {
-        const auto defaultRuntimeLoader = registeredRuntimeLoadFunctions_->begin();
-        if (defaultRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
-            return (defaultRuntimeLoader->second)();
-        }
-#ifdef WIN32
-        return std::shared_ptr<Runtime>();
-#else
-        return checkDynamicLibraries(loadState);
-#endif
-    }
+		struct stat s;
+		if (stat(config.c_str(), &s) != 0) {
+			config = defaultConfig_;
+		}
+	}
+
+	IniFileReader reader;
+	if (!reader.load(config))
+		return false;
+
+	std::shared_ptr<IniFileReader::Section> section
+		= reader.getSection("logging");
+	if (section) {
+		std::string itsConsole = section->getValue("console");
+		std::string itsFile = section->getValue("file");
+		std::string itsDlt = section->getValue("dlt");
+		std::string itsLevel = section->getValue("level");
+
+		Logger::init((itsConsole == "true"),
+					 itsFile,
+					 (itsDlt == "true"),
+					 itsLevel);
+	}
+
+	section	= reader.getSection("default");
+	if (section) {
+		std::string binding = section->getValue("binding");
+		if ("" != binding)
+			defaultBinding_ = binding;
+
+		std::string folder = section->getValue("folder");
+		if ("" != folder)
+			defaultFolder_ = folder;
+	}
+
+	section = reader.getSection("proxy");
+	if (section) {
+		for (auto m : section->getMappings()) {
+			COMMONAPI_DEBUG("Adding proxy mapping: ", m.first, " --> ", m.second);
+			libraries_[m.first][true] = m.second;
+		}
+	}
+
+	section = reader.getSection("stub");
+	if (section) {
+		for (auto m : section->getMappings()) {
+			COMMONAPI_DEBUG("Adding stub mapping: ", m.first, " --> ", m.second);
+			libraries_[m.first][false] = m.second;
+		}
+	}
+
+	return true;
+}
+
+std::shared_ptr<Proxy>
+Runtime::createProxy(
+		const std::string &_domain, const std::string &_interface, const std::string &_instance,
+		const ConnectionId_t &_connectionId) {
+
+	// Check whether we already know how to create such proxies...
+	std::shared_ptr<Proxy> proxy = createProxyHelper(_domain, _interface, _instance, _connectionId);
+	if (!proxy) {
+		// ...it seems do not, lets try to load a library that does...
+		std::lock_guard<std::mutex> itsGuard(loadMutex_);
+		std::string library = getLibrary(_domain, _interface, _instance, true);
+		if (loadLibrary(library)) {
+			proxy = createProxyHelper(_domain, _interface, _instance, _connectionId);
+		}
+	}
+	return proxy;
+}
+
+std::shared_ptr<Proxy>
+Runtime::createProxy(
+		const std::string &_domain, const std::string &_interface, const std::string &_instance,
+		std::shared_ptr<MainLoopContext> _context) {
+
+	// Check whether we already know how to create such proxies...
+	std::shared_ptr<Proxy> proxy = createProxyHelper(_domain, _interface, _instance, _context);
+	if (!proxy) {
+		// ...it seems do not, lets try to load a library that does...
+		std::lock_guard<std::mutex> itsGuard(loadMutex_);
+		std::string library = getLibrary(_domain, _interface, _instance, true);
+		if (loadLibrary(library)) {
+			proxy = createProxyHelper(_domain, _interface, _instance, _context);
+		}
+	}
+	return proxy;
 }
 
 
-std::shared_ptr<Runtime> Runtime::load(const std::string& middlewareIdOrAlias) {
-    LoadState dummyState;
-    return load(middlewareIdOrAlias, dummyState);
+bool
+Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
+				  	  std::shared_ptr<StubBase> _stub, const ConnectionId_t &_connectionId) {
+
+	bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId);
+	if (!isRegistered) {
+		std::string library = getLibrary(_domain, _interface, _instance, false);
+		std::lock_guard<std::mutex> itsGuard(loadMutex_);
+		if (loadLibrary(library)) {
+			isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId);
+		}
+	}
+	return isRegistered;
 }
 
-std::shared_ptr<Runtime> Runtime::load(const std::string& middlewareIdOrAlias, LoadState& loadState) {
-    isDynamic_ = true;
-    loadState = LoadState::SUCCESS;
-    if (!registeredRuntimeLoadFunctions_) {
-        registeredRuntimeLoadFunctions_ = new std::unordered_map<std::string, MiddlewareRuntimeLoadFunction>();
-    }
+bool
+Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
+				  	  std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
 
-    const std::string middlewareName = Configuration::getInstance().getMiddlewareNameForAlias(middlewareIdOrAlias);
-
-    auto foundRuntimeLoader = registeredRuntimeLoadFunctions_->find(middlewareName);
-    if (foundRuntimeLoader != registeredRuntimeLoadFunctions_->end()) {
-        return (foundRuntimeLoader->second)();
-    }
-
-#ifdef WIN32
-    return std::shared_ptr<Runtime>();
-#else
-    return checkDynamicLibraries(middlewareName, loadState);
-#endif
+	bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context);
+	if (!isRegistered) {
+		std::string library = getLibrary(_domain, _interface, _instance, false);
+		std::lock_guard<std::mutex> itsGuard(loadMutex_);
+		if (loadLibrary(library)) {
+			isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context);
+		}
+	}
+	return isRegistered;
 }
 
+bool 
+Runtime::unregisterStub(const std::string &_domain, const std::string &_interface, const std::string &_instance) {
+	for (auto factory : factories_) {
+		if (factory.second->unregisterStub(_domain, _interface, _instance))
+			return true;
+	}
 
-std::shared_ptr<MainLoopContext> Runtime::getNewMainLoopContext() const {
-    return std::make_shared<MainLoopContext>();
+	return (defaultFactory_ ? defaultFactory_->unregisterStub(_domain, _interface, _instance) : false);
 }
 
-std::shared_ptr<Factory> Runtime::createFactory(const std::string factoryName,
-                                                const bool nullOnInvalidName) {
-    return createFactory(std::shared_ptr<MainLoopContext>(NULL), factoryName, nullOnInvalidName);
+std::string
+Runtime::getLibrary(
+	const std::string &_domain, const std::string &_interface, const std::string &_instance,
+	bool _isProxy) {
+
+	std::string library;
+	std::string address = _domain + ":" + _interface + ":" + _instance;
+
+	COMMONAPI_DEBUG("Loading library for ", address, (_isProxy ? " proxy." : " stub."));
+
+	auto libraryIterator = libraries_.find(address);
+	if (libraryIterator != libraries_.end()) {
+		auto addressIterator = libraryIterator->second.find(_isProxy);
+		if (addressIterator != libraryIterator->second.end()) {
+			library = addressIterator->second;
+			return library;
+		}
+	}
+
+	// If no library was explicitely configured, check whether property
+	// "LibraryBase" is set. If yes, use it, if not build default library
+	// name.
+	library = getProperty("LibraryBase");
+	if (library != "") {
+		library = "lib" + library + "-" + defaultBinding_;
+	} else {
+		library = "lib" + _domain + "__" + _interface + "__" + _instance;
+		std::replace(library.begin(), library.end(), '.', '_');
+	}
+
+	return library;
 }
 
-std::shared_ptr<Factory> Runtime::createFactory(std::shared_ptr<MainLoopContext> mainLoopContext,
-                                                const std::string factoryName,
-                                                const bool nullOnInvalidName) {
-    if(mainLoopContext && !mainLoopContext->isInitialized()) {
-        return std::shared_ptr<Factory>(NULL);
-    }
-    return doCreateFactory(mainLoopContext, factoryName, nullOnInvalidName);
+bool
+Runtime::loadLibrary(const std::string &_library) {
+	std::string itsLibrary(_library);
+
+	// TODO: decide whether this really is a good idea...
+	#ifdef WIN32
+	if (itsLibrary.rfind(".dll") != itsLibrary.length() - 4) {
+		itsLibrary += ".dll";
+	}
+	#else
+	if (itsLibrary.rfind(".so") != itsLibrary.length() - 3) {
+		itsLibrary += ".so";
+	}
+	#endif
+
+	bool isLoaded(true);
+	if (loadedLibraries_.end() == loadedLibraries_.find(itsLibrary)) {
+		#ifdef WIN32
+		if (LoadLibrary(itsLibrary.c_str()) != 0) {
+			loadedLibraries_.insert(itsLibrary);
+			COMMONAPI_DEBUG("Loading interface library \"", itsLibrary, "\" succeeded.");
+		} else {
+			COMMONAPI_ERROR("Loading interface library \"", itsLibrary, "\" failed (", GetLastError(), ")");
+			isLoaded = false;
+		}
+		#else
+		if (dlopen(itsLibrary.c_str(), RTLD_LAZY | RTLD_GLOBAL) != 0) {
+			loadedLibraries_.insert(itsLibrary);
+			COMMONAPI_DEBUG("Loading interface library \"", itsLibrary, "\" succeeded.");
+		}
+		else {
+			COMMONAPI_ERROR("Loading interface library \"", itsLibrary, "\" failed (", dlerror(), ")");
+			isLoaded = false;
+		}
+		#endif
+	}
+	return isLoaded;
 }
 
+std::shared_ptr<Proxy>
+Runtime::createProxyHelper(const std::string &_domain, const std::string &_interface, const std::string &_instance,
+						   const std::string &_connectionId) {
+	std::lock_guard<std::mutex> itsLock(factoriesMutex_);
+	for (auto factory : factories_) {
+		std::shared_ptr<Proxy> proxy
+			= factory.second->createProxy(_domain, _interface, _instance, _connectionId);
+		if (proxy)
+			return proxy;
+	}
+	return (defaultFactory_ ?
+				defaultFactory_->createProxy(_domain, _interface, _instance, _connectionId)
+				: nullptr);
+}
 
-} // namespace CommonAPI
+std::shared_ptr<Proxy>
+Runtime::createProxyHelper(const std::string &_domain, const std::string &_interface, const std::string &_instance,
+						   std::shared_ptr<MainLoopContext> _context ) {
+	std::lock_guard<std::mutex> itsLock(factoriesMutex_);
+	for (auto factory : factories_) {
+		std::shared_ptr<Proxy> proxy
+			= factory.second->createProxy(_domain, _interface, _instance, _context);
+		if (proxy)
+			return proxy;
+	}
+	return (defaultFactory_ ?
+				defaultFactory_->createProxy(_domain, _interface, _instance, _context) :
+				nullptr);
+}
+
+bool
+Runtime::registerStubHelper(const std::string &_domain, const std::string &_interface, const std::string &_instance,
+	  	  	  	  	  	    std::shared_ptr<StubBase> _stub, const std::string &_connectionId) {
+	bool isRegistered(false);
+	std::lock_guard<std::mutex> itsLock(factoriesMutex_);
+	for (auto factory : factories_) {
+		isRegistered = factory.second->registerStub(_domain, _interface, _instance, _stub, _connectionId);
+		if (isRegistered)
+			return isRegistered;
+	}
+	return (defaultFactory_ ?
+				defaultFactory_->registerStub(_domain, _interface, _instance, _stub, _connectionId) :
+				false);
+}
+
+bool
+Runtime::registerStubHelper(const std::string &_domain, const std::string &_interface, const std::string &_instance,
+	  	  	  	  	  	    std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
+	bool isRegistered(false);
+	std::lock_guard<std::mutex> itsLock(factoriesMutex_);
+	for (auto factory : factories_) {
+		isRegistered = factory.second->registerStub(_domain, _interface, _instance, _stub, _context);
+		if (isRegistered)
+			return isRegistered;
+	}
+	return (defaultFactory_ ?
+				defaultFactory_->registerStub(_domain, _interface, _instance, _stub, _context) :
+				false);
+}
+
+} //Namespace CommonAPI
