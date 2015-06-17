@@ -4,7 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #if !defined (COMMONAPI_INTERNAL_COMPILATION)
-#error "Only <CommonAPI/CommonAPI.h> can be included directly, this file may disappear or change contents."
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
 #endif
 
 #ifndef COMMONAPI_STRUCT_HPP_
@@ -142,7 +142,11 @@ struct StructTypeWriter<_Index, _TypeOutput, _V<_Values...>> {
 	void operator()(TypeOutputStream<_TypeOutput> &_output,
 					const _V<_Values...> &_values) {
 		StructTypeWriter<_Index-1, _TypeOutput, _V<_Values...>>{}(_output, _values);
+#ifdef WIN32
+		_output.writeType(std::get<_Index>(_values.values_));
+#else
 		_output.template writeType(std::get<_Index>(_values.values_));
+#endif
 	}
 };
 
@@ -151,7 +155,11 @@ template<class _TypeOutput,
 struct StructTypeWriter<0, _TypeOutput, _V<_Values...>> {
 	void operator()(TypeOutputStream<_TypeOutput> &_output,
 					const _V<_Values...> &_values) {
+#ifdef WIN32
+		_output.writeType(std::get<0>(_values.values_));
+#else
 		_output.template writeType(std::get<0>(_values.values_));
+#endif
 	}
 };
 

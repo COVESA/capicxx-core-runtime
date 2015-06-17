@@ -69,6 +69,10 @@ public:
 		return get()->writeType(_value);
 	}
 
+	inline TypeOutputStream &writeType(const Version &_value) {
+		return get()->writeType(_value);
+	}
+
 	template<typename _Type>
 	TypeOutputStream &writeType(const Enumeration<_Type> &_value) {
 		_Type tmpValue;
@@ -79,6 +83,11 @@ public:
 	TypeOutputStream &writeType(const Struct<_Types...> &_value) {
 		return get()->writeType(_value);
 	}
+
+    template<class _PolymorphicStruct>
+    TypeOutputStream &writeType(const std::shared_ptr<_PolymorphicStruct> &_value) {
+        return get()->writeType(_value);
+    }
 
 	template<typename... _Types>
 	TypeOutputStream &writeType(const Variant<_Types...> &_value) {
@@ -174,6 +183,11 @@ inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_outpu
 template<class _Derived, typename... _Types>
 TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output, const Struct<_Types...> &_value) {
 	return _output.writeType(_value);
+}
+
+template<class _Derived, class _PolymorphicStruct>
+TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output, const std::shared_ptr<_PolymorphicStruct> &_value) {
+    return _output.writeType(_value);
 }
 
 template<class _Derived, typename... _Types>

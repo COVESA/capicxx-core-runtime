@@ -8,11 +8,11 @@
 
 namespace CommonAPI {
 
-template <typename _Base>
+template<typename _Base>
 struct Enumeration {
 	Enumeration() = default;
-	Enumeration(const _Base &_value)
-		: value_(_value) {
+	Enumeration(const _Base &_value) :
+			value_(_value) {
 	}
 
 	inline Enumeration &operator=(const _Base &_value) {
@@ -24,12 +24,28 @@ struct Enumeration {
 		return value_;
 	}
 
-	inline bool operator == (const Enumeration<_Base> &_other) const {
-		return value_ == _other.value_;
+	inline bool operator==(const Enumeration<_Base> &_other) const {
+		return (value_ == _other.value_);
 	}
 
-	inline bool operator != (const Enumeration<_Base> &_other) const {
-		return value_ != _other.value_;
+	inline bool operator!=(const Enumeration<_Base> &_other) const {
+		return (value_ != _other.value_);
+	}
+
+	inline bool operator<(const Enumeration<_Base> &_other) const {
+		return (value_ < _other.value_);
+	}
+
+	inline bool operator<=(const Enumeration<_Base> &_other) const {
+		return (value_ <= _other.value_);
+	}
+
+	inline bool operator>(const Enumeration<_Base> &_other) const {
+		return (value_ > _other.value_);
+	}
+
+	inline bool operator>=(const Enumeration<_Base> &_other) const {
+		return (value_ >= _other.value_);
 	}
 
 	_Base value_;

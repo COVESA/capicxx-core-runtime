@@ -516,6 +516,27 @@ struct TypeSelector<_Type> {
 };
 
 template<typename _Type, typename... _Types>
+struct TypeSelector<typename _Type::Literal, _Type, _Types...> {
+	typedef _Type type;
+};
+
+template<typename _Type, typename... _Types>
+struct TypeSelector<typename _Type::Literal &, _Type, _Types...> {
+	typedef _Type type;
+};
+
+
+template<typename _Type, typename... _Types>
+struct TypeSelector<typename _Type::Literal, const _Type&, _Types...> {
+	typedef _Type type;
+};
+
+template<typename _Type, typename... _Types>
+struct TypeSelector<const typename _Type::Literal &, _Type, _Types...> {
+	typedef _Type type;
+};
+
+template<typename _Type, typename... _Types>
 struct TypeSelector<_Type, _Type, _Types...> {
     typedef _Type type;
 };

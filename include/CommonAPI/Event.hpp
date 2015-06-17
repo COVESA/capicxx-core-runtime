@@ -106,24 +106,31 @@ typename Event<_Arguments...>::Subscription Event<_Arguments...>::subscribe(List
 template<typename ... _Arguments>
 void Event<_Arguments...>::unsubscribe(Subscription subscription) {
 	bool isLastListener(false);
+	bool hasUnsubscribed(false);
 
 	subscriptionMutex_.lock();
 	auto listener = subscriptions_.find(subscription);
 	if (subscriptions_.end() != listener
 			&& pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
-		if (0 == pendingSubscriptions_.erase(subscription)) {
-			pendingUnsubscriptions_.insert(subscription);
-			isLastListener = (1 == subscriptions_.size());
-		} else {
+		pendingUnsubscriptions_.insert(subscription);
+		isLastListener = (1 == subscriptions_.size());
+		hasUnsubscribed = true;
+	}
+	else {
+		listener = pendingSubscriptions_.find(subscription);
+		if (pendingSubscriptions_.end() != listener) {
+			pendingSubscriptions_.erase(subscription);
 			isLastListener = (0 == subscriptions_.size());
+			hasUnsubscribed = true;
 		}
 	}
 	subscriptionMutex_.unlock();
 
-	if (subscriptions_.end() != listener) {
+	if (hasUnsubscribed) {
 		onListenerRemoved(listener->second);
-		if (isLastListener)
+		if (isLastListener) {
 			onLastListenerRemoved(listener->second);
+		}
 	}
 }
 
