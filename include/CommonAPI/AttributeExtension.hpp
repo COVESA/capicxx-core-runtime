@@ -38,6 +38,15 @@ class AttributeExtension {
     _AttributeType& baseAttribute_;
 };
 
+template<template<typename ...> class _ProxyType, template<typename> class _AttributeExtension>
+struct DefaultAttributeProxyHelper;
+
+template<template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
+std::shared_ptr<
+	typename DefaultAttributeProxyHelper<_ProxyClass, _AttributeExtension>::class_t
+> createProxyWithDefaultAttributeExtension(
+	const std::string &_domain, const std::string &_instance);
+
 #ifdef WIN32
 template<typename _AttributeType>
 class WINDummyAttributeExtension : public CommonAPI::AttributeExtension<_AttributeType> {
