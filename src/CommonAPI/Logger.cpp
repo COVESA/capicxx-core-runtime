@@ -39,6 +39,13 @@ Logger::Logger() {
 #endif
 }
 
+Logger::~Logger() {
+#ifdef USE_DLT
+    DLT_UNREGISTER_CONTEXT(dlt_);
+    DLT_UNREGISTER_APP();
+#endif
+}
+
 void
 Logger::init(bool _useConsole, const std::string &_fileName, bool _useDlt, const std::string &_level) {
 #ifdef USE_CONSOLE
@@ -63,13 +70,13 @@ void
 Logger::doLog(Level _level, const std::string &_message) {
 #ifdef USE_CONSOLE
 	if (useConsole_) {
-		std::lock_guard<std::mutex> consoleGuard(mutex_);
+        std::lock_guard<std::mutex> itsLock(mutex_);
 		std::cout << "[CAPI][" << levelAsString(_level) << "] " << _message << std::endl;
 	}
 #endif
 #ifdef USE_FILE
 	if (file_ && file_->is_open()) {
-		std::lock_guard<std::mutex> consoleGuard(mutex_);
+        std::lock_guard<std::mutex> itsLock(mutex_);
 		(*(file_.get())) << "[CAPI][" << levelAsString(_level) << "] " << _message << std::endl;
 	}
 #endif

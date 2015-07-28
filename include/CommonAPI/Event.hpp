@@ -66,14 +66,15 @@ public:
 
 protected:
     void notifyListeners(const _Arguments&... eventArguments);
+    void notifySpecificListener(const Subscription subscription, const _Arguments&... eventArguments);
 
     virtual void onFirstListenerAdded(const Listener& listener) {}
-    virtual void onListenerAdded(const Listener& listener) {}
+    virtual void onListenerAdded(const Listener& listener, const Subscription subscription) {}
 
     virtual void onListenerRemoved(const Listener& listener) {}
     virtual void onLastListenerRemoved(const Listener& listener) {}
 
-//private:
+private:
     ListenersMap subscriptions_;
     Subscription nextSubscription_;
 
@@ -86,75 +87,108 @@ protected:
 
 template<typename ... _Arguments>
 typename Event<_Arguments...>::Subscription Event<_Arguments...>::subscribe(Listener listener) {
-	Subscription subscription;
-	bool isFirstListener;
+    Subscription subscription;
+    bool isFirstListener;
 
-	subscriptionMutex_.lock();
-	subscription = nextSubscription_++;
-	// TODO?: check for key/subscription overrun
-	listener = pendingSubscriptions_[subscription] = std::move(listener);
-	isFirstListener = (0 == subscriptions_.size());
-	subscriptionMutex_.unlock();
+    subscriptionMutex_.lock();
+    subscription = nextSubscription_++;
+    // TODO?: check for key/subscription overrun
+    listener = pendingSubscriptions_[subscription] = std::move(listener);
+    isFirstListener = (0 == subscriptions_.size());
+    subscriptionMutex_.unlock();
 
-	if (isFirstListener)
-		onFirstListenerAdded(listener);
-	onListenerAdded(listener);
+    if (isFirstListener)
+        onFirstListenerAdded(listener);
+    onListenerAdded(listener, subscription);
 
-	return subscription;
+    return subscription;
 }
 
 template<typename ... _Arguments>
 void Event<_Arguments...>::unsubscribe(Subscription subscription) {
-	bool isLastListener(false);
-	bool hasUnsubscribed(false);
+    bool isLastListener(false);
+    bool hasUnsubscribed(false);
+    Listener listener;
 
-	subscriptionMutex_.lock();
-	auto listener = subscriptions_.find(subscription);
-	if (subscriptions_.end() != listener
-			&& pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
-		pendingUnsubscriptions_.insert(subscription);
-		isLastListener = (1 == subscriptions_.size());
-		hasUnsubscribed = true;
-	}
-	else {
-		listener = pendingSubscriptions_.find(subscription);
-		if (pendingSubscriptions_.end() != listener) {
-			pendingSubscriptions_.erase(subscription);
-			isLastListener = (0 == subscriptions_.size());
-			hasUnsubscribed = true;
-		}
-	}
-	subscriptionMutex_.unlock();
+    subscriptionMutex_.lock();
+    auto listenerIterator = subscriptions_.find(subscription);
+    if (subscriptions_.end() != listenerIterator
+            && pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
+        listener = listenerIterator->second;
+        pendingUnsubscriptions_.insert(subscription);
+        isLastListener = (1 == subscriptions_.size());
+        hasUnsubscribed = true;
+    }
+    else {
+        listenerIterator = pendingSubscriptions_.find(subscription);
+        if (pendingSubscriptions_.end() != listenerIterator) {
+            listener = listenerIterator->second;
+            pendingSubscriptions_.erase(listenerIterator);
+            isLastListener = (0 == subscriptions_.size());
+            hasUnsubscribed = true;
+        }
+    }
+    subscriptionMutex_.unlock();
 
-	if (hasUnsubscribed) {
-		onListenerRemoved(listener->second);
-		if (isLastListener) {
-			onLastListenerRemoved(listener->second);
-		}
-	}
+    if (hasUnsubscribed) {
+        onListenerRemoved(listener);
+        if (isLastListener) {
+            onLastListenerRemoved(listener);
+        }
+    }
 }
 
 template<typename ... _Arguments>
 void Event<_Arguments...>::notifyListeners(const _Arguments&... eventArguments) {
-	subscriptionMutex_.lock();
-	notificationMutex_.lock();
-	for (auto iterator = pendingUnsubscriptions_.begin();
-		 iterator != pendingUnsubscriptions_.end();
-		 iterator++) {
-		subscriptions_.erase(*iterator);
-	}
-	pendingUnsubscriptions_.clear();
+    subscriptionMutex_.lock();
+    notificationMutex_.lock();
+    for (auto iterator = pendingUnsubscriptions_.begin();
+         iterator != pendingUnsubscriptions_.end();
+         iterator++) {
+        subscriptions_.erase(*iterator);
+    }
+    pendingUnsubscriptions_.clear();
 
-	for (auto iterator = pendingSubscriptions_.begin();
-		 iterator != pendingSubscriptions_.end();
-		 iterator++) {
-		subscriptions_.insert(*iterator);
-	}
-	pendingSubscriptions_.clear();
+    for (auto iterator = pendingSubscriptions_.begin();
+         iterator != pendingSubscriptions_.end();
+         iterator++) {
+        subscriptions_.insert(*iterator);
+    }
+    pendingSubscriptions_.clear();
 
-	subscriptionMutex_.unlock();
-	for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
+    subscriptionMutex_.unlock();
+    for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
         iterator->second(eventArguments...);
+    }
+
+    notificationMutex_.unlock();
+}
+
+template<typename ... _Arguments>
+void Event<_Arguments...>::notifySpecificListener(const Subscription subscription, const _Arguments&... eventArguments) {
+	subscriptionMutex_.lock();
+    notificationMutex_.lock();
+    for (auto iterator = pendingUnsubscriptions_.begin();
+         iterator != pendingUnsubscriptions_.end();
+         iterator++) {
+        subscriptions_.erase(*iterator);
+    }
+    pendingUnsubscriptions_.clear();
+
+    for (auto iterator = pendingSubscriptions_.begin();
+         iterator != pendingSubscriptions_.end();
+         iterator++) {
+
+        subscriptions_.insert(*iterator);
+    }
+    pendingSubscriptions_.clear();
+
+
+    subscriptionMutex_.unlock();
+    for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
+        if (subscription == iterator->first) {
+            iterator->second(eventArguments...);
+        }
     }
 
     notificationMutex_.unlock();

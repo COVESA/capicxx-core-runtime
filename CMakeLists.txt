@@ -10,7 +10,7 @@ PROJECT(libcommonapi)
 # version of CommonAPI
 SET( LIBCOMMONAPI_MAJOR_VERSION 3 )
 SET( LIBCOMMONAPI_MINOR_VERSION 1 )
-SET( LIBCOMMONAPI_PATCH_VERSION 2 )
+SET( LIBCOMMONAPI_PATCH_VERSION 3 )
 
 message(STATUS "Project name: ${PROJECT_NAME}")
 
@@ -64,7 +64,7 @@ set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation director
 foreach(p LIB INCLUDE CMAKE)
   set(var INSTALL_${p}_DIR)
   if(NOT IS_ABSOLUTE "${${var}}")
-    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+    set(ABSOLUTE_${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
   endif()
 endforeach()
 
@@ -143,7 +143,7 @@ export(TARGETS CommonAPI
 export(PACKAGE CommonAPI)
 
 # Create the CommonAPIConfig.cmake and CommonAPIConfigVersion files ...
-file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
+file(RELATIVE_PATH REL_INCLUDE_DIR "${ABSOLUTE_INSTALL_CMAKE_DIR}" "${ABSOLUTE_INSTALL_INCLUDE_DIR}")
 
 # ... for the build tree
 set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include" )

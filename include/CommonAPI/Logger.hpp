@@ -120,20 +120,25 @@ public:
 	};
 
 	COMMONAPI_EXPORT Logger();
+	COMMONAPI_EXPORT ~Logger();
 
 	template<typename... _LogEntries>
 	COMMONAPI_EXPORT static void log(Level _level, _LogEntries... _entries) {
-		std::stringstream buffer;
-		log_intern(buffer, _entries...);
-		Logger::get()->doLog(_level, buffer.str());
+#if defined(USE_CONSOLE) || defined(USE_FILE) || defined(USE_DLT)
+	    if (_level < maximumLogLevel_) {
+            std::stringstream buffer;
+            log_intern(buffer, _entries...);
+            Logger::get()->doLog(_level, buffer.str());
+	    }
+#endif
 	}
 
-	COMMONAPI_EXPORT static void init(bool, const std::string &, bool = false, const std::string & = "");
+	COMMONAPI_EXPORT static void init(bool, const std::string &, bool, const std::string &);
 
 private:
-	COMMONAPI_EXPORT static inline std::shared_ptr<Logger> get() {
-		static std::shared_ptr<Logger> theLogger = std::make_shared<Logger>();
-		return theLogger;
+	COMMONAPI_EXPORT static inline Logger *get() {
+		static Logger theLogger;
+		return &theLogger;
 	}
 
 	COMMONAPI_EXPORT static void log_intern(std::stringstream &_buffer) {

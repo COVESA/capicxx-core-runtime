@@ -11,6 +11,7 @@
 #endif
 
 #include "Address.hpp"
+#include "Attribute.hpp"
 #include "AttributeExtension.hpp"
 #include "ByteBuffer.hpp"
 #include "MainLoopContext.hpp"

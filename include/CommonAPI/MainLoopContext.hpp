@@ -111,6 +111,15 @@ struct Watch {
      */
     virtual const pollfd& getAssociatedFileDescriptor() = 0;
 
+#ifdef WIN32
+	/**
+	* \brief Returns the event bound to the file descriptor that is managed by this watch.
+	*
+	* @return The event bound to the associated file descriptor.
+	*/
+	virtual const HANDLE& getAssociatedEvent() = 0;
+#endif
+
     /**
      * \brief Returns a vector of all dispatch sources that depend on the watched file descriptor.
      *

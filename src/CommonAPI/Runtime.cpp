@@ -153,6 +153,11 @@ Runtime::readConfiguration() {
     if (!reader.load(config))
         return false;
 
+    std::string itsConsole("true");
+    std::string itsFile;
+    std::string itsDlt("false");
+    std::string itsLevel("info");
+
     std::shared_ptr<IniFileReader::Section> section
         = reader.getSection("logging");
     if (section) {
@@ -160,12 +165,12 @@ Runtime::readConfiguration() {
         std::string itsFile = section->getValue("file");
         std::string itsDlt = section->getValue("dlt");
         std::string itsLevel = section->getValue("level");
-
-        Logger::init((itsConsole == "true"),
-                     itsFile,
-                     (itsDlt == "true"),
-                     itsLevel);
     }
+
+    Logger::init((itsConsole == "true"),
+                 itsFile,
+                 (itsDlt == "true"),
+                 itsLevel);
 
     section    = reader.getSection("default");
     if (section) {
@@ -298,7 +303,11 @@ Runtime::getLibrary(
     // name.
     library = getProperty("LibraryBase");
     if (library != "") {
+#ifdef WIN32
+		library = library + "-" + defaultBinding_;
+#else
         library = "lib" + library + "-" + defaultBinding_;
+#endif
     } else {
         library = "lib" + _domain + "__" + _interface + "__" + _instance;
         std::replace(library.begin(), library.end(), '.', '_');

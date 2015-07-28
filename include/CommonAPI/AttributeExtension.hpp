@@ -4,7 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #if !defined (COMMONAPI_INTERNAL_COMPILATION)
-#error "Only <CommonAPI/CommonAPI.h> can be included directly, this file may disappear or change contents."
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
 #endif
 
 #ifndef COMMON_API_DBUS_ATTRIBUTE_EXTENSION_HPP_
@@ -16,10 +16,6 @@
 
 #include <CommonAPI/Event.hpp>
 #include <CommonAPI/Types.hpp>
-
-#ifdef WIN32
-#include "Attribute.hpp"
-#endif
 
 namespace CommonAPI {
 
@@ -46,17 +42,6 @@ std::shared_ptr<
 	typename DefaultAttributeProxyHelper<_ProxyClass, _AttributeExtension>::class_t
 > createProxyWithDefaultAttributeExtension(
 	const std::string &_domain, const std::string &_instance);
-
-#ifdef WIN32
-template<typename _AttributeType>
-class WINDummyAttributeExtension : public CommonAPI::AttributeExtension<_AttributeType> {
-    typedef AttributeExtension<_AttributeType> __baseClass_t;
-    WINDummyAttribute dummyAttribute;
-public:
-    WINDummyAttributeExtension() {};
-    ~WINDummyAttributeExtension() {}
-};
-#endif
 
 } // namespace CommonAPI
 
