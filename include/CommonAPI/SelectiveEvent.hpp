@@ -14,11 +14,11 @@
 
 namespace CommonAPI {
 
-template<typename ... _Arguments>
-class SelectiveEvent: public Event<_Arguments...> {
+template<typename ... Arguments_>
+class SelectiveEvent: public Event<Arguments_...> {
 public:
-    typedef typename Event<_Arguments...>::Listener Listener;
-    typedef typename Event<_Arguments...>::Subscription Subscription;
+    typedef typename Event<Arguments_...>::Listener Listener;
+    typedef typename Event<Arguments_...>::Subscription Subscription;
 
     virtual ~SelectiveEvent() {}
 };

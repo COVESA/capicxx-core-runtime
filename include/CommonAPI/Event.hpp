@@ -16,6 +16,8 @@
 #include <set>
 #include <tuple>
 
+#include <CommonAPI/Types.hpp>
+
 namespace CommonAPI {
 
 /**
@@ -23,14 +25,16 @@ namespace CommonAPI {
  *
  * Class representing an event
  */
-template<typename... _Arguments>
+template<typename... Arguments_>
 class Event {
 public:
-    typedef std::tuple<_Arguments...> ArgumentsTuple;
-    typedef std::function<void(const _Arguments&...)> Listener;
+    typedef std::tuple<Arguments_...> ArgumentsTuple;
+    typedef std::function<void(const Arguments_&...)> Listener;
     typedef uint32_t Subscription;
     typedef std::set<Subscription> SubscriptionsSet;
-    typedef std::map<Subscription, Listener> ListenersMap;
+    typedef std::function<void(const CallStatus)> ErrorListener;
+    typedef std::tuple<Listener, ErrorListener> Listeners;
+    typedef std::map<Subscription, Listeners> ListenersMap;
 
     /**
      * \brief Constructor
@@ -50,7 +54,7 @@ public:
      * @param listener A listener to be added
      * @return key of the new subscription
      */
-    Subscription subscribe(Listener listener);
+    Subscription subscribe(Listener listener, ErrorListener errorListener = nullptr);
 
     /**
      * \brief Remove a listener from this event
@@ -65,14 +69,24 @@ public:
     virtual ~Event() {}
 
 protected:
-    void notifyListeners(const _Arguments&... eventArguments);
-    void notifySpecificListener(const Subscription subscription, const _Arguments&... eventArguments);
+    void notifyListeners(const Arguments_&... _eventArguments);
+    void notifySpecificListener(const Subscription _subscription, const Arguments_&... _eventArguments);
+    void notifyError(const CallStatus status);
 
-    virtual void onFirstListenerAdded(const Listener& listener) {}
-    virtual void onListenerAdded(const Listener& listener, const Subscription subscription) {}
+    virtual void onFirstListenerAdded(const Listener &_listener) {
+        (void)_listener;
+    }
+    virtual void onListenerAdded(const Listener &_listener, const Subscription _subscription) {
+        (void)_listener;
+        (void)_subscription;
+    }
 
-    virtual void onListenerRemoved(const Listener& listener) {}
-    virtual void onLastListenerRemoved(const Listener& listener) {}
+    virtual void onListenerRemoved(const Listener &_listener) {
+        (void)_listener;
+    }
+    virtual void onLastListenerRemoved(const Listener &_listener) {
+        (void)_listener;
+    }
 
 private:
     ListenersMap subscriptions_;
@@ -85,16 +99,19 @@ private:
     std::mutex subscriptionMutex_;
 };
 
-template<typename ... _Arguments>
-typename Event<_Arguments...>::Subscription Event<_Arguments...>::subscribe(Listener listener) {
+template<typename ... Arguments_>
+typename Event<Arguments_...>::Subscription Event<Arguments_...>::subscribe(Listener listener, ErrorListener errorListener) {
     Subscription subscription;
     bool isFirstListener;
+    Listeners listeners;
 
     subscriptionMutex_.lock();
     subscription = nextSubscription_++;
-    // TODO?: check for key/subscription overrun
-    listener = pendingSubscriptions_[subscription] = std::move(listener);
-    isFirstListener = (0 == subscriptions_.size());
+    isFirstListener = (0 == pendingSubscriptions_.size()) && (pendingUnsubscriptions_.size() == subscriptions_.size());
+    listener = std::move(listener);
+    errorListener = std::move(errorListener);
+    listeners = std::make_tuple(listener, errorListener);
+    pendingSubscriptions_[subscription] = std::move(listeners);
     subscriptionMutex_.unlock();
 
     if (isFirstListener)
@@ -104,30 +121,35 @@ typename Event<_Arguments...>::Subscription Event<_Arguments...>::subscribe(List
     return subscription;
 }
 
-template<typename ... _Arguments>
-void Event<_Arguments...>::unsubscribe(Subscription subscription) {
+template<typename ... Arguments_>
+void Event<Arguments_...>::unsubscribe(Subscription subscription) {
     bool isLastListener(false);
     bool hasUnsubscribed(false);
     Listener listener;
 
     subscriptionMutex_.lock();
     auto listenerIterator = subscriptions_.find(subscription);
-    if (subscriptions_.end() != listenerIterator
-            && pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
-        listener = listenerIterator->second;
-        pendingUnsubscriptions_.insert(subscription);
-        isLastListener = (1 == subscriptions_.size());
-        hasUnsubscribed = true;
+    if (subscriptions_.end() != listenerIterator) {
+        if (pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
+            if (0 == pendingSubscriptions_.erase(subscription)) {
+                pendingUnsubscriptions_.insert(subscription);
+                listener = std::get<0>(listenerIterator->second);
+                hasUnsubscribed = true;
+            }
+            isLastListener = (pendingUnsubscriptions_.size() == subscriptions_.size());
+        }
     }
     else {
         listenerIterator = pendingSubscriptions_.find(subscription);
         if (pendingSubscriptions_.end() != listenerIterator) {
-            listener = listenerIterator->second;
-            pendingSubscriptions_.erase(listenerIterator);
-            isLastListener = (0 == subscriptions_.size());
-            hasUnsubscribed = true;
+            listener = std::get<0>(listenerIterator->second);
+            if (0 != pendingSubscriptions_.erase(subscription)) {
+                isLastListener = (pendingUnsubscriptions_.size() == subscriptions_.size());
+                hasUnsubscribed = true;
+            }
         }
     }
+    isLastListener = isLastListener && (0 == pendingSubscriptions_.size());
     subscriptionMutex_.unlock();
 
     if (hasUnsubscribed) {
@@ -138,8 +160,8 @@ void Event<_Arguments...>::unsubscribe(Subscription subscription) {
     }
 }
 
-template<typename ... _Arguments>
-void Event<_Arguments...>::notifyListeners(const _Arguments&... eventArguments) {
+template<typename ... Arguments_>
+void Event<Arguments_...>::notifyListeners(const Arguments_&... eventArguments) {
     subscriptionMutex_.lock();
     notificationMutex_.lock();
     for (auto iterator = pendingUnsubscriptions_.begin();
@@ -158,15 +180,15 @@ void Event<_Arguments...>::notifyListeners(const _Arguments&... eventArguments) 
 
     subscriptionMutex_.unlock();
     for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
-        iterator->second(eventArguments...);
+        (std::get<0>(iterator->second))(eventArguments...);
     }
 
     notificationMutex_.unlock();
 }
 
-template<typename ... _Arguments>
-void Event<_Arguments...>::notifySpecificListener(const Subscription subscription, const _Arguments&... eventArguments) {
-	subscriptionMutex_.lock();
+template<typename ... Arguments_>
+void Event<Arguments_...>::notifySpecificListener(const Subscription subscription, const Arguments_&... eventArguments) {
+    subscriptionMutex_.lock();
     notificationMutex_.lock();
     for (auto iterator = pendingUnsubscriptions_.begin();
          iterator != pendingUnsubscriptions_.end();
@@ -187,7 +209,37 @@ void Event<_Arguments...>::notifySpecificListener(const Subscription subscriptio
     subscriptionMutex_.unlock();
     for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
         if (subscription == iterator->first) {
-            iterator->second(eventArguments...);
+            (std::get<0>(iterator->second))(eventArguments...);
+        }
+    }
+
+    notificationMutex_.unlock();
+}
+
+template<typename ... Arguments_>
+void Event<Arguments_...>::notifyError(const CallStatus status) {
+
+    subscriptionMutex_.lock();
+    notificationMutex_.lock();
+    for (auto iterator = pendingUnsubscriptions_.begin();
+         iterator != pendingUnsubscriptions_.end();
+         iterator++) {
+        subscriptions_.erase(*iterator);
+    }
+    pendingUnsubscriptions_.clear();
+
+    for (auto iterator = pendingSubscriptions_.begin();
+         iterator != pendingSubscriptions_.end();
+         iterator++) {
+        subscriptions_.insert(*iterator);
+    }
+    pendingSubscriptions_.clear();
+
+    subscriptionMutex_.unlock();
+    for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
+        ErrorListener listener = std::get<1>(iterator->second);
+        if (listener) {
+            listener(status);
         }
     }
 

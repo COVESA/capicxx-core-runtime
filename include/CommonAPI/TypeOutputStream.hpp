@@ -18,192 +18,207 @@
 
 namespace CommonAPI {
 
-template<class _Derived>
+template<class Derived_>
 class TypeOutputStream {
 public:
-	inline TypeOutputStream &writeType(const bool &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const int8_t &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const int16_t &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const int32_t &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const int64_t &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const uint8_t &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const uint16_t &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const uint32_t &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const uint64_t &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const float &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const double &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const std::string &_value) {
-		return get()->writeType(_value);
-	}
-
-	inline TypeOutputStream &writeType(const Version &_value) {
-		return get()->writeType(_value);
-	}
-
-	template<typename _Type>
-	TypeOutputStream &writeType(const Enumeration<_Type> &_value) {
-		_Type tmpValue;
-		return get()->writeType(tmpValue);
-	}
-
-	template<typename... _Types>
-	TypeOutputStream &writeType(const Struct<_Types...> &_value) {
-		return get()->writeType(_value);
-	}
-
-    template<class _PolymorphicStruct>
-    TypeOutputStream &writeType(const std::shared_ptr<_PolymorphicStruct> &_value) {
-        return get()->writeType(_value);
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const bool &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
     }
 
-	template<typename... _Types>
-	TypeOutputStream &writeType(const Variant<_Types...> &_value) {
-		return get()->writeType(_value);
-	}
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const int8_t &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
 
-	template<typename _ElementType>
-	TypeOutputStream &writeType(const std::vector<_ElementType> &_value) {
-		return get()->writeType(_value);
-	}
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const int16_t &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
 
-	template<typename _KeyType, typename _ValueType, typename _HasherType>
-	TypeOutputStream &writeType(const std::unordered_map<_KeyType, _ValueType, _HasherType> &_value) {
-		return get()->writeType(_value);
-	}
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const int32_t &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const int64_t &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const uint8_t &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const uint16_t &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const uint32_t &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const uint64_t &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const float &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const double &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const std::string &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_>
+    inline TypeOutputStream &writeType(const Version &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_, typename Type_>
+    TypeOutputStream &writeType(const Enumeration<Type_> &_value, const Deployment_ *_depl = nullptr) {
+        (void)_value;
+        Type_ tmpValue;
+        return get()->writeType(tmpValue, _depl);
+    }
+
+    template<class Deployment_, typename... Types_>
+    TypeOutputStream &writeType(const Struct<Types_...> &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_, class PolymorphicStruct_>
+    TypeOutputStream &writeType(const std::shared_ptr<PolymorphicStruct_> &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_, typename... Types_>
+    TypeOutputStream &writeType(const Variant<Types_...> &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_, typename ElementType_>
+    TypeOutputStream &writeType(const std::vector<ElementType_> &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
+
+    template<class Deployment_, typename KeyType_, typename ValueType_, typename HasherType_>
+    TypeOutputStream &writeType(const std::unordered_map<KeyType_, ValueType_, HasherType_> &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeType(_value, _depl);
+    }
 
 private:
-	inline _Derived *get() {
-		return static_cast<_Derived *>(this);
-	}
+    inline Derived_ *get() {
+        return static_cast<Derived_ *>(this);
+    }
 };
 
-template<class _Derived>
-inline TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output, const bool &_value) {
-    return _output.writeType(_value);
+
+template<class Derived_>
+inline TypeOutputStream<Derived_> &operator<<(TypeOutputStream<Derived_> &_output, const bool &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const int8_t &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const int8_t &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const int16_t &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const int16_t &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const int32_t &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const int32_t &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const int64_t &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const int64_t &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const uint8_t &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const uint8_t &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const uint16_t &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const uint16_t &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const uint32_t &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const uint32_t &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const uint64_t &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const uint64_t &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const float &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const float &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const double &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const double &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const std::string &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const std::string &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived, typename _Type, typename _TypeDepl>
-inline TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output, const Deployable<_Type, _TypeDepl> &_value) {
-	return _output.writeType(_value.getValue());
+template<class Derived_, typename Type_, typename TypeDepl_>
+inline TypeOutputStream<Derived_> &operator<<(TypeOutputStream<Derived_> &_output, const Deployable<Type_, TypeDepl_> &_value) {
+    return _output.template writeType<TypeDepl_>(_value.getValue(), _value.getDepl());
 }
 
-template<class _Derived>
-inline TypeOutputStream<_Derived>& operator<<(TypeOutputStream<_Derived> &_output, const Version &_value) {
-    return _output.writeType(_value);
+template<class Derived_>
+inline TypeOutputStream<Derived_>& operator<<(TypeOutputStream<Derived_> &_output, const Version &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived, typename... _Types>
-TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output, const Struct<_Types...> &_value) {
-	return _output.writeType(_value);
+template<class Derived_, typename... Types_>
+TypeOutputStream<Derived_> &operator<<(TypeOutputStream<Derived_> &_output, const Struct<Types_...> &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived, class _PolymorphicStruct>
-TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output, const std::shared_ptr<_PolymorphicStruct> &_value) {
-    return _output.writeType(_value);
+template<class Derived_, class PolymorphicStruct_>
+TypeOutputStream<Derived_> &operator<<(TypeOutputStream<Derived_> &_output, const std::shared_ptr<PolymorphicStruct_> &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived, typename... _Types>
-TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output, const Variant<_Types...> &_value) {
-	return _output.writeType(_value);
+template<class Derived_, typename... Types_>
+TypeOutputStream<Derived_> &operator<<(TypeOutputStream<Derived_> &_output, const Variant<Types_...> &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived, typename _ElementType>
-TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output, const std::vector<_ElementType> &_value) {
-	return _output.writeType(_value);
+template<class Derived_, typename ElementType_>
+TypeOutputStream<Derived_> &operator<<(TypeOutputStream<Derived_> &_output, const std::vector<ElementType_> &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
-template<class _Derived, typename _KeyType, typename _ValueType, typename _HasherType>
-TypeOutputStream<_Derived> &operator<<(TypeOutputStream<_Derived> &_output,
-                         	 	 	   const std::unordered_map<_KeyType, _ValueType, _HasherType> &_value) {
-	return _output.writeType(_value);
+template<class Derived_, typename KeyType_, typename ValueType_, typename HasherType_>
+TypeOutputStream<Derived_> &operator<<(TypeOutputStream<Derived_> &_output,
+                                          const std::unordered_map<KeyType_, ValueType_, HasherType_> &_value) {
+    return _output.template writeType<EmptyDeployment>(_value);
 }
 
 } // namespace CommonAPI

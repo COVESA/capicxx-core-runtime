@@ -17,21 +17,21 @@ namespace CommonAPI {
 // defined like this:
 //
 // struct BindingUInt16Deployment : CommonAPI::Deployment<> {
-// 		// Binding-specific bool deployment parameters
+//         // Binding-specific bool deployment parameters
 // };
 //
 // struct BindingStringDeployment : CommonAPI::Deployment<> {
-// 		// Binding-specific String deployment parameters
+//         // Binding-specific String deployment parameters
 // };
 //
-// template<typename... _Types>
+// template<typename... Types_>
 // struct BindingStructDeployment
-// 			: CommonAPI::Deployment<_Types...> {
-// 		BindingStructDeployment(<SPECIFIC PARAMETERS>, _Types... t)
-// 			: CommonAPI::Deployment<_Types...>(t),
-// 			  <SPECIFIC INITIALIZERS> {};
+//             : CommonAPI::Deployment<Types_...> {
+//         BindingStructDeployment(<SPECIFIC PARAMETERS>, Types_... t)
+//             : CommonAPI::Deployment<Types_...>(t),
+//               <SPECIFIC INITIALIZERS> {};
 //
-// 		// Binding-specific struct deployment parameters
+//         // Binding-specific struct deployment parameters
 // };
 //
 // The generated code needs to use these definitions to
@@ -46,28 +46,28 @@ namespace CommonAPI {
 
 struct EmptyDeployment {};
 
-template<typename _ElementDepl>
+template<typename ElementDepl_>
 struct ArrayDeployment {
-	ArrayDeployment(_ElementDepl *_elementDepl)
-		: elementDepl_(_elementDepl) {}
+    ArrayDeployment(ElementDepl_ *_elementDepl)
+        : elementDepl_(_elementDepl) {}
 
-	_ElementDepl *elementDepl_;
+    ElementDepl_ *elementDepl_;
 };
 
-template<typename _KeyDepl, typename _ValueDepl>
+template<typename KeyDepl_, typename ValueDepl_>
 struct MapDeployment {
-	MapDeployment(_KeyDepl *_key, _ValueDepl *_value)
-		: key_(_key), value_(_value) {}
+    MapDeployment(KeyDepl_ *_key, ValueDepl_ *_value)
+        : key_(_key), value_(_value) {}
 
-	const _KeyDepl *key_;
-	const _ValueDepl *value_;
+    const KeyDepl_ *key_;
+    const ValueDepl_ *value_;
 };
 
 // The following shall be used as a base for structure/variant deployments.
-template<typename... _Types>
+template<typename... Types_>
 struct Deployment {
-	Deployment(_Types*... _values) : values_(_values...) {}
-	std::tuple<_Types*...> values_;
+    Deployment(Types_*... _values) : values_(_values...) {}
+    std::tuple<Types_*...> values_;
 };
 
 } // namespace CommonAPI

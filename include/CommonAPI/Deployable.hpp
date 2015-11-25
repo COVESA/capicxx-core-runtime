@@ -15,43 +15,43 @@ namespace CommonAPI {
 struct DeployableBase {
 };
 
-template<typename _Type, typename _TypeDepl>
+template<typename Type_, typename TypeDepl_>
 struct Deployable : DeployableBase
 {
-	Deployable(const _TypeDepl *_depl = nullptr)
-		: depl_(const_cast<_TypeDepl *>(_depl)) {
-	}
+    Deployable(const TypeDepl_ *_depl = nullptr)
+        : depl_(const_cast<TypeDepl_ *>(_depl)) {
+    }
 
-	Deployable(const _Type &_value, const _TypeDepl *_depl)
-		: value_(_value),
-		  depl_(const_cast<_TypeDepl *>(_depl)) {
+    Deployable(const Type_ &_value, const TypeDepl_ *_depl)
+        : value_(_value),
+          depl_(const_cast<TypeDepl_ *>(_depl)) {
     };
 
-    Deployable<_Type, _TypeDepl>& operator=(const Deployable<_Type, _TypeDepl> &_source) {
+    Deployable<Type_, TypeDepl_>& operator=(const Deployable<Type_, TypeDepl_> &_source) {
         value_ = _source.value_;
         depl_ = _source.depl_;
         return (*this);
     }
 
-    operator _Type() const {
-    	return value_;
-    }
-
-    const _Type &getValue() const {
-    	return value_;
-    }
-
-	_Type &getValue() {
+    operator Type_() const {
         return value_;
     }
 
-	const _TypeDepl *getDepl() const {
-		return depl_;
-	}
+    const Type_ &getValue() const {
+        return value_;
+    }
+
+    Type_ &getValue() {
+        return value_;
+    }
+
+    const TypeDepl_ *getDepl() const {
+        return depl_;
+    }
 
  protected:
-	_Type value_;
-	_TypeDepl *depl_;
+    Type_ value_;
+    TypeDepl_ *depl_;
 };
 
 } // namespace CommonAPI

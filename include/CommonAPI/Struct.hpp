@@ -17,66 +17,67 @@ namespace CommonAPI {
 
 typedef uint32_t Serial;
 
-template<class _Derived>
+template<class Derived_>
 class InputStream;
 
-template<class _Derived>
+template<class Derived_>
 class OutputStream;
 
-template<class _Derived>
+template<class Derived_>
 class TypeOutputStream;
 
 template<int, class, class, class>
 struct StructReader;
 
 template<
-	int _Index, class _Input,
-    template<class...> class _V, class... _Values,
-    template<class...> class _D, class... _Depls>
-struct StructReader<_Index, _Input, _V<_Values...>, _D<_Depls...>> {
-	void operator()(InputStream<_Input> &_input,
-					_V<_Values...> &_values,
-					const _D<_Depls...> *_depls) {
-		StructReader<_Index-1, _Input, _V<_Values...>, _D<_Depls...>>{}(_input, _values, _depls);
-		_input.template readValue<>(std::get<_Index>(_values.values_),
-									(_depls ? std::get<_Index>(_depls->values_) : nullptr));
-	}
+    int Index_, class Input_,
+    template<class...> class V_, class... Values_,
+    template<class...> class D_, class... Depls_>
+struct StructReader<Index_, Input_, V_<Values_...>, D_<Depls_...>> {
+    void operator()(InputStream<Input_> &_input,
+                    V_<Values_...> &_values,
+                    const D_<Depls_...> *_depls) {
+        StructReader<Index_-1, Input_, V_<Values_...>, D_<Depls_...>>{}(_input, _values, _depls);
+        _input.template readValue<>(std::get<Index_>(_values.values_),
+                                    (_depls ? std::get<Index_>(_depls->values_) : nullptr));
+    }
 };
 
 template<
-	int _Index, class _Input,
-	template<class...> class _V, class... _Values,
-	class _D>
-struct StructReader<_Index, _Input, _V<_Values...>, _D> {
-	void operator()(InputStream<_Input> &_input,
-					_V<_Values...> &_values,
-					const _D *_depls) {
-		StructReader<_Index-1, _Input, _V<_Values...>, _D>{}(_input, _values, _depls);
-		_input.template readValue<_D>(std::get<_Index>(_values.values_));
-	}
+    int Index_, class Input_,
+    template<class...> class V_, class... Values_,
+    class D_>
+struct StructReader<Index_, Input_, V_<Values_...>, D_> {
+    void operator()(InputStream<Input_> &_input,
+                    V_<Values_...> &_values,
+                    const D_ *_depls) {
+        StructReader<Index_-1, Input_, V_<Values_...>, D_>{}(_input, _values, _depls);
+        _input.template readValue<D_>(std::get<Index_>(_values.values_));
+    }
 };
 
-template<class _Input,
-	template<class...> class _V, class... _Values,
-	template<class...> class _D, class... _Depls>
-struct StructReader<0, _Input, _V<_Values...>, _D<_Depls...>> {
-	void operator()(InputStream<_Input> &_input,
-					_V<_Values...> &_values,
-					const _D<_Depls...> *_depls) {
-		_input.template readValue<>(std::get<0>(_values.values_),
-									(_depls ? std::get<0>(_depls->values_) : nullptr));
-	}
+template<class Input_,
+    template<class...> class V_, class... Values_,
+    template<class...> class D_, class... Depls_>
+struct StructReader<0, Input_, V_<Values_...>, D_<Depls_...>> {
+    void operator()(InputStream<Input_> &_input,
+                    V_<Values_...> &_values,
+                    const D_<Depls_...> *_depls) {
+        _input.template readValue<>(std::get<0>(_values.values_),
+                                    (_depls ? std::get<0>(_depls->values_) : nullptr));
+    }
 };
 
-template<class _Input,
-	template<class...> class _V, class... _Values,
-	class _D>
-struct StructReader<0, _Input, _V<_Values...>, _D> {
-	void operator()(InputStream<_Input> &_input,
-					_V<_Values...> &_values,
-					const _D *_depls) {
-		_input.template readValue<_D>(std::get<0>(_values.values_));
-	}
+template<class Input_,
+    template<class...> class V_, class... Values_,
+    class D_>
+struct StructReader<0, Input_, V_<Values_...>, D_> {
+    void operator()(InputStream<Input_> &_input,
+                    V_<Values_...> &_values,
+                    const D_ *_depls) {
+        (void)_depls;
+        _input.template readValue<D_>(std::get<0>(_values.values_));
+    }
 };
 
 
@@ -84,97 +85,136 @@ template< int, class, class, class >
 struct StructWriter;
 
 template<
-	int _Index, class _Output,
-    template<class ...> class _V, class... _Values,
-    template <class...> class _D, class... _Depls>
-struct StructWriter<_Index, _Output, _V<_Values...>, _D<_Depls...>> {
-	void operator()(OutputStream<_Output> &_output,
-					const _V<_Values...> &_values,
-					const _D<_Depls...> *_depls) {
-		StructWriter<_Index-1, _Output, _V<_Values...>, _D<_Depls...>>{}(_output, _values, _depls);
-		_output.template writeValue<>(std::get<_Index>(_values.values_),
-									  (_depls ? std::get<_Index>(_depls->values_) : nullptr));
-	}
+    int Index_, class Output_,
+    template<class ...> class V_, class... Values_,
+    template <class...> class D_, class... Depls_>
+struct StructWriter<Index_, Output_, V_<Values_...>, D_<Depls_...>> {
+    void operator()(OutputStream<Output_> &_output,
+                    const V_<Values_...> &_values,
+                    const D_<Depls_...> *_depls) {
+        StructWriter<Index_-1, Output_, V_<Values_...>, D_<Depls_...>>{}(_output, _values, _depls);
+        _output.template writeValue<>(std::get<Index_>(_values.values_),
+                                      (_depls ? std::get<Index_>(_depls->values_) : nullptr));
+    }
 };
 
 template<
-	int _Index, class _Output,
-	template<class...> class _V, class... _Values,
-	class _D>
-struct StructWriter<_Index, _Output, _V<_Values...>, _D> {
-	void operator()(OutputStream<_Output> &_output,
-					const _V<_Values...> &_values,
-					const _D *_depls) {
-		StructWriter<_Index-1, _Output, _V<_Values...>, _D>{}(_output, _values, _depls);
-		_output.template writeValue<_D>(std::get<_Index>(_values.values_));
-	}
+    int Index_, class Output_,
+    template<class...> class V_, class... Values_,
+    class D_>
+struct StructWriter<Index_, Output_, V_<Values_...>, D_> {
+    void operator()(OutputStream<Output_> &_output,
+                    const V_<Values_...> &_values,
+                    const D_ *_depls) {
+        StructWriter<Index_-1, Output_, V_<Values_...>, D_>{}(_output, _values, _depls);
+        _output.template writeValue<D_>(std::get<Index_>(_values.values_));
+    }
 };
 
-template<class _Output,
-	template<class...> class _V, class... _Values,
-	template<class...> class _D, class... _Depls>
-struct StructWriter<0, _Output, _V<_Values...>, _D<_Depls...>> {
-	void operator()(OutputStream<_Output> &_output,
-					const _V<_Values...> &_values,
-					const _D<_Depls...> *_depls) {
-		_output.template writeValue<>(std::get<0>(_values.values_),
-									  (_depls ? std::get<0>(_depls->values_) : nullptr));
-	}
+template<class Output_,
+    template<class...> class V_, class... Values_,
+    template<class...> class D_, class... Depls_>
+struct StructWriter<0, Output_, V_<Values_...>, D_<Depls_...>> {
+    void operator()(OutputStream<Output_> &_output,
+                    const V_<Values_...> &_values,
+                    const D_<Depls_...> *_depls) {
+        _output.template writeValue<>(std::get<0>(_values.values_),
+                                      (_depls ? std::get<0>(_depls->values_) : nullptr));
+    }
 };
 
-template<class _Output,
-	template<class...> class _V, class... _Values,
-	class _D>
-struct StructWriter<0, _Output, _V<_Values...>, _D> {
-	void operator()(OutputStream<_Output> &_output,
-					const _V<_Values...> &_values,
-					const _D *_depls) {
-		_output.template writeValue<_D>(std::get<0>(_values.values_));
-	}
+template<class Output_,
+    template<class...> class V_, class... Values_,
+    class D_>
+struct StructWriter<0, Output_, V_<Values_...>, D_> {
+    void operator()(OutputStream<Output_> &_output,
+                    const V_<Values_...> &_values,
+                    const D_ *_depls) {
+        (void)_depls;
+        _output.template writeValue<D_>(std::get<0>(_values.values_));
+    }
 };
 
-template<int, class, class>
+template<class, int,  class, class>
 struct StructTypeWriter;
 
-template<int _Index, class _TypeOutput,
-	template<class...> class _V, class... _Values>
-struct StructTypeWriter<_Index, _TypeOutput, _V<_Values...>> {
-	void operator()(TypeOutputStream<_TypeOutput> &_output,
-					const _V<_Values...> &_values) {
-		StructTypeWriter<_Index-1, _TypeOutput, _V<_Values...>>{}(_output, _values);
+template<int Index_, class  TypeOutput_,
+        template<class...> class V_, class... Values_>
+struct StructTypeWriter<EmptyDeployment, Index_, TypeOutput_, V_<Values_...>> {
+        void operator()(TypeOutputStream<TypeOutput_> &_output,
+                        const V_<Values_...> &_values,
+                        const EmptyDeployment *_depl = nullptr) {
+                StructTypeWriter<EmptyDeployment, Index_-1, TypeOutput_, V_<Values_...>>{}(_output, _values, _depl);
 #ifdef WIN32
-		_output.writeType(std::get<_Index>(_values.values_));
+                _output.writeType(std::get<Index_>(_values.values_), _depl);
 #else
-		_output.template writeType(std::get<_Index>(_values.values_));
+                _output.template writeType(std::get<Index_>(_values.values_), _depl);
 #endif
-	}
+        }
 };
 
-template<class _TypeOutput,
-	template<class...> class _V, class... _Values>
-struct StructTypeWriter<0, _TypeOutput, _V<_Values...>> {
-	void operator()(TypeOutputStream<_TypeOutput> &_output,
-					const _V<_Values...> &_values) {
+template<class TypeOutput_,
+        template<class...> class V_, class... Values_>
+struct StructTypeWriter<EmptyDeployment, 0, TypeOutput_, V_<Values_...>> {
+        void operator()(TypeOutputStream<TypeOutput_> &_output,
+                        const V_<Values_...> &_values,
+                        const EmptyDeployment *_depl = nullptr) {
 #ifdef WIN32
-		_output.writeType(std::get<0>(_values.values_));
+                _output.writeType(std::get<0>(_values.values_), _depl);
 #else
-		_output.template writeType(std::get<0>(_values.values_));
+                _output.template writeType(std::get<0>(_values.values_), _depl);
 #endif
-	}
+        }
+};
+template<typename Deployment_, int Index_, class TypeOutput_,
+        template<class...> class V_, class... Values_>
+struct StructTypeWriter<Deployment_, Index_, TypeOutput_, V_<Values_...>> {
+        void operator()(TypeOutputStream<TypeOutput_> &_output,
+                        const V_<Values_...> &_values,
+                        const Deployment_ *_depl = nullptr) {
+                StructTypeWriter<Deployment_, Index_-1, TypeOutput_, V_<Values_...>>{}(_output, _values, _depl);
+#ifdef WIN32
+                _output.writeType(std::get<Index_>(_values.values_),
+                                  (_depl ? std::get<Index_>(_depl->values_)
+                                         : nullptr));
+#else
+                _output.template writeType(std::get<Index_>(_values.values_),
+                                           (_depl ? std::get<Index_>(_depl->values_)
+                                                  : nullptr));
+#endif
+        }
+};
+
+template<typename Deployment_, class TypeOutput_,
+        template<class...> class V_, class... Values_>
+struct StructTypeWriter<Deployment_, 0, TypeOutput_, V_<Values_...>> {
+        void operator()(TypeOutputStream<TypeOutput_> &_output,
+                        const V_<Values_...> &_values,
+                        const Deployment_ *_depl = nullptr) {
+#ifdef WIN32
+                _output.writeType(std::get<0>(_values.values_),
+                                    (_depl ? std::get<0>(_depl->values_)
+                                                  : nullptr));
+#else
+                _output.template writeType(std::get<0>(_values.values_),
+                                    (_depl ? std::get<0>(_depl->values_)
+                                                  : nullptr));
+#endif
+        }
 };
 
 // Structures are mapped to a (generated) struct which inherits from CommonAPI::Struct.
 // CommonAPI::Struct holds the structured data in a tuple. The generated class provides
 // getter- and setter-methods for the structure members.
-template<typename... _Types>
+template<typename... Types_>
 struct Struct {
-	std::tuple<_Types...> values_;
+    std::tuple<Types_...> values_;
 };
 
 // Polymorphic structs are mapped to an interface that is derived from the base class
 // PolymorphicStruct and contain their parameter in a Struct.
 struct PolymorphicStruct {
-	virtual const Serial getSerial() const = 0;
+    virtual Serial getSerial() const = 0;
 };
 
 } // namespace CommonAPI

@@ -26,20 +26,20 @@ typedef ReadonlyAttribute<Version> InterfaceVersionAttribute;
 
 class Proxy {
 public:
-	COMMONAPI_EXPORT virtual ~Proxy() {}
+    COMMONAPI_EXPORT virtual ~Proxy() {}
 
-	COMMONAPI_EXPORT const Address &getAddress() const;
+    COMMONAPI_EXPORT const Address &getAddress() const;
 
-	COMMONAPI_EXPORT virtual bool isAvailable() const = 0;
+    COMMONAPI_EXPORT virtual bool isAvailable() const = 0;
 
-	COMMONAPI_EXPORT virtual bool isAvailableBlocking() const = 0;
+    COMMONAPI_EXPORT virtual bool isAvailableBlocking() const = 0;
 
-	COMMONAPI_EXPORT virtual ProxyStatusEvent& getProxyStatusEvent() = 0;
+    COMMONAPI_EXPORT virtual ProxyStatusEvent& getProxyStatusEvent() = 0;
 
-	COMMONAPI_EXPORT virtual InterfaceVersionAttribute& getInterfaceVersionAttribute() = 0;
+    COMMONAPI_EXPORT virtual InterfaceVersionAttribute& getInterfaceVersionAttribute() = 0;
 
 protected:
-	Address address_;
+    Address address_;
 };
 
 } // namespace CommonAPI

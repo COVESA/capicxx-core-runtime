@@ -7,16 +7,16 @@
 #define COMMONAPI_EXPORT_HPP_
 
 #ifdef WIN32
-	#define COMMONAPI_EXPORT __declspec(dllexport)
+    #define COMMONAPI_EXPORT __declspec(dllexport)
 
-	#if COMMONAPI_DLL_COMPILATION
-		#define COMMONAPI_IMPORT_EXPORT __declspec(dllexport)
-	#else
-		#define COMMONAPI_IMPORT_EXPORT __declspec(dllimport)
-	#endif
+    #if COMMONAPI_DLL_COMPILATION
+        #define COMMONAPI_IMPORT_EXPORT __declspec(dllexport)
+    #else
+        #define COMMONAPI_IMPORT_EXPORT __declspec(dllimport)
+    #endif
 #else
-	#define COMMONAPI_EXPORT
-	#define COMMONAPI_IMPORT_EXPORT
+    #define COMMONAPI_EXPORT
+    #define COMMONAPI_IMPORT_EXPORT
 #endif
 
 #endif // COMMONAPI_EXPORT_HPP_

@@ -15,36 +15,36 @@ namespace CommonAPI {
 
 class Address {
 public:
-	COMMONAPI_EXPORT Address() = default;
-	COMMONAPI_EXPORT Address(const std::string &_address);
-	COMMONAPI_EXPORT Address(const std::string &_domain,
-			const std::string &_interface,
-			const std::string &_instance);
-	COMMONAPI_EXPORT Address(const Address &_source);
-	COMMONAPI_EXPORT virtual ~Address();
+    COMMONAPI_EXPORT Address() = default;
+    COMMONAPI_EXPORT Address(const std::string &_address);
+    COMMONAPI_EXPORT Address(const std::string &_domain,
+            const std::string &_interface,
+            const std::string &_instance);
+    COMMONAPI_EXPORT Address(const Address &_source);
+    COMMONAPI_EXPORT virtual ~Address();
 
-	COMMONAPI_EXPORT bool operator==(const Address &_other) const;
-	COMMONAPI_EXPORT bool operator!=(const Address &_other) const;
-	COMMONAPI_EXPORT bool operator<(const Address &_other) const;
+    COMMONAPI_EXPORT bool operator==(const Address &_other) const;
+    COMMONAPI_EXPORT bool operator!=(const Address &_other) const;
+    COMMONAPI_EXPORT bool operator<(const Address &_other) const;
 
-	COMMONAPI_EXPORT std::string getAddress() const;
-	COMMONAPI_EXPORT void setAddress(const std::string &_address);
+    COMMONAPI_EXPORT std::string getAddress() const;
+    COMMONAPI_EXPORT void setAddress(const std::string &_address);
 
-	COMMONAPI_EXPORT const std::string &getDomain() const;
-	COMMONAPI_EXPORT void setDomain(const std::string &_domain);
+    COMMONAPI_EXPORT const std::string &getDomain() const;
+    COMMONAPI_EXPORT void setDomain(const std::string &_domain);
 
-	COMMONAPI_EXPORT const std::string &getInterface() const;
-	COMMONAPI_EXPORT void setInterface(const std::string &_interface);
+    COMMONAPI_EXPORT const std::string &getInterface() const;
+    COMMONAPI_EXPORT void setInterface(const std::string &_interface);
 
-	COMMONAPI_EXPORT const std::string &getInstance() const;
-	COMMONAPI_EXPORT void setInstance(const std::string &_instance);
+    COMMONAPI_EXPORT const std::string &getInstance() const;
+    COMMONAPI_EXPORT void setInstance(const std::string &_instance);
 
 private:
-	std::string domain_;
-	std::string interface_;
-	std::string instance_;
+    std::string domain_;
+    std::string interface_;
+    std::string instance_;
 
-	friend COMMONAPI_EXPORT std::ostream &operator<<(std::ostream &_out, const Address &_address);
+    friend COMMONAPI_EXPORT std::ostream &operator<<(std::ostream &_out, const Address &_address);
 };
 
 } // namespace CommonAPI

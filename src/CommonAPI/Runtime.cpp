@@ -161,10 +161,10 @@ Runtime::readConfiguration() {
     std::shared_ptr<IniFileReader::Section> section
         = reader.getSection("logging");
     if (section) {
-        std::string itsConsole = section->getValue("console");
-        std::string itsFile = section->getValue("file");
-        std::string itsDlt = section->getValue("dlt");
-        std::string itsLevel = section->getValue("level");
+        itsConsole = section->getValue("console");
+        itsFile = section->getValue("file");
+        itsDlt = section->getValue("dlt");
+        itsLevel = section->getValue("level");
     }
 
     Logger::init((itsConsole == "true"),
@@ -208,13 +208,13 @@ Runtime::createProxy(
         const ConnectionId_t &_connectionId) {
 
     // Check whether we already know how to create such proxies...
-    std::shared_ptr<Proxy> proxy = createProxyHelper(_domain, _interface, _instance, _connectionId);
+    std::shared_ptr<Proxy> proxy = createProxyHelper(_domain, _interface, _instance, _connectionId, false);
     if (!proxy) {
         // ...it seems do not, lets try to load a library that does...
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         std::string library = getLibrary(_domain, _interface, _instance, true);
         if (loadLibrary(library)) {
-            proxy = createProxyHelper(_domain, _interface, _instance, _connectionId);
+            proxy = createProxyHelper(_domain, _interface, _instance, _connectionId, true);
         }
     }
     return proxy;
@@ -226,13 +226,13 @@ Runtime::createProxy(
         std::shared_ptr<MainLoopContext> _context) {
 
     // Check whether we already know how to create such proxies...
-    std::shared_ptr<Proxy> proxy = createProxyHelper(_domain, _interface, _instance, _context);
+    std::shared_ptr<Proxy> proxy = createProxyHelper(_domain, _interface, _instance, _context, false);
     if (!proxy) {
         // ...it seems do not, lets try to load a library that does...
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         std::string library = getLibrary(_domain, _interface, _instance, true);
         if (loadLibrary(library)) {
-            proxy = createProxyHelper(_domain, _interface, _instance, _context);
+            proxy = createProxyHelper(_domain, _interface, _instance, _context, true);
         }
     }
     return proxy;
@@ -243,12 +243,12 @@ bool
 Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
                         std::shared_ptr<StubBase> _stub, const ConnectionId_t &_connectionId) {
 
-    bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId);
+    bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId, false);
     if (!isRegistered) {
         std::string library = getLibrary(_domain, _interface, _instance, false);
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         if (loadLibrary(library)) {
-            isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId);
+            isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId, true);
         }
     }
     return isRegistered;
@@ -258,12 +258,12 @@ bool
 Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
                         std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
 
-    bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context);
+    bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context, false);
     if (!isRegistered) {
         std::string library = getLibrary(_domain, _interface, _instance, false);
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         if (loadLibrary(library)) {
-            isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context);
+            isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context, true);
         }
     }
     return isRegistered;
@@ -304,7 +304,7 @@ Runtime::getLibrary(
     library = getProperty("LibraryBase");
     if (library != "") {
 #ifdef WIN32
-		library = library + "-" + defaultBinding_;
+        library = library + "-" + defaultBinding_;
 #else
         library = "lib" + library + "-" + defaultBinding_;
 #endif
@@ -357,7 +357,7 @@ Runtime::loadLibrary(const std::string &_library) {
 
 std::shared_ptr<Proxy>
 Runtime::createProxyHelper(const std::string &_domain, const std::string &_interface, const std::string &_instance,
-                           const std::string &_connectionId) {
+                           const std::string &_connectionId, bool _useDefault) {
     std::lock_guard<std::mutex> itsLock(factoriesMutex_);
     for (auto factory : factories_) {
         std::shared_ptr<Proxy> proxy
@@ -365,14 +365,14 @@ Runtime::createProxyHelper(const std::string &_domain, const std::string &_inter
         if (proxy)
             return proxy;
     }
-    return (defaultFactory_ ?
+    return (_useDefault && defaultFactory_ ?
                 defaultFactory_->createProxy(_domain, _interface, _instance, _connectionId)
                 : nullptr);
 }
 
 std::shared_ptr<Proxy>
 Runtime::createProxyHelper(const std::string &_domain, const std::string &_interface, const std::string &_instance,
-                           std::shared_ptr<MainLoopContext> _context ) {
+                           std::shared_ptr<MainLoopContext> _context, bool _useDefault) {
     std::lock_guard<std::mutex> itsLock(factoriesMutex_);
     for (auto factory : factories_) {
         std::shared_ptr<Proxy> proxy
@@ -380,14 +380,14 @@ Runtime::createProxyHelper(const std::string &_domain, const std::string &_inter
         if (proxy)
             return proxy;
     }
-    return (defaultFactory_ ?
+    return (_useDefault && defaultFactory_ ?
                 defaultFactory_->createProxy(_domain, _interface, _instance, _context) :
                 nullptr);
 }
 
 bool
 Runtime::registerStubHelper(const std::string &_domain, const std::string &_interface, const std::string &_instance,
-                                      std::shared_ptr<StubBase> _stub, const std::string &_connectionId) {
+                            std::shared_ptr<StubBase> _stub, const std::string &_connectionId, bool _useDefault) {
     bool isRegistered(false);
     std::lock_guard<std::mutex> itsLock(factoriesMutex_);
     for (auto factory : factories_) {
@@ -395,14 +395,14 @@ Runtime::registerStubHelper(const std::string &_domain, const std::string &_inte
         if (isRegistered)
             return isRegistered;
     }
-    return (defaultFactory_ ?
+    return (_useDefault && defaultFactory_ ?
                 defaultFactory_->registerStub(_domain, _interface, _instance, _stub, _connectionId) :
                 false);
 }
 
 bool
 Runtime::registerStubHelper(const std::string &_domain, const std::string &_interface, const std::string &_instance,
-                                      std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
+                            std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context, bool _useDefault) {
     bool isRegistered(false);
     std::lock_guard<std::mutex> itsLock(factoriesMutex_);
     for (auto factory : factories_) {
@@ -410,7 +410,7 @@ Runtime::registerStubHelper(const std::string &_domain, const std::string &_inte
         if (isRegistered)
             return isRegistered;
     }
-    return (defaultFactory_ ?
+    return (_useDefault && defaultFactory_ ?
                 defaultFactory_->registerStub(_domain, _interface, _instance, _stub, _context) :
                 false);
 }

@@ -8,47 +8,47 @@
 
 namespace CommonAPI {
 
-template<typename _Base>
+template<typename Base_>
 struct Enumeration {
-	Enumeration() = default;
-	Enumeration(const _Base &_value) :
-			value_(_value) {
-	}
+    Enumeration() = default;
+    Enumeration(const Base_ &_value) :
+            value_(_value) {
+    }
 
-	inline Enumeration &operator=(const _Base &_value) {
-		value_ = _value;
-		return (*this);
-	}
+    inline Enumeration &operator=(const Base_ &_value) {
+        value_ = _value;
+        return (*this);
+    }
 
-	inline operator const _Base() const {
-		return value_;
-	}
+    inline operator const Base_() const {
+        return value_;
+    }
 
-	inline bool operator==(const Enumeration<_Base> &_other) const {
-		return (value_ == _other.value_);
-	}
+    inline bool operator==(const Enumeration<Base_> &_other) const {
+        return (value_ == _other.value_);
+    }
 
-	inline bool operator!=(const Enumeration<_Base> &_other) const {
-		return (value_ != _other.value_);
-	}
+    inline bool operator!=(const Enumeration<Base_> &_other) const {
+        return (value_ != _other.value_);
+    }
 
-	inline bool operator<(const Enumeration<_Base> &_other) const {
-		return (value_ < _other.value_);
-	}
+    inline bool operator<(const Enumeration<Base_> &_other) const {
+        return (value_ < _other.value_);
+    }
 
-	inline bool operator<=(const Enumeration<_Base> &_other) const {
-		return (value_ <= _other.value_);
-	}
+    inline bool operator<=(const Enumeration<Base_> &_other) const {
+        return (value_ <= _other.value_);
+    }
 
-	inline bool operator>(const Enumeration<_Base> &_other) const {
-		return (value_ > _other.value_);
-	}
+    inline bool operator>(const Enumeration<Base_> &_other) const {
+        return (value_ > _other.value_);
+    }
 
-	inline bool operator>=(const Enumeration<_Base> &_other) const {
-		return (value_ >= _other.value_);
-	}
+    inline bool operator>=(const Enumeration<Base_> &_other) const {
+        return (value_ >= _other.value_);
+    }
 
-	_Base value_;
+    Base_ value_;
 };
 
 } // namespace CommonAPI

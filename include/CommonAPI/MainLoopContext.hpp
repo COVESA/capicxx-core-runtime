@@ -112,12 +112,12 @@ struct Watch {
     virtual const pollfd& getAssociatedFileDescriptor() = 0;
 
 #ifdef WIN32
-	/**
-	* \brief Returns the event bound to the file descriptor that is managed by this watch.
-	*
-	* @return The event bound to the associated file descriptor.
-	*/
-	virtual const HANDLE& getAssociatedEvent() = 0;
+    /**
+    * \brief Returns the event bound to the file descriptor that is managed by this watch.
+    *
+    * @return The event bound to the associated file descriptor.
+    */
+    virtual const HANDLE& getAssociatedEvent() = 0;
 #endif
 
     /**
@@ -200,91 +200,91 @@ typedef WakeupListenerList::iterator WakeupListenerSubscription;
  */
 class MainLoopContext {
 public:
-	COMMONAPI_EXPORT MainLoopContext(const std::string &_name = "COMMONAPI_DEFAULT_MAINLOOP_CONTEXT")
-		: name_(_name){
+    COMMONAPI_EXPORT MainLoopContext(const std::string &_name = "COMMONAPI_DEFAULT_MAINLOOP_CONTEXT")
+        : name_(_name){
     }
 
-	COMMONAPI_EXPORT MainLoopContext(const MainLoopContext&) = delete;
-	COMMONAPI_EXPORT MainLoopContext& operator=(const MainLoopContext&) = delete;
-	COMMONAPI_EXPORT MainLoopContext(MainLoopContext&&) = delete;
-	COMMONAPI_EXPORT MainLoopContext& operator=(MainLoopContext&&) = delete;
+    COMMONAPI_EXPORT MainLoopContext(const MainLoopContext&) = delete;
+    COMMONAPI_EXPORT MainLoopContext& operator=(const MainLoopContext&) = delete;
+    COMMONAPI_EXPORT MainLoopContext(MainLoopContext&&) = delete;
+    COMMONAPI_EXPORT MainLoopContext& operator=(MainLoopContext&&) = delete;
 
-	COMMONAPI_EXPORT const std::string &getName() const;
+    COMMONAPI_EXPORT const std::string &getName() const;
 
     /**
      * \brief Registers for all DispatchSources that are added or removed.
      */
-	COMMONAPI_EXPORT DispatchSourceListenerSubscription subscribeForDispatchSources(DispatchSourceAddedCallback dispatchAddedCallback, DispatchSourceRemovedCallback dispatchRemovedCallback);
+    COMMONAPI_EXPORT DispatchSourceListenerSubscription subscribeForDispatchSources(DispatchSourceAddedCallback dispatchAddedCallback, DispatchSourceRemovedCallback dispatchRemovedCallback);
 
     /**
      * \brief Registers for all Watches that are added or removed.
      */
-	COMMONAPI_EXPORT WatchListenerSubscription subscribeForWatches(WatchAddedCallback watchAddedCallback, WatchRemovedCallback watchRemovedCallback);
+    COMMONAPI_EXPORT WatchListenerSubscription subscribeForWatches(WatchAddedCallback watchAddedCallback, WatchRemovedCallback watchRemovedCallback);
 
     /**
      * \brief Registers for all Timeouts that are added or removed.
      */
-	COMMONAPI_EXPORT TimeoutSourceListenerSubscription subscribeForTimeouts(TimeoutSourceAddedCallback timeoutAddedCallback, TimeoutSourceRemovedCallback timeoutRemovedCallback);
+    COMMONAPI_EXPORT TimeoutSourceListenerSubscription subscribeForTimeouts(TimeoutSourceAddedCallback timeoutAddedCallback, TimeoutSourceRemovedCallback timeoutRemovedCallback);
 
     /**
      * \brief Registers for all Wakeup-Events that need to interrupt a call to "poll".
      */
-	COMMONAPI_EXPORT WakeupListenerSubscription subscribeForWakeupEvents(WakeupCallback wakeupCallback);
+    COMMONAPI_EXPORT WakeupListenerSubscription subscribeForWakeupEvents(WakeupCallback wakeupCallback);
 
     /**
      * \brief Unsubscribes your listeners for DispatchSources.
      */
-	COMMONAPI_EXPORT void unsubscribeForDispatchSources(DispatchSourceListenerSubscription subscription);
+    COMMONAPI_EXPORT void unsubscribeForDispatchSources(DispatchSourceListenerSubscription subscription);
 
     /**
      * \brief Unsubscribes your listeners for Watches.
      */
-	COMMONAPI_EXPORT void unsubscribeForWatches(WatchListenerSubscription subscription);
+    COMMONAPI_EXPORT void unsubscribeForWatches(WatchListenerSubscription subscription);
 
     /**
      * \brief Unsubscribes your listeners for Timeouts.
      */
-	COMMONAPI_EXPORT void unsubscribeForTimeouts(TimeoutSourceListenerSubscription subscription);
+    COMMONAPI_EXPORT void unsubscribeForTimeouts(TimeoutSourceListenerSubscription subscription);
 
     /**
      * \brief Unsubscribes your listeners for Wakeup-Events.
      */
-	COMMONAPI_EXPORT void unsubscribeForWakeupEvents(WakeupListenerSubscription subscription);
+    COMMONAPI_EXPORT void unsubscribeForWakeupEvents(WakeupListenerSubscription subscription);
 
     /**
      * \brief Notifies all listeners about a new DispatchSource.
      */
-	COMMONAPI_EXPORT void registerDispatchSource(DispatchSource* dispatchSource, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
+    COMMONAPI_EXPORT void registerDispatchSource(DispatchSource* dispatchSource, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
 
     /**
      * \brief Notifies all listeners about the removal of a DispatchSource.
      */
-	COMMONAPI_EXPORT void deregisterDispatchSource(DispatchSource* dispatchSource);
+    COMMONAPI_EXPORT void deregisterDispatchSource(DispatchSource* dispatchSource);
 
     /**
      * \brief Notifies all listeners about a new Watch.
      */
-	COMMONAPI_EXPORT void registerWatch(Watch* watch, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
+    COMMONAPI_EXPORT void registerWatch(Watch* watch, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
 
     /**
      * \brief Notifies all listeners about the removal of a Watch.
      */
-	COMMONAPI_EXPORT void deregisterWatch(Watch* watch);
+    COMMONAPI_EXPORT void deregisterWatch(Watch* watch);
 
     /**
      * \brief Notifies all listeners about a new Timeout.
      */
-	COMMONAPI_EXPORT void registerTimeoutSource(Timeout* timeoutEvent, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
+    COMMONAPI_EXPORT void registerTimeoutSource(Timeout* timeoutEvent, const DispatchPriority dispatchPriority = DispatchPriority::DEFAULT);
 
     /**
      * \brief Notifies all listeners about the removal of a Timeout.
      */
-	COMMONAPI_EXPORT void deregisterTimeoutSource(Timeout* timeoutEvent);
+    COMMONAPI_EXPORT void deregisterTimeoutSource(Timeout* timeoutEvent);
 
     /**
      * \brief Notifies all listeners about a wakeup event that just happened.
      */
-	COMMONAPI_EXPORT void wakeup();
+    COMMONAPI_EXPORT void wakeup();
 
     /**
      * \brief Will return true if at least one subscribe for DispatchSources or Watches has been called.
@@ -292,7 +292,7 @@ public:
      * This function will be used to prevent creation of a factory if a mainloop context is given, but
      * no listeners have been registered. This is done in order to ensure correct use of the mainloop context.
      */
-	COMMONAPI_EXPORT bool isInitialized();
+    COMMONAPI_EXPORT bool isInitialized();
 
  private:
     DispatchSourceListenerList dispatchSourceListeners_;

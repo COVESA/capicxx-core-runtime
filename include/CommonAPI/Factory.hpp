@@ -26,31 +26,31 @@ public:
 
     virtual ~Factory() {};
 
-	virtual std::shared_ptr<Proxy> createProxy(const std::string &_domain,
-									   	   	   const std::string &_interface,
-									   	   	   const std::string &_instance,
-									   	   	   const ConnectionId_t &_connectionId) = 0;
+    virtual std::shared_ptr<Proxy> createProxy(const std::string &_domain,
+                                               const std::string &_interface,
+                                               const std::string &_instance,
+                                               const ConnectionId_t &_connectionId) = 0;
 
-	virtual std::shared_ptr<Proxy> createProxy(const std::string &_domain,
-									   	   	   const std::string &_interface,
-									   	   	   const std::string &_instance,
-									   	   	   std::shared_ptr<MainLoopContext> mainLoopContext) = 0;
+    virtual std::shared_ptr<Proxy> createProxy(const std::string &_domain,
+                                               const std::string &_interface,
+                                               const std::string &_instance,
+                                               std::shared_ptr<MainLoopContext> mainLoopContext) = 0;
 
-	virtual bool registerStub(const std::string &_domain,
-						   	  const std::string &_interface,
-							  const std::string &_instance,
-						 	  std::shared_ptr<StubBase> _stub,
-						 	  const ConnectionId_t &_connectionId) = 0;
+    virtual bool registerStub(const std::string &_domain,
+                              const std::string &_interface,
+                              const std::string &_instance,
+                              std::shared_ptr<StubBase> _stub,
+                              const ConnectionId_t &_connectionId) = 0;
 
-	virtual bool registerStub(const std::string &_domain,
-						   	  const std::string &_interface,
-							  const std::string &_instance,
-						 	  std::shared_ptr<StubBase> _stub,
-							  std::shared_ptr<MainLoopContext> mainLoopContext) = 0;
+    virtual bool registerStub(const std::string &_domain,
+                              const std::string &_interface,
+                              const std::string &_instance,
+                              std::shared_ptr<StubBase> _stub,
+                              std::shared_ptr<MainLoopContext> mainLoopContext) = 0;
 
-	virtual bool unregisterStub(const std::string &_domain, 
-								const std::string &_interface, 
-								const std::string &_instance) = 0;
+    virtual bool unregisterStub(const std::string &_domain, 
+                                const std::string &_interface, 
+                                const std::string &_instance) = 0;
 };
 
 } // namespace CommonAPI

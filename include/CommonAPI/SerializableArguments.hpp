@@ -15,45 +15,47 @@
 
 namespace CommonAPI {
 
-template<class _In, class _Out, typename... _Arguments>
+template<class In_, class Out_, typename... Arguments_>
 struct SerializableArguments;
 
-template<class _In, class _Out>
-struct SerializableArguments<_In, _Out> {
-    static bool serialize(OutputStream<_Out> &_output) {
+template<class In_, class Out_>
+struct SerializableArguments<In_, Out_> {
+    static bool serialize(OutputStream<Out_> &_output) {
+        (void)_output;
         return true;
     }
 
-    static bool deserialize(InputStream<_In> &_input) {
+    static bool deserialize(InputStream<In_> &_input) {
+        (void)_input;
         return true;
     }
 };
 
-template<class _In, class _Out, typename _ArgumentType>
-struct SerializableArguments<_In, _Out, _ArgumentType> {
-    static bool serialize(OutputStream<_Out> &_output, const _ArgumentType &_argument) {
+template<class In_, class Out_, typename ArgumentType_>
+struct SerializableArguments<In_, Out_, ArgumentType_> {
+    static bool serialize(OutputStream<Out_> &_output, const ArgumentType_ &_argument) {
         _output << _argument;
         return !_output.hasError();
     }
 
-    static bool deserialize(InputStream<_In> &_input, _ArgumentType &_argument) {
+    static bool deserialize(InputStream<In_> &_input, ArgumentType_ &_argument) {
         _input >> _argument;
         return !_input.hasError();
     }
 };
 
-template <class _In, class _Out, typename _ArgumentType, typename ... _Rest>
-struct SerializableArguments<_In, _Out, _ArgumentType, _Rest...> {
-    static bool serialize(OutputStream<_Out> &_output, const _ArgumentType &_argument, const _Rest&... _rest) {
+template <class In_, class Out_, typename ArgumentType_, typename ... Rest_>
+struct SerializableArguments<In_, Out_, ArgumentType_, Rest_...> {
+    static bool serialize(OutputStream<Out_> &_output, const ArgumentType_ &_argument, const Rest_&... _rest) {
         _output << _argument;
         return !_output.hasError() ?
-        			SerializableArguments<_In, _Out, _Rest...>::serialize(_output, _rest...) : false;
+                    SerializableArguments<In_, Out_, Rest_...>::serialize(_output, _rest...) : false;
     }
 
-    static bool deserialize(InputStream<_In> &_input, _ArgumentType &_argument, _Rest&... _rest) {
+    static bool deserialize(InputStream<In_> &_input, ArgumentType_ &_argument, Rest_&... _rest) {
         _input >> _argument;
         return !_input.hasError() ?
-        			SerializableArguments<_In, _Out, _Rest...>::deserialize(_input, _rest...) : false;
+                    SerializableArguments<In_, Out_, Rest_...>::deserialize(_input, _rest...) : false;
     }
 };
 

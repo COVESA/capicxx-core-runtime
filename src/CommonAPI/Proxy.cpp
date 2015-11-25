@@ -9,7 +9,7 @@ namespace CommonAPI {
 
 const Address &
 Proxy::getAddress() const {
-	return address_;
+    return address_;
 }
 
 } // namespace CommonAPI

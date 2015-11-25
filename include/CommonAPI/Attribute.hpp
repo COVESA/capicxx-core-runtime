@@ -26,28 +26,28 @@ namespace CommonAPI {
  *
  * Class representing a read only attribute
  */
-template <typename _ValueType>
+template <typename ValueType_>
 class ReadonlyAttribute {
  public:
-	typedef _ValueType ValueType;
+    typedef ValueType_ ValueType;
 
-	typedef std::function<void(const CallStatus &, _ValueType)> AttributeAsyncCallback;
+    typedef std::function<void(const CallStatus &, ValueType_)> AttributeAsyncCallback;
 
-	virtual ~ReadonlyAttribute() { }
+    virtual ~ReadonlyAttribute() { }
 
-	/**
-	 * \brief Get value of attribute, usually from remote. Synchronous call.
-	 *
-	 * Get value of attribute, usually from remote. Synchronous call.
-	 *
-	 * @param value Reference to be filled with value.
-	 * @param callStatus call status reference will be filled with status of the operation
-	 */
-	virtual void getValue(CallStatus &_status,
-						  _ValueType &_value,
-						  const CallInfo *_info = nullptr) const = 0;
+    /**
+     * \brief Get value of attribute, usually from remote. Synchronous call.
+     *
+     * Get value of attribute, usually from remote. Synchronous call.
+     *
+     * @param value Reference to be filled with value.
+     * @param callStatus call status reference will be filled with status of the operation
+     */
+    virtual void getValue(CallStatus &_status,
+                          ValueType_ &_value,
+                          const CallInfo *_info = nullptr) const = 0;
 
-	/**
+    /**
      * \brief Get value of attribute, usually from remote. Asynchronous call.
      *
      * Get value of attribute, usually from remote. Asynchronous call.
@@ -55,8 +55,8 @@ class ReadonlyAttribute {
      * @param attributeAsyncCallback std::function object for the callback to be invoked.
      * @return std::future containing the call status of the operation.
      */
-	virtual std::future<CallStatus> getValueAsync(AttributeAsyncCallback attributeAsyncCallback,
-												  const CallInfo *_info = nullptr) = 0;
+    virtual std::future<CallStatus> getValueAsync(AttributeAsyncCallback attributeAsyncCallback,
+                                                  const CallInfo *_info = nullptr) = 0;
 };
 
 /**
@@ -64,13 +64,13 @@ class ReadonlyAttribute {
  *
  * Class representing a read and writable attribute
  */
-template <typename _ValueType>
-class Attribute: public ReadonlyAttribute<_ValueType> {
+template <typename ValueType_>
+class Attribute: public ReadonlyAttribute<ValueType_> {
  public:
-	typedef typename ReadonlyAttribute<_ValueType>::ValueType ValueType;
-	typedef typename ReadonlyAttribute<_ValueType>::AttributeAsyncCallback AttributeAsyncCallback;
+    typedef typename ReadonlyAttribute<ValueType_>::ValueType ValueType;
+    typedef typename ReadonlyAttribute<ValueType_>::AttributeAsyncCallback AttributeAsyncCallback;
 
-	virtual ~Attribute() { }
+    virtual ~Attribute() { }
 
     /**
      * \brief Set value of attribute, usually to remote. Synchronous call.
@@ -81,12 +81,12 @@ class Attribute: public ReadonlyAttribute<_ValueType> {
      * @param callStatus call status reference will be filled with status of the operation
      * @param responseValue Reference which will contain the actuall value set by the remote.
      */
-	virtual void setValue(const _ValueType& requestValue,
-						  CallStatus& callStatus,
-						  _ValueType& responseValue,
-						  const CallInfo *_info = nullptr) = 0;
+    virtual void setValue(const ValueType_& requestValue,
+                          CallStatus& callStatus,
+                          ValueType_& responseValue,
+                          const CallInfo *_info = nullptr) = 0;
 
-	/**
+    /**
      * \brief Set value of attribute, usually to remote. Asynchronous call.
      *
      * Set value of attribute, usually to remote. Asynchronous call.
@@ -95,9 +95,9 @@ class Attribute: public ReadonlyAttribute<_ValueType> {
      * @param attributeAsyncCallback std::function object for the callback to be invoked.
      * @return std::future containing the call status of the operation.
      */
-	virtual std::future<CallStatus> setValueAsync(const _ValueType& requestValue,
-												  AttributeAsyncCallback attributeAsyncCallback,
-												  const CallInfo *_info = nullptr) = 0;
+    virtual std::future<CallStatus> setValueAsync(const ValueType_& requestValue,
+                                                  AttributeAsyncCallback attributeAsyncCallback,
+                                                  const CallInfo *_info = nullptr) = 0;
 };
 
 /**
@@ -105,31 +105,31 @@ class Attribute: public ReadonlyAttribute<_ValueType> {
  *
  * Class representing an observable attribute
  */
-template <typename _AttributeBaseClass>
-class _ObservableAttributeImpl: public _AttributeBaseClass {
+template <typename AttributeBaseClass_>
+class ObservableAttributeImpl: public AttributeBaseClass_ {
  public:
-	typedef typename _AttributeBaseClass::ValueType ValueType;
-	typedef typename _AttributeBaseClass::AttributeAsyncCallback AttributeAsyncCallback;
-	typedef Event<ValueType> ChangedEvent;
+    typedef typename AttributeBaseClass_::ValueType ValueType;
+    typedef typename AttributeBaseClass_::AttributeAsyncCallback AttributeAsyncCallback;
+    typedef Event<ValueType> ChangedEvent;
 
-	virtual ~_ObservableAttributeImpl() { }
+    virtual ~ObservableAttributeImpl() { }
 
-	/**
-	 * \brief Returns the event handler for the remote change notification event
-	 *
-	 * Returns the event handler for the remote change notification event
-	 *
-	 * @return The event handler object
-	 */
-	virtual ChangedEvent& getChangedEvent() = 0;
+    /**
+     * \brief Returns the event handler for the remote change notification event
+     *
+     * Returns the event handler for the remote change notification event
+     *
+     * @return The event handler object
+     */
+    virtual ChangedEvent& getChangedEvent() = 0;
 };
 
-template <typename _ValueType>
-struct ObservableReadonlyAttribute: _ObservableAttributeImpl< ReadonlyAttribute<_ValueType> > {
+template <typename ValueType_>
+struct ObservableReadonlyAttribute: ObservableAttributeImpl< ReadonlyAttribute<ValueType_> > {
 };
 
-template <typename _ValueType>
-struct ObservableAttribute: _ObservableAttributeImpl< Attribute<_ValueType> > {
+template <typename ValueType_>
+struct ObservableAttribute: ObservableAttributeImpl< Attribute<ValueType_> > {
 };
 
 #ifdef WIN32

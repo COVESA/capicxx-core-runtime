@@ -12,7 +12,7 @@ int64_t getCurrentTimeInMs() {
 }
 
 const std::string &MainLoopContext::getName() const {
-	return name_;
+    return name_;
 }
 
 DispatchSourceListenerSubscription MainLoopContext::subscribeForDispatchSources(DispatchSourceAddedCallback dispatchAddedCallback, DispatchSourceRemovedCallback dispatchRemovedCallback) {

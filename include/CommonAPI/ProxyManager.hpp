@@ -39,7 +39,7 @@ public:
     virtual const ConnectionId_t &getConnectionId() const = 0;
 
     virtual void getAvailableInstances(CommonAPI::CallStatus&, std::vector<std::string>& availableInstances) = 0;
-	virtual std::future<CallStatus> getAvailableInstancesAsync(GetAvailableInstancesCallback callback) = 0;
+    virtual std::future<CallStatus> getAvailableInstancesAsync(GetAvailableInstancesCallback callback) = 0;
 
     virtual void getInstanceAvailabilityStatus(const std::string& instanceAddress,
                                                CallStatus& callStatus,
@@ -50,22 +50,22 @@ public:
 
     virtual InstanceAvailabilityStatusChangedEvent& getInstanceAvailabilityStatusChangedEvent() = 0;
 
-    template<template<typename ...> class _ProxyClass, typename ... _AttributeExtensions>
-    std::shared_ptr<_ProxyClass<_AttributeExtensions...> >
+    template<template<typename ...> class ProxyClass_, typename ... AttributeExtensions_>
+    std::shared_ptr<ProxyClass_<AttributeExtensions_...> >
     buildProxy(const std::string &_instance) {
         std::shared_ptr<Proxy> proxy = createProxy(getDomain(), getInterface(), _instance, getConnectionId());
         if (proxy) {
-            return std::make_shared<_ProxyClass<_AttributeExtensions...>>(proxy);
+            return std::make_shared<ProxyClass_<AttributeExtensions_...>>(proxy);
         }
         return NULL;
 
     }
 
 protected:
-    std::shared_ptr<Proxy> createProxy(const std::string &,
-    								   const std::string &,
-									   const std::string &,
-									   const ConnectionId_t &_connection) const;
+    COMMONAPI_EXPORT std::shared_ptr<Proxy> createProxy(const std::string &,
+                                       const std::string &,
+                                       const std::string &,
+                                       const ConnectionId_t &_connection) const;
 };
 
 } // namespace CommonAPI

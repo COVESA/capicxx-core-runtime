@@ -27,17 +27,17 @@ std::vector<std::string> split(const std::string& s, char delim) {
 
 void trim(std::string& toTrim) {
     toTrim.erase(
-		toTrim.begin(),
-		std::find_if(
-			toTrim.begin(),
-			toTrim.end(),
-			std::not1(std::ptr_fun(isspace))
-		)
-	);
+        toTrim.begin(),
+        std::find_if(
+            toTrim.begin(),
+            toTrim.end(),
+            std::not1(std::ptr_fun(isspace))
+        )
+    );
 
     toTrim.erase(
-    	std::find_if(
-    		toTrim.rbegin(),
+        std::find_if(
+            toTrim.rbegin(),
             toTrim.rend(),
             std::not1(std::ptr_fun(isspace))).base(),
             toTrim.end()

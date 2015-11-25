@@ -10,7 +10,7 @@ PROJECT(libcommonapi)
 # version of CommonAPI
 SET( LIBCOMMONAPI_MAJOR_VERSION 3 )
 SET( LIBCOMMONAPI_MINOR_VERSION 1 )
-SET( LIBCOMMONAPI_PATCH_VERSION 3 )
+SET( LIBCOMMONAPI_PATCH_VERSION 4 )
 
 message(STATUS "Project name: ${PROJECT_NAME}")
 
@@ -23,7 +23,7 @@ message(STATUS "This is CMake for Common API C++ Version ${COMPONENT_VERSION}.")
 # OS
 set(DL_LIBRARY "")
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-	set(DL_LIBRARY "dl")
+    set(DL_LIBRARY "dl")
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 ##############################################################################
@@ -79,11 +79,11 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # CommonAPI build section
 IF(MSVC)
-	message("using MSVC Compiler")
-	add_definitions(-DCOMMONAPI_INTERNAL_COMPILATION)
-	add_compile_options(/EHsc /wd"4996")
+    message("using MSVC Compiler")
+    add_definitions(-DCOMMONAPI_INTERNAL_COMPILATION)
+    add_compile_options(/EHsc /wd"4996")
 ELSE ()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall -DCOMMONAPI_INTERNAL_COMPILATION -DUSE_CONSOLE")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall -Wextra -Wformat -Wformat-security -Wconversion -fexceptions -fstrict-aliasing -fstack-protector -fasynchronous-unwind-tables -fno-omit-frame-pointer -Werror -DCOMMONAPI_INTERNAL_COMPILATION -DUSE_CONSOLE")
 ENDIF(MSVC)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCOMMONAPI_LOGLEVEL=COMMONAPI_LOGLEVEL_${MAX_LOG_LEVEL}")
@@ -102,7 +102,7 @@ include_directories(
 )
 
 link_directories(
-	${DLT_LIBDIR}
+    ${DLT_LIBDIR}
 )
 
 file(GLOB CAPI_SRCS "src/CommonAPI/*.cpp")
@@ -226,3 +226,11 @@ else()
 endif()
 
 ##############################################################################
+# create pkg-config file
+if(NOT WIN32 AND PKG_CONFIG_FOUND)
+        configure_file(CommonAPI.pc.in ${PROJECT_BINARY_DIR}/CommonAPI.pc @ONLY)
+        install(FILES ${PROJECT_BINARY_DIR}/CommonAPI.pc DESTINATION lib/pkconfig)
+endif()
+
+##############################################################################
+

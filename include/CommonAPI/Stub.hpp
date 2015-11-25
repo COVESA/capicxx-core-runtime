@@ -33,21 +33,21 @@ public:
     virtual ~StubBase() {}
 };
 
-template<typename _StubAdapter, typename _StubRemoteEventHandler>
+template<typename StubAdapter_, typename StubRemoteEventHandler_>
 class Stub: public virtual StubBase {
-    static_assert(std::is_base_of<StubAdapter, _StubAdapter>::value, "Invalid StubAdapter Class!");
+    static_assert(std::is_base_of<StubAdapter, StubAdapter_>::value, "Invalid StubAdapter Class!");
 public:
-    typedef _StubAdapter StubAdapterType;
-    typedef _StubRemoteEventHandler RemoteEventHandlerType;
+    typedef StubAdapter_ StubAdapterType;
+    typedef StubRemoteEventHandler_ RemoteEventHandlerType;
 
     virtual ~Stub() {}
 
-    virtual _StubRemoteEventHandler* initStubAdapter(const std::shared_ptr<_StubAdapter> &_stubAdapter) = 0;
+    virtual StubRemoteEventHandler_* initStubAdapter(const std::shared_ptr<StubAdapter_> &_stubAdapter) = 0;
 
-    inline const std::shared_ptr<_StubAdapter> getStubAdapter() const { return stubAdapter_; }
+    inline const std::shared_ptr<StubAdapter_> getStubAdapter() const { return stubAdapter_.lock(); }
 
 protected:
-    std::shared_ptr<_StubAdapter> stubAdapter_;
+    std::weak_ptr<StubAdapter_> stubAdapter_;
 };
 
 enum SelectiveBroadcastSubscriptionEvent {

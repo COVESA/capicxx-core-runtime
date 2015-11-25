@@ -16,6 +16,21 @@
 #include <memory>
 #include <tuple>
 
+// define CallStatus before including Event.hpp
+namespace CommonAPI {
+    enum class CallStatus {
+        SUCCESS,
+        OUT_OF_MEMORY,
+        NOT_AVAILABLE,
+        CONNECTION_FAILED,
+        REMOTE_ERROR,
+        UNKNOWN,
+        INVALID_VALUE,
+        SUBSCRIPTION_REFUSED
+    };
+} // namespace CommonAPI
+
+
 #include <CommonAPI/ByteBuffer.hpp>
 #include <CommonAPI/ContainerUtils.hpp>
 #include <CommonAPI/Event.hpp>
@@ -58,15 +73,6 @@ enum class AvailabilityStatus {
     NOT_AVAILABLE
 };
 
-enum class CallStatus {
-    SUCCESS,
-    OUT_OF_MEMORY,
-    NOT_AVAILABLE,
-    CONNECTION_FAILED,
-    REMOTE_ERROR,
-	UNKNOWN
-};
-
 typedef uint32_t CallId_t;
 typedef std::string ConnectionId_t;
 typedef int Timeout_t; // in ms, -1 means "forever"
@@ -85,21 +91,21 @@ public:
     virtual std::size_t hashCode() = 0;
 };
 
-template <typename ... Args>
+template <typename ... Args_>
 struct SelectiveBroadcastFunctorHelper {
-    typedef std::function<void(Args...)> SelectiveBroadcastFunctor;
+    typedef std::function<void(Args_...)> SelectiveBroadcastFunctor;
 };
 
 typedef std::unordered_set<
-	std::shared_ptr<CommonAPI::ClientId>,
-	SharedPointerClientIdContentHash,
-	SharedPointerClientIdContentEqual
+    std::shared_ptr<CommonAPI::ClientId>,
+    SharedPointerClientIdContentHash,
+    SharedPointerClientIdContentEqual
 > ClientIdList;
 
-template<typename _EnumType>
+template<typename EnumType_>
 class EnumHasher {
 public:
-    size_t operator()(const _EnumType& testEnum) const {
+    size_t operator()(const EnumType_& testEnum) const {
         return static_cast<int32_t>(testEnum);
     }
 };

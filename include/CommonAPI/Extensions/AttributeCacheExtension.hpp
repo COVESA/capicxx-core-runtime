@@ -15,59 +15,66 @@
 namespace CommonAPI {
 namespace Extensions {
 
-template<typename _AttributeType,
-        bool = (std::is_base_of<
-                        CommonAPI::ObservableAttribute<
-                                typename _AttributeType::ValueType>,
-                        _AttributeType>::value
-                        || std::is_base_of<
-                                CommonAPI::ObservableReadonlyAttribute<
-                                        typename _AttributeType::ValueType>,
-                                _AttributeType>::value)>
-class AttributeCacheExtension {
+namespace AttributeCache {
+template<typename AttributeType_>
+struct AttributeTraits;
+
+template<typename AttributeType_, bool>
+class AttributeCacheExtensionImpl;
+}
+
+template <typename AttributeType_>
+using AttributeCacheExtension = AttributeCache::AttributeCacheExtensionImpl<AttributeType_,
+                                                                            AttributeCache::AttributeTraits<AttributeType_>::observable>;
+
+namespace AttributeCache {
+
+template<typename AttributeType_>
+struct AttributeTraits {
+    static const bool observable = (std::is_base_of<
+                                            CommonAPI::ObservableAttribute<
+                                                    typename AttributeType_::ValueType>,
+                                            AttributeType_>::value
+                                            || std::is_base_of<
+                                                    CommonAPI::ObservableReadonlyAttribute<
+                                                            typename AttributeType_::ValueType>,
+                                                    AttributeType_>::value);
 };
 
-template<typename _AttributeType>
-class AttributeCacheExtension<_AttributeType, false> : public CommonAPI::AttributeExtension<
-        _AttributeType> {
+template<typename AttributeType_>
+class AttributeCacheExtensionImpl<AttributeType_, false> : public CommonAPI::AttributeExtension<
+        AttributeType_> {
 protected:
-    typedef CommonAPI::AttributeExtension<_AttributeType> __baseClass_t;
+    typedef CommonAPI::AttributeExtension<AttributeType_> __baseClass_t;
 
-    typedef typename _AttributeType::ValueType value_t;
-
-    AttributeCacheExtension(_AttributeType& baseAttribute)
-            : CommonAPI::AttributeExtension<_AttributeType>(baseAttribute) {
-    }
-
-    ~AttributeCacheExtension() {
-    }
-};
-
-template<typename _AttributeType>
-class AttributeCacheExtension<_AttributeType, true> : public CommonAPI::AttributeExtension<
-        _AttributeType> {
-    typedef CommonAPI::AttributeExtension<_AttributeType> __baseClass_t;
-
-protected:
-    typedef typename _AttributeType::ValueType value_t;
-    typedef std::shared_ptr<const value_t> valueptr_t;
-
-    AttributeCacheExtension(_AttributeType& baseAttribute)
-            : CommonAPI::AttributeExtension<_AttributeType>(baseAttribute) {
-        auto &event = __baseClass_t::getBaseAttribute().getChangedEvent();
-        subscription_ =
-                event.subscribe(
-                        std::bind(
-                                &AttributeCacheExtension<_AttributeType, true>::onValueUpdate,
-                                this, std::placeholders::_1));
-    }
-
-    ~AttributeCacheExtension() {
-        auto &event = __baseClass_t::getBaseAttribute().getChangedEvent();
-        event.unsubscribe(subscription_);
-    }
+    typedef typename AttributeType_::ValueType value_t;
 
 public:
+    AttributeCacheExtensionImpl(AttributeType_& baseAttribute)
+            : CommonAPI::AttributeExtension<AttributeType_>(baseAttribute) {
+    }
+
+};
+
+template<typename AttributeType_>
+class AttributeCacheExtensionImpl<AttributeType_, true> : public CommonAPI::AttributeExtension<
+        AttributeType_> {
+    typedef CommonAPI::AttributeExtension<AttributeType_> __baseClass_t;
+
+protected:
+    typedef typename AttributeType_::ValueType value_t;
+    typedef std::shared_ptr<const value_t> valueptr_t;
+
+public:
+    AttributeCacheExtensionImpl(AttributeType_& baseAttribute)
+            : CommonAPI::AttributeExtension<AttributeType_>(baseAttribute) {
+        auto &event = __baseClass_t::getBaseAttribute().getChangedEvent();
+        event.subscribe(
+                std::bind(
+                        &AttributeCacheExtensionImpl<AttributeType_, true>::onValueUpdate,
+                        this, std::placeholders::_1));
+    }
+
     /**
      * @brief getCachedValue Retrieve attribute value from the cache
      * @return The value of the attribute or a null pointer if the value is not
@@ -79,12 +86,6 @@ public:
         if (cachedValue_) {
             return cachedValue_;
         }
-
-        // This may get called more than once if a previous retrieval is still
-        // on-going (saving the current state would just take up extra resources)
-        __baseClass_t::getBaseAttribute().getValueAsync(
-                std::bind(&AttributeCacheExtension<_AttributeType, true>::valueRetrieved,
-                          this, std::placeholders::_1, std::placeholders::_2));
 
         return nullptr;
     }
@@ -109,20 +110,22 @@ private:
 
     void valueRetrieved(const CommonAPI::CallStatus &callStatus, value_t t) {
         if (callStatus == CommonAPI::CallStatus::SUCCESS) {
-            assert(!cachedValue_ || *cachedValue_ == t);
             onValueUpdate(t);
         }
     }
 
     void onValueUpdate(const value_t& t) {
+        if (cachedValue_ && *cachedValue_ == t) {
+            return;
+        }
+
         cachedValue_ = std::make_shared<const value_t>(t);
     }
 
     valueptr_t cachedValue_;
-
-    typename _AttributeType::ChangedEvent::Subscription subscription_;
 };
 
+} // namespace AttributeCache
 } // namespace Extensions
 } // namespace CommonAPI
 

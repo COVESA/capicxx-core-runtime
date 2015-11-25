@@ -12,18 +12,18 @@
 namespace CommonAPI {
 
 struct COMMONAPI_EXPORT CallInfo {
-	CallInfo()
-		: timeout_(DEFAULT_SEND_TIMEOUT_MS), sender_(0) {
-	}
-	CallInfo(Timeout_t _timeout)
-		: timeout_(_timeout), sender_(0) {
-	}
-	CallInfo(Timeout_t _timeout, Sender_t _sender)
-		: timeout_(_timeout), sender_(_sender) {
-	}
+    CallInfo()
+        : timeout_(DEFAULT_SEND_TIMEOUT_MS), sender_(0) {
+    }
+    CallInfo(Timeout_t _timeout)
+        : timeout_(_timeout), sender_(0) {
+    }
+    CallInfo(Timeout_t _timeout, Sender_t _sender)
+        : timeout_(_timeout), sender_(_sender) {
+    }
 
-	Timeout_t timeout_;
-	Sender_t sender_;
+    Timeout_t timeout_;
+    Sender_t sender_;
 };
 
 } // namespace CommonAPI

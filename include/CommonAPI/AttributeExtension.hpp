@@ -19,29 +19,29 @@
 
 namespace CommonAPI {
 
-template<typename _AttributeType>
+template<typename AttributeType_>
 class AttributeExtension {
  public:
-    _AttributeType& getBaseAttribute() {
+    AttributeType_& getBaseAttribute() {
         return baseAttribute_;
     }
 
  protected:
     AttributeExtension() = delete;
-    AttributeExtension(_AttributeType& baseAttribute): baseAttribute_(baseAttribute) {
+    AttributeExtension(AttributeType_& baseAttribute): baseAttribute_(baseAttribute) {
     }
 
-    _AttributeType& baseAttribute_;
+    AttributeType_& baseAttribute_;
 };
 
-template<template<typename ...> class _ProxyType, template<typename> class _AttributeExtension>
+template<template<typename ...> class ProxyType_, template<typename> class AttributeExtension_>
 struct DefaultAttributeProxyHelper;
 
-template<template<typename ...> class _ProxyClass, template<typename> class _AttributeExtension>
+template<template<typename ...> class ProxyClass_, template<typename> class AttributeExtension_>
 std::shared_ptr<
-	typename DefaultAttributeProxyHelper<_ProxyClass, _AttributeExtension>::class_t
+    typename DefaultAttributeProxyHelper<ProxyClass_, AttributeExtension_>::class_t
 > createProxyWithDefaultAttributeExtension(
-	const std::string &_domain, const std::string &_instance);
+    const std::string &_domain, const std::string &_instance);
 
 } // namespace CommonAPI
 
