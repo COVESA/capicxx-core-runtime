@@ -213,7 +213,8 @@ Runtime::createProxy(
         // ...it seems do not, lets try to load a library that does...
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         std::string library = getLibrary(_domain, _interface, _instance, true);
-        if (loadLibrary(library)) {
+        loadLibrary(library);
+        {
             proxy = createProxyHelper(_domain, _interface, _instance, _connectionId, true);
         }
     }
@@ -231,7 +232,8 @@ Runtime::createProxy(
         // ...it seems do not, lets try to load a library that does...
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         std::string library = getLibrary(_domain, _interface, _instance, true);
-        if (loadLibrary(library)) {
+        loadLibrary(library);
+        {
             proxy = createProxyHelper(_domain, _interface, _instance, _context, true);
         }
     }
@@ -247,7 +249,8 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
     if (!isRegistered) {
         std::string library = getLibrary(_domain, _interface, _instance, false);
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
-        if (loadLibrary(library)) {
+        loadLibrary(library);
+        {
             isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId, true);
         }
     }
@@ -262,7 +265,8 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
     if (!isRegistered) {
         std::string library = getLibrary(_domain, _interface, _instance, false);
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
-        if (loadLibrary(library)) {
+        loadLibrary(library);
+        {
             isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context, true);
         }
     }
@@ -338,7 +342,7 @@ Runtime::loadLibrary(const std::string &_library) {
             loadedLibraries_.insert(itsLibrary);
             COMMONAPI_DEBUG("Loading interface library \"", itsLibrary, "\" succeeded.");
         } else {
-            COMMONAPI_ERROR("Loading interface library \"", itsLibrary, "\" failed (", GetLastError(), ")");
+            //COMMONAPI_ERROR("Loading interface library \"", itsLibrary, "\" failed (", GetLastError(), ")");
             isLoaded = false;
         }
         #else
@@ -347,7 +351,7 @@ Runtime::loadLibrary(const std::string &_library) {
             COMMONAPI_DEBUG("Loading interface library \"", itsLibrary, "\" succeeded.");
         }
         else {
-            COMMONAPI_ERROR("Loading interface library \"", itsLibrary, "\" failed (", dlerror(), ")");
+            //COMMONAPI_ERROR("Loading interface library \"", itsLibrary, "\" failed (", dlerror(), ")");
             isLoaded = false;
         }
         #endif
