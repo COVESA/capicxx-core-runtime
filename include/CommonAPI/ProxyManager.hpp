@@ -18,6 +18,7 @@
 #include <CommonAPI/Event.hpp>
 #include <CommonAPI/Proxy.hpp>
 #include <CommonAPI/Types.hpp>
+#include <CommonAPI/Runtime.hpp>
 
 namespace CommonAPI {
 
@@ -52,13 +53,12 @@ public:
 
     template<template<typename ...> class ProxyClass_, typename ... AttributeExtensions_>
     std::shared_ptr<ProxyClass_<AttributeExtensions_...> >
-    buildProxy(const std::string &_instance) {
-        std::shared_ptr<Proxy> proxy = createProxy(getDomain(), getInterface(), _instance, getConnectionId());
+    buildProxy(const std::string &_instance, const ConnectionId_t& _connectionId = DEFAULT_CONNECTION_ID) {
+        std::shared_ptr<Proxy> proxy = createProxy(getDomain(), getInterface(), _instance, (DEFAULT_CONNECTION_ID == _connectionId) ? getConnectionId() : _connectionId);
         if (proxy) {
             return std::make_shared<ProxyClass_<AttributeExtensions_...>>(proxy);
         }
         return NULL;
-
     }
 
 protected:

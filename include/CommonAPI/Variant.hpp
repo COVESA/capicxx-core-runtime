@@ -197,6 +197,10 @@ public:
         return valueType_;
     }
 
+    uint8_t getMaxValueType() const {
+        return uint8_t(TypesTupleSize::value);
+    }
+
 private:
     template<typename Type_>
     void set(const Type_ &_value, const bool clear);

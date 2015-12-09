@@ -10,7 +10,7 @@ PROJECT(libcommonapi)
 # version of CommonAPI
 SET( LIBCOMMONAPI_MAJOR_VERSION 3 )
 SET( LIBCOMMONAPI_MINOR_VERSION 1 )
-SET( LIBCOMMONAPI_PATCH_VERSION 4 )
+SET( LIBCOMMONAPI_PATCH_VERSION 5 )
 
 message(STATUS "Project name: ${PROJECT_NAME}")
 
@@ -229,7 +229,7 @@ endif()
 # create pkg-config file
 if(NOT WIN32 AND PKG_CONFIG_FOUND)
         configure_file(CommonAPI.pc.in ${PROJECT_BINARY_DIR}/CommonAPI.pc @ONLY)
-        install(FILES ${PROJECT_BINARY_DIR}/CommonAPI.pc DESTINATION lib/pkconfig)
+        install(FILES ${PROJECT_BINARY_DIR}/CommonAPI.pc DESTINATION lib/pkgconfig)
 endif()
 
 ##############################################################################
