@@ -214,6 +214,7 @@ struct Struct {
 // Polymorphic structs are mapped to an interface that is derived from the base class
 // PolymorphicStruct and contain their parameter in a Struct.
 struct PolymorphicStruct {
+    virtual ~PolymorphicStruct() {};
     virtual Serial getSerial() const = 0;
 };
 

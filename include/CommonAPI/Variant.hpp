@@ -223,7 +223,7 @@ private:
 
 public:
     inline bool hasValue() const {
-        return (valueType_ <= TypesTupleSize::value);
+        return (valueType_ != 0);
     }
     typename std::aligned_storage<maxSize>::type valueStorage_;
 
@@ -342,12 +342,12 @@ struct ApplyStreamVisitor<Visitor_, Variant_, Deployment_> {
 
     static
     void visit(Visitor_ &, Variant_ &, const Deployment_ *) {
-        assert(false);
+        //assert(false);
     }
 
     static
     void visit(Visitor_ &, const Variant_ &, const Deployment_ *) {
-        assert(false);
+        //assert(false);
     }
 };
 

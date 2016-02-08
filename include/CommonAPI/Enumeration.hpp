@@ -15,6 +15,8 @@ struct Enumeration {
             value_(_value) {
     }
 
+    virtual ~Enumeration() {}
+
     inline Enumeration &operator=(const Base_ &_value) {
         value_ = _value;
         return (*this);
@@ -47,6 +49,8 @@ struct Enumeration {
     inline bool operator>=(const Enumeration<Base_> &_other) const {
         return (value_ >= _other.value_);
     }
+
+    virtual bool validate() const = 0;
 
     Base_ value_;
 };
