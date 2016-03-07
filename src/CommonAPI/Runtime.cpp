@@ -49,7 +49,9 @@ std::shared_ptr<Runtime> Runtime::get() {
 
 Runtime::Runtime()
     : defaultBinding_(COMMONAPI_DEFAULT_BINDING),
-      defaultFolder_(COMMONAPI_DEFAULT_FOLDER) {
+      defaultFolder_(COMMONAPI_DEFAULT_FOLDER),
+	  isConfigured_(false),
+	  isInitialized_(false) {
 }
 
 Runtime::~Runtime() {
@@ -58,13 +60,13 @@ Runtime::~Runtime() {
 
 bool
 Runtime::registerFactory(const std::string &_binding, std::shared_ptr<Factory> _factory) {
-    COMMONAPI_DEBUG("Registering factory for binding=", _binding);
     bool isRegistered(false);
 #ifndef WIN32
     std::lock_guard<std::mutex> itsLock(factoriesMutex_);
 #endif
     if (_binding == defaultBinding_) {
         defaultFactory_ = _factory;
+        isRegistered = true;
     } else {
         auto foundFactory = factories_.find(_binding);
         if (foundFactory == factories_.end()) {
@@ -72,12 +74,15 @@ Runtime::registerFactory(const std::string &_binding, std::shared_ptr<Factory> _
             isRegistered = true;
         }
     }
+
+    if (isRegistered && isInitialized_)
+    	_factory->init();
+
     return isRegistered;
 }
 
 bool
 Runtime::unregisterFactory(const std::string &_binding) {
-    COMMONAPI_DEBUG("Unregistering factory for binding=", _binding);
 #ifndef WIN32
     std::lock_guard<std::mutex> itsLock(factoriesMutex_);
 #endif
@@ -93,11 +98,10 @@ Runtime::unregisterFactory(const std::string &_binding) {
  * Private
  */
 void Runtime::init() {
-    static bool isInitialized(false);
 #ifndef WIN32
     std::lock_guard<std::mutex> itsLock(mutex_);
 #endif
-    if (!isInitialized) {
+    if (!isConfigured_) {
         // Determine default configuration file
         const char *config = getenv("COMMONAPI_CONFIG");
         if (config) {
@@ -120,13 +124,26 @@ void Runtime::init() {
         if (folder)
             defaultFolder_ = folder;
 
-        // Log settings
-        COMMONAPI_INFO("Using default binding \'", defaultBinding_, "\'");
-        COMMONAPI_INFO("Using default shared library folder \'", defaultFolder_, "\'");
-        COMMONAPI_INFO("Using default configuration file \'", defaultConfig_, "\'");
-
-        isInitialized = true;
+        isConfigured_ = true;
     }
+}
+
+void
+Runtime::initFactories() {
+	std::lock_guard<std::mutex> itsLock(factoriesMutex_);
+	if (!isInitialized_) {
+		COMMONAPI_INFO("Using default binding \'", defaultBinding_, "\'");
+		COMMONAPI_INFO("Using default shared library folder \'", defaultFolder_, "\'");
+		COMMONAPI_INFO("Using default configuration file \'", defaultConfig_, "\'");
+
+		if (defaultFactory_)
+			defaultFactory_->init();
+
+		for (auto f : factories_)
+			f.second->init();
+
+		isInitialized_ = true;
+	}
 }
 
 bool
@@ -206,6 +223,9 @@ std::shared_ptr<Proxy>
 Runtime::createProxy(
         const std::string &_domain, const std::string &_interface, const std::string &_instance,
         const ConnectionId_t &_connectionId) {
+	if (!isInitialized_) {
+		initFactories();
+	}
 
     // Check whether we already know how to create such proxies...
     std::shared_ptr<Proxy> proxy = createProxyHelper(_domain, _interface, _instance, _connectionId, false);
@@ -224,6 +244,9 @@ std::shared_ptr<Proxy>
 Runtime::createProxy(
         const std::string &_domain, const std::string &_interface, const std::string &_instance,
         std::shared_ptr<MainLoopContext> _context) {
+	if (!isInitialized_) {
+		initFactories();
+	}
 
     // Check whether we already know how to create such proxies...
     std::shared_ptr<Proxy> proxy = createProxyHelper(_domain, _interface, _instance, _context, false);
@@ -242,6 +265,9 @@ Runtime::createProxy(
 bool
 Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
                         std::shared_ptr<StubBase> _stub, const ConnectionId_t &_connectionId) {
+	if (!isInitialized_) {
+		initFactories();
+	}
 
     bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId, false);
     if (!isRegistered) {
@@ -257,6 +283,9 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
 bool
 Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
                         std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
+	if (!isInitialized_) {
+		initFactories();
+	}
 
     bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context, false);
     if (!isRegistered) {
@@ -326,9 +355,29 @@ Runtime::loadLibrary(const std::string &_library) {
         itsLibrary += ".dll";
     }
     #else
-    if (itsLibrary.rfind(".so") != itsLibrary.length() - 3) {
-        itsLibrary += ".so";
-    }
+    std::size_t soStart = itsLibrary.rfind(".so");
+	if (soStart == std::string::npos) {
+		// Library name does not contain ".so" --> add it
+		itsLibrary += ".so";
+	} else if (soStart < itsLibrary.length() - 3) {
+		// We found ".so" but even the last one is not the end
+		// of the filename
+		soStart += 3;
+
+		// Check the version information
+		while (soStart < itsLibrary.length()) {
+			if (itsLibrary[soStart] != '.'
+					&& !std::isdigit(itsLibrary[soStart])) {
+				break;
+			}
+			soStart++;
+		}
+
+		// What should be a version is something else
+		// --> add another ".so"
+		if (soStart < itsLibrary.length())
+			itsLibrary += ".so";
+	}
     #endif
 
     bool isLoaded(true);

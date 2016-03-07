@@ -138,6 +138,7 @@ public:
     inline const std::string &getDefaultBinding() const { return defaultBinding_; };
 
 private:
+    COMMONAPI_EXPORT void initFactories();
     COMMONAPI_EXPORT bool readConfiguration();
     COMMONAPI_EXPORT bool splitAddress(const std::string &, std::string &, std::string &, std::string &);
 
@@ -179,6 +180,9 @@ private:
     std::mutex mutex_;
     std::mutex factoriesMutex_;
     std::mutex loadMutex_;
+
+    bool isConfigured_;
+    bool isInitialized_;
 
     static std::map<std::string, std::string> properties_;
     static std::shared_ptr<Runtime> theRuntime__;

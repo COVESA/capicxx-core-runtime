@@ -26,6 +26,8 @@ public:
 
     virtual ~Factory() {};
 
+    virtual void init() = 0;
+
     virtual std::shared_ptr<Proxy> createProxy(const std::string &_domain,
                                                const std::string &_interface,
                                                const std::string &_instance,

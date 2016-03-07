@@ -15,4 +15,11 @@ ProxyManager::createProxy(
     return Runtime::get()->createProxy(_domain, _interface, _instance, _connection);
 }
 
+std::shared_ptr<Proxy>
+ProxyManager::createProxy(
+        const std::string &_domain, const std::string &_interface, const std::string &_instance,
+        std::shared_ptr<MainLoopContext> _context) const {
+    return Runtime::get()->createProxy(_domain, _interface, _instance, _context);
+}
+
 } // namespace CommonAPI

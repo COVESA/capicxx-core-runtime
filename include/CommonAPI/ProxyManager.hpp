@@ -61,11 +61,26 @@ public:
         return NULL;
     }
 
+    template<template<typename ...> class ProxyClass_, typename ... AttributeExtensions_>
+    std::shared_ptr<ProxyClass_<AttributeExtensions_...> >
+    buildProxy(const std::string &_instance, std::shared_ptr<MainLoopContext> _context) {
+        std::shared_ptr<Proxy> proxy = createProxy(getDomain(), getInterface(), _instance, _context);
+        if (proxy) {
+            return std::make_shared<ProxyClass_<AttributeExtensions_...>>(proxy);
+        }
+        return NULL;
+    }
+
 protected:
     COMMONAPI_EXPORT std::shared_ptr<Proxy> createProxy(const std::string &,
                                        const std::string &,
                                        const std::string &,
                                        const ConnectionId_t &_connection) const;
+
+    COMMONAPI_EXPORT std::shared_ptr<Proxy> createProxy(const std::string &,
+                                       const std::string &,
+                                       const std::string &,
+                                       std::shared_ptr<MainLoopContext> _context) const;
 };
 
 } // namespace CommonAPI
