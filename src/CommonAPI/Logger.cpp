@@ -33,12 +33,15 @@ Logger::Level Logger::maximumLogLevel_(Logger::Level::LL_INFO);
 Logger::Logger() {
 #ifdef USE_DLT
     if (useDlt_) {
-        std::string app = Runtime::getProperty("LogApplication");
-        if (app == "") app = "CAPI";
-        DLT_REGISTER_APP(app.c_str(), "CAPI");
         std::string context = Runtime::getProperty("LogContext");
         if (context == "") context = "CAPI";
-        DLT_REGISTER_CONTEXT(dlt_, context.c_str(), "CAPI");
+        if (DLT_RETURN_ERROR == dlt_register_context(&dlt_, context.c_str(), "CAPI")) {
+            std::string app = Runtime::getProperty("LogApplication");
+            if (app == "") app = "CAPI";
+            ownAppID_ = true;
+            DLT_REGISTER_APP(app.c_str(), "CAPI");
+            DLT_REGISTER_CONTEXT(dlt_, context.c_str(), "CAPI");
+        }
     }
 #endif
 }
@@ -47,7 +50,9 @@ Logger::~Logger() {
 #ifdef USE_DLT
     if (useDlt_) {
         DLT_UNREGISTER_CONTEXT(dlt_);
-        DLT_UNREGISTER_APP();
+        if (ownAppID_) {
+            DLT_UNREGISTER_APP();
+        }
     }
 #endif
 }

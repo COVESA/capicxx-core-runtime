@@ -185,6 +185,7 @@ private:
 #ifdef USE_DLT
     static bool useDlt_;
     DLT_DECLARE_CONTEXT(dlt_);
+    bool ownAppID_;
 #endif
 };
 

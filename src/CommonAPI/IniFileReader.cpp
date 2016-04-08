@@ -30,7 +30,7 @@ bool
 IniFileReader::load(const std::string &_path) {
     std::ifstream configStream(_path);
     if (configStream.is_open()) {
-        COMMONAPI_INFO("Loading ini file from ", _path);
+        //COMMONAPI_INFO("Loading ini file from ", _path);
 
         int lineCounter(0);
         std::string currentSectionName;
