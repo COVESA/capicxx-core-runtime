@@ -132,9 +132,9 @@ void
 Runtime::initFactories() {
 	std::lock_guard<std::mutex> itsLock(factoriesMutex_);
 	if (!isInitialized_) {
+		COMMONAPI_INFO("Loading configuration file \'", usedConfig_, "\'");
 		COMMONAPI_INFO("Using default binding \'", defaultBinding_, "\'");
 		COMMONAPI_INFO("Using default shared library folder \'", defaultFolder_, "\'");
-		COMMONAPI_INFO("Using default configuration file \'", defaultConfig_, "\'");
 
 		if (defaultFactory_)
 			defaultFactory_->init();
@@ -156,18 +156,18 @@ Runtime::readConfiguration() {
 #else
     if (getcwd(currentDirectory, MAX_PATH_LEN)) {
 #endif
-        config = currentDirectory;
-        config += "/";
-        config += COMMONAPI_DEFAULT_CONFIG_FILE;
+    	usedConfig_ = currentDirectory;
+    	usedConfig_ += "/";
+    	usedConfig_ += COMMONAPI_DEFAULT_CONFIG_FILE;
 
         struct stat s;
-        if (stat(config.c_str(), &s) != 0) {
-            config = defaultConfig_;
+        if (stat(usedConfig_.c_str(), &s) != 0) {
+        	usedConfig_ = defaultConfig_;
         }
     }
 
     IniFileReader reader;
-    if (!reader.load(config))
+    if (!reader.load(usedConfig_))
         return false;
 
     std::string itsConsole("true");

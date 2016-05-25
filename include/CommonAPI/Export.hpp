@@ -8,6 +8,7 @@
 
 #ifdef WIN32
     #define COMMONAPI_EXPORT __declspec(dllexport)
+    #define COMMONAPI_EXPORT_CLASS_EXPLICIT
 
     #if COMMONAPI_DLL_COMPILATION
         #define COMMONAPI_IMPORT_EXPORT __declspec(dllexport)
@@ -15,7 +16,8 @@
         #define COMMONAPI_IMPORT_EXPORT __declspec(dllimport)
     #endif
 #else
-    #define COMMONAPI_EXPORT
+    #define COMMONAPI_EXPORT __attribute__ ((visibility ("default")))
+    #define COMMONAPI_EXPORT_CLASS_EXPLICIT COMMONAPI_EXPORT
     #define COMMONAPI_IMPORT_EXPORT
 #endif
 

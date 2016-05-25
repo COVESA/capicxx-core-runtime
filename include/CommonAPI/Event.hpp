@@ -71,7 +71,7 @@ public:
 protected:
     void notifyListeners(const Arguments_&... _eventArguments);
     void notifySpecificListener(const Subscription _subscription, const Arguments_&... _eventArguments);
-    void notifyError(const CallStatus status);
+    void notifySpecificError(const Subscription _subscription, const CallStatus status);
 
     virtual void onFirstListenerAdded(const Listener &_listener) {
         (void)_listener;
@@ -216,7 +216,7 @@ void Event<Arguments_...>::notifySpecificListener(const Subscription subscriptio
 }
 
 template<typename ... Arguments_>
-void Event<Arguments_...>::notifyError(const CallStatus status) {
+void Event<Arguments_...>::notifySpecificError(const Subscription subscription, const CallStatus status) {
 
     subscriptionMutex_.lock();
     notificationMutex_.lock();
@@ -236,13 +236,34 @@ void Event<Arguments_...>::notifyError(const CallStatus status) {
 
     subscriptionMutex_.unlock();
     for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
-        ErrorListener listener = std::get<1>(iterator->second);
-        if (listener) {
-            listener(status);
+        if (subscription == iterator->first) {
+            ErrorListener listener = std::get<1>(iterator->second);
+            if (listener) {
+                listener(status);
+            }
         }
     }
 
     notificationMutex_.unlock();
+
+    if (status != CommonAPI::CallStatus::SUCCESS) {
+        subscriptionMutex_.lock();
+        auto listenerIterator = subscriptions_.find(subscription);
+        if (subscriptions_.end() != listenerIterator) {
+            if (pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
+                if (0 == pendingSubscriptions_.erase(subscription)) {
+                    pendingUnsubscriptions_.insert(subscription);
+                }
+            }
+        }
+        else {
+            listenerIterator = pendingSubscriptions_.find(subscription);
+            if (pendingSubscriptions_.end() != listenerIterator) {
+                pendingSubscriptions_.erase(subscription);
+            }
+        }
+        subscriptionMutex_.unlock();
+    }
 }
 
 } // namespace CommonAPI

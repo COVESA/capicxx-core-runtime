@@ -3,7 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -17,6 +16,8 @@
 
 #include <CommonAPI/Deployable.hpp>
 #include <CommonAPI/Deployment.hpp>
+#include <CommonAPI/Logger.hpp>
+
 
 #ifndef COMMONAPI_VARIANT_HPP_
 #define COMMONAPI_VARIANT_HPP_
@@ -223,7 +224,7 @@ private:
 
 public:
     inline bool hasValue() const {
-        return (valueType_ != 0);
+        return (valueType_ != 0 && valueType_ <= TypesTupleSize::value );
     }
     typename std::aligned_storage<maxSize>::type valueStorage_;
 
@@ -239,7 +240,7 @@ struct ApplyVoidIndexVisitor<Variant_> {
 
     static
     void visit(Variant_ &, uint8_t &) {
-        assert(false);
+        COMMONAPI_ERROR("ApplyVoidIndexVisitor<Variant_>::visit type not found");
     }
 };
 
@@ -269,12 +270,12 @@ struct ApplyVoidVisitor<Visitor_, Variant_> {
 
     static
     void visit(Visitor_ &, Variant_ &) {
-        assert(false);
+        COMMONAPI_ERROR("ApplyVoidIndexVisitor<Visitor_, Variant_>::visit - type not found");
     }
 
     static
     void visit(Visitor_ &, const Variant_ &) {
-        assert(false);
+        COMMONAPI_ERROR("ApplyVoidIndexVisitor<Visitor_, Variant_>::visit(const) - type not found");
     }
 };
 
@@ -312,7 +313,7 @@ struct ApplyBoolVisitor<Visitor_, Variant_> {
     static const uint8_t index = 0;
 
     static bool visit(Visitor_ &, Variant_ &) {
-        assert(false);
+        COMMONAPI_ERROR("ApplyBoolVisitor<Visitor_, Variant_>::visit - type not found");
         return false;
     }
 };
@@ -342,12 +343,13 @@ struct ApplyStreamVisitor<Visitor_, Variant_, Deployment_> {
 
     static
     void visit(Visitor_ &, Variant_ &, const Deployment_ *) {
-        //assert(false);
+        COMMONAPI_ERROR("ApplyStreamVisitor<Visitor_, Variant_, Deployment_>::visit - type not found");
+
     }
 
     static
     void visit(Visitor_ &, const Variant_ &, const Deployment_ *) {
-        //assert(false);
+        COMMONAPI_ERROR("ApplyStreamVisitor<Visitor_, Variant_, Deployment_>::visit(const) - type not found");
     }
 };
 
@@ -746,10 +748,8 @@ void Variant<Types_...>::set(U_ &&_value, const bool _clear) {
         ApplyVoidVisitor<
             DeleteVisitor<maxSize>, Variant<Types_...>, Types_...
         >::visit(visitor, *this);
-    } else {
-        new (&valueStorage_) selected_type_t(std::move(any_container_value));
     }
-
+    new (&valueStorage_) selected_type_t(std::move(any_container_value));
     valueType_ = TypeIndex<Types_...>::template get<selected_type_t>();
 }
 

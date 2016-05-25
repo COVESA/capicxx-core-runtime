@@ -8,7 +8,6 @@
 
 #include <CommonAPI/CommonAPI.hpp>
 
-#include <cassert>
 #include <memory>
 #include <type_traits>
 

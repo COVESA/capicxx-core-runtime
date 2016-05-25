@@ -15,7 +15,7 @@ namespace CommonAPI {
 
 class Address {
 public:
-    COMMONAPI_EXPORT Address() = default;
+    COMMONAPI_EXPORT Address();
     COMMONAPI_EXPORT Address(const std::string &_address);
     COMMONAPI_EXPORT Address(const std::string &_domain,
             const std::string &_interface,

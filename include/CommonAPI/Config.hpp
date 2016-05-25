@@ -10,7 +10,11 @@
 
 namespace CommonAPI {
 
-static const Timeout_t DEFAULT_SEND_TIMEOUT_MS = 5000;
+#ifndef DEFAULT_SEND_TIMEOUT
+#define DEFAULT_SEND_TIMEOUT 5000
+#endif
+
+static const Timeout_t DEFAULT_SEND_TIMEOUT_MS = DEFAULT_SEND_TIMEOUT;
 
 } // namespace CommonAPI
 

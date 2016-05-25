@@ -168,6 +168,8 @@ private:
     COMMONAPI_EXPORT bool loadLibrary(const std::string &);
 
 private:
+    std::string usedConfig_;
+
     std::string defaultBinding_;
     std::string defaultFolder_;
     std::string defaultConfig_;

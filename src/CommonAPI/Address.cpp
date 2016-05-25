@@ -9,6 +9,10 @@
 
 namespace CommonAPI {
 
+Address::Address() {
+
+}
+
 Address::Address(const std::string &_address) {
     // TODO: handle error situation (_address is no valid CommonAPI address)
     setAddress(_address);
