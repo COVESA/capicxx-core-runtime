@@ -81,8 +81,9 @@ protected:
         (void)_subscription;
     }
 
-    virtual void onListenerRemoved(const Listener &_listener) {
+    virtual void onListenerRemoved(const Listener &_listener, const Subscription _subscription) {
         (void)_listener;
+        (void) _subscription;
     }
     virtual void onLastListenerRemoved(const Listener &_listener) {
         (void)_listener;
@@ -121,7 +122,7 @@ typename Event<Arguments_...>::Subscription Event<Arguments_...>::subscribe(List
 }
 
 template<typename ... Arguments_>
-void Event<Arguments_...>::unsubscribe(Subscription subscription) {
+void Event<Arguments_...>::unsubscribe(const Subscription subscription) {
     bool isLastListener(false);
     bool hasUnsubscribed(false);
     Listener listener;
@@ -152,7 +153,7 @@ void Event<Arguments_...>::unsubscribe(Subscription subscription) {
     subscriptionMutex_.unlock();
 
     if (hasUnsubscribed) {
-        onListenerRemoved(listener);
+        onListenerRemoved(listener, subscription);
         if (isLastListener) {
             onLastListenerRemoved(listener);
         }

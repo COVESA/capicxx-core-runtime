@@ -60,11 +60,6 @@ namespace CommonAPI {
     static void f(void)
 #endif
 
-#ifdef WIN32
-#define usleep(micSec) \
-    std::this_thread::sleep_for(std::chrono::microseconds(micSec))
-#endif
-
 namespace CommonAPI {
 
 enum class AvailabilityStatus {

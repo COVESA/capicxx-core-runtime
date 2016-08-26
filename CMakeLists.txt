@@ -10,7 +10,7 @@ PROJECT(libcommonapi)
 # version of CommonAPI
 SET( LIBCOMMONAPI_MAJOR_VERSION 3 )
 SET( LIBCOMMONAPI_MINOR_VERSION 1 )
-SET( LIBCOMMONAPI_PATCH_VERSION 8 )
+SET( LIBCOMMONAPI_PATCH_VERSION 9 )
 
 message(STATUS "Project name: ${PROJECT_NAME}")
 
@@ -121,6 +121,7 @@ link_directories(
 )
 
 file(GLOB CAPI_SRCS "src/CommonAPI/*.cpp")
+list(SORT CAPI_SRCS)
 add_library(CommonAPI SHARED ${CAPI_SRCS})
 target_link_libraries(CommonAPI PRIVATE ${DL_LIBRARY} ${DLT_LIBRARIES})
 set_target_properties(CommonAPI PROPERTIES VERSION ${LIBCOMMONAPI_MAJOR_VERSION}.${LIBCOMMONAPI_MINOR_VERSION}.${LIBCOMMONAPI_PATCH_VERSION} SOVERSION ${LIBCOMMONAPI_MAJOR_VERSION}.${LIBCOMMONAPI_MINOR_VERSION}.${LIBCOMMONAPI_PATCH_VERSION} LINKER_LANGUAGE C)
@@ -136,6 +137,7 @@ CONFIGURE_FILE(commonapi.spec.in commonapi.spec)
 
 # for installation of CommonAPI header files
 file (GLOB_RECURSE CommonAPI_INCLUDE_INSTALL_FILES "include/CommonAPI/*.hpp")
+list (SORT CommonAPI_INCLUDE_INSTALL_FILES)
 set_target_properties (CommonAPI PROPERTIES PUBLIC_HEADER "${CommonAPI_INCLUDE_INSTALL_FILES}")
 
 # install CommonAPI library including headers

@@ -20,96 +20,67 @@
 #define COMMONAPI_LOGLEVEL COMMONAPI_LOGLEVEL_NONE
 #endif
 
-#ifdef WIN32
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_FATAL
-#define COMMONAPI_FATAL(...) \
-    do { Logger::log(LoggerImpl::Level::LL_FATAL, __VA_ARGS__); } while (false);
-#else
-#define COMMONAPI_FATAL(...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_ERROR
-#define COMMONAPI_ERROR(...) \
-        do { Logger::log(LoggerImpl::Level::LL_ERROR, __VA_ARGS__); } while (false);
-#else
-#define COMMONAPI_ERROR(...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_WARNING
-#define COMMONAPI_WARNING(...) \
-        do { Logger::log(LoggerImpl::Level::LL_WARNING, __VA_ARGS__); } while (false);
-#else
-#define COMMONAPI_WARNING(...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_INFO
-#define COMMONAPI_INFO(...) \
-        do { Logger::log(LoggerImpl::Level::LL_INFO, __VA_ARGS__); } while (false);
-#else
-#define COMMONAPI_INFO(...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_DEBUG
-#define COMMONAPI_DEBUG(...) \
-        do { Logger::log(LoggerImpl::Level::LL_DEBUG, __VA_ARGS__); } while (false);
-#else
-#define COMMONAPI_DEBUG(...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_VERBOSE
-#define COMMONAPI_VERBOSE(...) \
-        do { Logger::log(LoggerImpl::Level::LL_VERBOSE, __VA_ARGS__); } while (false);
-#else
-#define COMMONAPI_VERBOSE(...)
-#endif
-
-#else // !WIN32
-
-#define COMMONAPI_FATAL(params...) \
-    do { Logger::log(LoggerImpl::Level::LL_FATAL, params); } while (false);
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_ERROR
-    #define COMMONAPI_ERROR(params...) \
-        do { Logger::log(LoggerImpl::Level::LL_ERROR, params); } while (false);
-#else
-    #define COMMONAPI_ERROR(params...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_WARNING
-    #define COMMONAPI_WARNING(params...) \
-        do { Logger::log(LoggerImpl::Level::LL_WARNING, params); } while (false);
-#else
-    #define COMMONAPI_WARNING(params...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_INFO
-    #define COMMONAPI_INFO(params...) \
-        do { Logger::log(LoggerImpl::Level::LL_INFO, params); } while (false);
-#else
-    #define COMMONAPI_INFO(params...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_DEBUG
-    #define COMMONAPI_DEBUG(params...) \
-        do { Logger::log(LoggerImpl::Level::LL_DEBUG, params); } while (false);
-#else
-    #define COMMONAPI_DEBUG(params...)
-#endif
-
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_VERBOSE
-    #define COMMONAPI_VERBOSE(params...) \
-        do { Logger::log(LoggerImpl::Level::LL_VERBOSE, params); } while (false);
-#else
-    #define COMMONAPI_VERBOSE(params...)
-#endif
-
-#endif // WIN32
+#define COMMONAPI_FATAL     CommonAPI::Logger::fatal
+#define COMMONAPI_ERROR     CommonAPI::Logger::error
+#define COMMONAPI_WARNING   CommonAPI::Logger::warning
+#define COMMONAPI_INFO      CommonAPI::Logger::info
+#define COMMONAPI_DEBUG     CommonAPI::Logger::debug
+#define COMMONAPI_VERBOSE   CommonAPI::Logger::verbose
 
 namespace CommonAPI {
 
 class Logger {
 public:
+
+    template<typename... LogEntries_>
+    COMMONAPI_EXPORT static void fatal(LogEntries_... _entries) {
+        log(LoggerImpl::Level::LL_FATAL, _entries...);
+    }
+
+    template<typename... LogEntries_>
+    COMMONAPI_EXPORT static void error(LogEntries_... _entries) {
+#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_ERROR
+        log(LoggerImpl::Level::LL_ERROR, _entries...);
+#else
+    std::tuple<LogEntries_...> args(_entries...);
+#endif
+    }
+
+    template<typename... LogEntries_>
+    COMMONAPI_EXPORT static void warning(LogEntries_... _entries) {
+#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_WARNING
+        log(LoggerImpl::Level::LL_WARNING, _entries...);
+#else
+    std::tuple<LogEntries_...> args(_entries...);
+#endif
+    }
+
+    template<typename... LogEntries_>
+    COMMONAPI_EXPORT static void info(LogEntries_... _entries) {
+#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_INFO
+        log(LoggerImpl::Level::LL_INFO, _entries...);
+#else
+    std::tuple<LogEntries_...> args(_entries...);
+#endif
+    }
+
+    template<typename... LogEntries_>
+    COMMONAPI_EXPORT static void debug(LogEntries_... _entries) {
+#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_DEBUG
+        log(LoggerImpl::Level::LL_DEBUG, _entries...);
+#else
+    std::tuple<LogEntries_...> args(_entries...);
+#endif
+    }
+
+    template<typename... LogEntries_>
+    COMMONAPI_EXPORT static void verbose(LogEntries_... _entries) {
+#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_VERBOSE
+        log(LoggerImpl::Level::LL_VERBOSE, _entries...);
+#else
+    std::tuple<LogEntries_...> args(_entries...);
+#endif
+    }
 
     template<typename... LogEntries_>
     COMMONAPI_EXPORT static void log(LoggerImpl::Level _level, LogEntries_... _entries) {

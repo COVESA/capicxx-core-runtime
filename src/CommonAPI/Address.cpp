@@ -3,9 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <cctype>
 #include <sstream>
 
 #include <CommonAPI/Address.hpp>
+#include <CommonAPI/Logger.hpp>
 
 namespace CommonAPI {
 
@@ -20,10 +22,8 @@ Address::Address(const std::string &_address) {
 
 Address::Address(const std::string &_domain,
                  const std::string &_interface,
-                 const std::string &_instance)
-    : domain_(_domain),
-      interface_(_interface),
-      instance_(_instance) {
+                 const std::string &_instance) {
+    setAddress(_domain + ":" + _interface + ":" + _instance);
 }
 
 Address::Address(const Address &_source)
@@ -74,14 +74,77 @@ Address::getAddress() const {
 
 void
 Address::setAddress(const std::string &_address) {
-    std::istringstream addressStream(_address);
-    if (std::getline(addressStream, domain_, ':')) {
-        if (std::getline(addressStream, interface_, ':')) {
-            if(!std::getline(addressStream, instance_, ':')) {
-                if(std::getline(addressStream, instance_)) {
+    std::string itsDomain, itsInterface, itsVersion, itsInstance;
+    std::size_t itsDomainPos, itsInterfacePos, itsVersionPos, itsInstancePos;
+    bool isValid(true);
+
+    itsDomainPos = _address.find(':');
+    if (itsDomainPos == std::string::npos) {
+        isValid = false;
+    }
+
+    if (isValid) {
+        itsDomain = _address.substr(0, itsDomainPos);
+        itsDomainPos++;
+
+        itsInterfacePos = _address.find(':', itsDomainPos);
+        if (itsInterfacePos == std::string::npos) {
+            isValid = false;
+        }
+    }
+
+    if (isValid) {
+        itsInterface = _address.substr(itsDomainPos, itsInterfacePos-itsDomainPos);
+        itsInterfacePos++;
+
+        itsVersionPos = _address.find(':', itsInterfacePos);
+        if (itsVersionPos == std::string::npos) {
+            itsInstance = _address.substr(itsInterfacePos);
+        } else {
+            itsVersion = _address.substr(itsInterfacePos, itsVersionPos-itsInterfacePos);
+            if (itsVersion != "") {
+                // check version
+                std::size_t itsSeparatorPos = itsVersion.find('_');
+                if (itsSeparatorPos == std::string::npos) {
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    if( *(itsVersion.begin()) != 'v')
+                        isValid = false;
+                    if(isValid) {
+                        for (auto it = itsVersion.begin()+1; it != itsVersion.end(); ++it) {
+                            if (!isdigit(*it) && *it != '_') {
+                                isValid = false;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
+            itsVersionPos++;
+
+            if (isValid) {
+                itsInstancePos = _address.find(':', itsVersionPos);
+                if (itsInstancePos != std::string::npos) {
+                    isValid = false;
+                }
+
+                itsInstance = _address.substr(itsVersionPos);
+            }
         }
+    }
+
+    if (isValid) {
+        domain_ = itsDomain;
+        if (itsVersion != "")
+            itsInterface += ":" + itsVersion;
+        else
+            itsInterface += ":v1_0";
+        interface_ = itsInterface;
+        instance_ = itsInstance;
+    } else {
+        COMMONAPI_ERROR("Attempted to set invalid CommonAPI address: ", _address);
     }
 }
 
