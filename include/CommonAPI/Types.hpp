@@ -53,10 +53,20 @@ namespace CommonAPI {
     static void __cdecl f(void); \
     __declspec(allocate(".CRT$XCU")) void(__cdecl*f##_)(void) = f; \
     static void __cdecl f(void)
+#define DEINITIALIZER(f) \
+    static void __cdecl f(void); \
+    static void _##f##_wrapper(void) { \
+        atexit(f); \
+    } \
+    __declspec(allocate(".CRT$XCU")) void(__cdecl * f##_)(void) = _##f##_wrapper; \
+    static void __cdecl f(void)
 #else
 #define CCALL
 #define INITIALIZER(f) \
     static void f(void) __attribute__((constructor)); \
+    static void f(void)
+#define DEINITIALIZER(f) \
+    static void f(void) __attribute__((destructor)); \
     static void f(void)
 #endif
 

@@ -1,6 +1,9 @@
 Changes
 =======
 
+v3.1.10.1
+- Fixed crash on dlclose()
+
 v3.1.10
 - no changes
 
