@@ -1,4 +1,4 @@
-// Copyright (C) 2014-2015 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2014-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -145,7 +145,7 @@ struct StructTypeWriter<EmptyDeployment, Index_, TypeOutput_, V_<Values_...>> {
                         const V_<Values_...> &_values,
                         const EmptyDeployment *_depl = nullptr) {
                 StructTypeWriter<EmptyDeployment, Index_-1, TypeOutput_, V_<Values_...>>{}(_output, _values, _depl);
-#ifdef WIN32
+#ifdef _WIN32
                 _output.writeType(std::get<Index_>(_values.values_), _depl);
 #else
                 _output.template writeType(std::get<Index_>(_values.values_), _depl);
@@ -159,7 +159,7 @@ struct StructTypeWriter<EmptyDeployment, 0, TypeOutput_, V_<Values_...>> {
         void operator()(TypeOutputStream<TypeOutput_> &_output,
                         const V_<Values_...> &_values,
                         const EmptyDeployment *_depl = nullptr) {
-#ifdef WIN32
+#ifdef _WIN32
                 _output.writeType(std::get<0>(_values.values_), _depl);
 #else
                 _output.template writeType(std::get<0>(_values.values_), _depl);
@@ -173,7 +173,7 @@ struct StructTypeWriter<Deployment_, Index_, TypeOutput_, V_<Values_...>> {
                         const V_<Values_...> &_values,
                         const Deployment_ *_depl = nullptr) {
                 StructTypeWriter<Deployment_, Index_-1, TypeOutput_, V_<Values_...>>{}(_output, _values, _depl);
-#ifdef WIN32
+#ifdef _WIN32
                 _output.writeType(std::get<Index_>(_values.values_),
                                   (_depl ? std::get<Index_>(_depl->values_)
                                          : nullptr));
@@ -191,7 +191,7 @@ struct StructTypeWriter<Deployment_, 0, TypeOutput_, V_<Values_...>> {
         void operator()(TypeOutputStream<TypeOutput_> &_output,
                         const V_<Values_...> &_values,
                         const Deployment_ *_depl = nullptr) {
-#ifdef WIN32
+#ifdef _WIN32
                 _output.writeType(std::get<0>(_values.values_),
                                     (_depl ? std::get<0>(_depl->values_)
                                                   : nullptr));

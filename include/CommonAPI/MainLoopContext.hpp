@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2015 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2013-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -12,13 +12,13 @@
 
 #include <cstdint>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <WinSock2.h>
 #else
 #include <poll.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #undef max
 #endif
 
@@ -111,7 +111,7 @@ struct Watch {
      */
     virtual const pollfd& getAssociatedFileDescriptor() = 0;
 
-#ifdef WIN32
+#ifdef _WIN32
     /**
     * \brief Returns the event bound to the file descriptor that is managed by this watch.
     *

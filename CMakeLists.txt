@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2015 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2013-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -10,7 +10,7 @@ PROJECT(libcommonapi)
 # version of CommonAPI
 SET( LIBCOMMONAPI_MAJOR_VERSION 3 )
 SET( LIBCOMMONAPI_MINOR_VERSION 1 )
-SET( LIBCOMMONAPI_PATCH_VERSION 10 )
+SET( LIBCOMMONAPI_PATCH_VERSION 11 )
 
 message(STATUS "Project name: ${PROJECT_NAME}")
 

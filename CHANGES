@@ -1,6 +1,11 @@
 Changes
 =======
 
+v3.1.11
+- console logging - log to standard error stream instead of standard output stream
+- Runtime::initFactories() made public
+- check for #define _WIN32 instead of (deprecated) WIN32
+
 v3.1.10.1
 - Fixed crash on dlclose()
 

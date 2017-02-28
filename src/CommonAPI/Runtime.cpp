@@ -1,9 +1,9 @@
-// Copyright (C) 2013-2015 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2013-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <Windows.h>
 #else
 #include <dlfcn.h>
@@ -61,7 +61,7 @@ Runtime::~Runtime() {
 bool
 Runtime::registerFactory(const std::string &_binding, std::shared_ptr<Factory> _factory) {
     bool isRegistered(false);
-#ifndef WIN32
+#ifndef _WIN32
     std::lock_guard<std::mutex> itsLock(factoriesMutex_);
 #endif
     if (_binding == defaultBinding_) {
@@ -83,7 +83,7 @@ Runtime::registerFactory(const std::string &_binding, std::shared_ptr<Factory> _
 
 bool
 Runtime::unregisterFactory(const std::string &_binding) {
-#ifndef WIN32
+#ifndef _WIN32
     std::lock_guard<std::mutex> itsLock(factoriesMutex_);
 #endif
     if (_binding == defaultBinding_) {
@@ -98,7 +98,7 @@ Runtime::unregisterFactory(const std::string &_binding) {
  * Private
  */
 void Runtime::init() {
-#ifndef WIN32
+#ifndef _WIN32
     std::lock_guard<std::mutex> itsLock(mutex_);
 #endif
     if (!isConfigured_) {
@@ -151,7 +151,7 @@ Runtime::readConfiguration() {
 #define MAX_PATH_LEN 255
     std::string config;
     char currentDirectory[MAX_PATH_LEN];
-#ifdef WIN32
+#ifdef _WIN32
     if (GetCurrentDirectory(MAX_PATH_LEN, currentDirectory)) {
 #else
     if (getcwd(currentDirectory, MAX_PATH_LEN)) {
@@ -332,7 +332,7 @@ Runtime::getLibrary(
     // name.
     library = getProperty("LibraryBase");
     if (library != "") {
-#ifdef WIN32
+#ifdef _WIN32
         library = library + "-" + defaultBinding_;
 #else
         library = "lib" + library + "-" + defaultBinding_;
@@ -350,7 +350,7 @@ Runtime::loadLibrary(const std::string &_library) {
     std::string itsLibrary(_library);
 
     // TODO: decide whether this really is a good idea...
-    #ifdef WIN32
+    #ifdef _WIN32
     if (itsLibrary.rfind(".dll") != itsLibrary.length() - 4) {
         itsLibrary += ".dll";
     }
@@ -382,7 +382,7 @@ Runtime::loadLibrary(const std::string &_library) {
 
     bool isLoaded(true);
     if (loadedLibraries_.end() == loadedLibraries_.find(itsLibrary)) {
-        #ifdef WIN32
+        #ifdef _WIN32
         if (LoadLibrary(itsLibrary.c_str()) != 0) {
             loadedLibraries_.insert(itsLibrary);
             COMMONAPI_DEBUG("Loading interface library \"", itsLibrary, "\" succeeded.");
