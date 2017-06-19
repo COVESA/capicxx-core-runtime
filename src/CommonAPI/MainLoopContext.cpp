@@ -8,7 +8,7 @@
 namespace CommonAPI {
 
 int64_t getCurrentTimeInMs() {
-   return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+   return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
 const std::string &MainLoopContext::getName() const {
