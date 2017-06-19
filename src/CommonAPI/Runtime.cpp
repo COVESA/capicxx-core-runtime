@@ -150,6 +150,7 @@ bool
 Runtime::readConfiguration() {
 #define MAX_PATH_LEN 255
     std::string config;
+    bool tryLoadConfig(true);
     char currentDirectory[MAX_PATH_LEN];
 #ifdef _WIN32
     if (GetCurrentDirectory(MAX_PATH_LEN, currentDirectory)) {
@@ -163,11 +164,14 @@ Runtime::readConfiguration() {
         struct stat s;
         if (stat(usedConfig_.c_str(), &s) != 0) {
         	usedConfig_ = defaultConfig_;
+            if (stat(usedConfig_.c_str(), &s) != 0) {
+                tryLoadConfig = false;
+            }
         }
     }
 
     IniFileReader reader;
-    if (!reader.load(usedConfig_))
+    if (tryLoadConfig && !reader.load(usedConfig_))
         return false;
 
     std::string itsConsole("true");
@@ -367,7 +371,7 @@ Runtime::loadLibrary(const std::string &_library) {
 		// Check the version information
 		while (soStart < itsLibrary.length()) {
 			if (itsLibrary[soStart] != '.'
-					&& !std::isdigit(itsLibrary[soStart])) {
+					&& !std::isdigit(static_cast<unsigned char>(itsLibrary[soStart]))) {
 				break;
 			}
 			soStart++;

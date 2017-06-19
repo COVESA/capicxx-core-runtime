@@ -7,9 +7,17 @@
 
 namespace CommonAPI {
 
+Proxy::~Proxy() {
+    completed_.set_value();
+}
+
 const Address &
 Proxy::getAddress() const {
     return address_;
+}
+
+std::future<void> Proxy::getCompletionFuture() {
+    return completed_.get_future();
 }
 
 } // namespace CommonAPI

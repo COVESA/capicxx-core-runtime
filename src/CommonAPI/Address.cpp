@@ -75,7 +75,10 @@ Address::getAddress() const {
 void
 Address::setAddress(const std::string &_address) {
     std::string itsDomain, itsInterface, itsVersion, itsInstance;
-    std::size_t itsDomainPos, itsInterfacePos, itsVersionPos, itsInstancePos;
+    std::size_t itsDomainPos(0);
+    std::size_t itsInterfacePos(0);
+    std::size_t itsVersionPos(0);
+    std::size_t itsInstancePos(0);
     bool isValid(true);
 
     itsDomainPos = _address.find(':');
@@ -114,7 +117,7 @@ Address::setAddress(const std::string &_address) {
                         isValid = false;
                     if(isValid) {
                         for (auto it = itsVersion.begin()+1; it != itsVersion.end(); ++it) {
-                            if (!isdigit(*it) && *it != '_') {
+                            if (!isdigit(static_cast<unsigned char>(*it)) && *it != '_') {
                                 isValid = false;
                                 break;
                             }

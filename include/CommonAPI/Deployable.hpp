@@ -19,7 +19,8 @@ template<typename Type_, typename TypeDepl_>
 struct Deployable : DeployableBase
 {
     Deployable(const TypeDepl_ *_depl = nullptr)
-        : depl_(const_cast<TypeDepl_ *>(_depl)) {
+        : value_(),
+          depl_(const_cast<TypeDepl_ *>(_depl)) {
     }
 
     Deployable(const Type_ &_value, const TypeDepl_ *_depl)

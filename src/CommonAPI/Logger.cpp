@@ -6,7 +6,7 @@
 #include <CommonAPI/Logger.hpp>
 #include <CommonAPI/Runtime.hpp>
 
-namespace CommonAPI {;
+namespace CommonAPI {
 void
   Logger::init(bool _useConsole, const std::string &_fileName, bool _useDlt, const std::string &_level) {
   LoggerImpl::init(_useConsole, _fileName, _useDlt, _level);

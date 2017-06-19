@@ -72,6 +72,7 @@ protected:
     void notifyListeners(const Arguments_&... _eventArguments);
     void notifySpecificListener(const Subscription _subscription, const Arguments_&... _eventArguments);
     void notifySpecificError(const Subscription _subscription, const CallStatus status);
+    void notifyErrorListeners(const CallStatus status);
 
     virtual void onFirstListenerAdded(const Listener &_listener) {
         (void)_listener;
@@ -266,6 +267,37 @@ void Event<Arguments_...>::notifySpecificError(const Subscription subscription, 
         subscriptionMutex_.unlock();
     }
 }
+
+template<typename ... Arguments_>
+void Event<Arguments_...>::notifyErrorListeners(const CallStatus status) {
+    subscriptionMutex_.lock();
+    notificationMutex_.lock();
+    for (auto iterator = pendingUnsubscriptions_.begin();
+         iterator != pendingUnsubscriptions_.end();
+         iterator++) {
+        subscriptions_.erase(*iterator);
+    }
+    pendingUnsubscriptions_.clear();
+
+    for (auto iterator = pendingSubscriptions_.begin();
+         iterator != pendingSubscriptions_.end();
+         iterator++) {
+        subscriptions_.insert(*iterator);
+    }
+    pendingSubscriptions_.clear();
+
+    subscriptionMutex_.unlock();
+
+    for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
+        ErrorListener listener = std::get<1>(iterator->second);
+        if (listener) {
+            listener(status);
+        }
+    }
+
+    notificationMutex_.unlock();
+}
+
 
 } // namespace CommonAPI
 

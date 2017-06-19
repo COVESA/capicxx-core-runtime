@@ -1,6 +1,12 @@
 Changes
 =======
 
+v3.1.12
+- Add possibility to be notified on proxy destruction via
+  Proxy::getCompletionFuture method
+- set CommonAPI CallStatus to INVALID_VALUE for wrong CRC values
+- fixed code sonar warnings
+
 v3.1.11
 - console logging - log to standard error stream instead of standard output stream
 - Runtime::initFactories() made public

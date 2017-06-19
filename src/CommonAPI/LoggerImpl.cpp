@@ -10,7 +10,7 @@
 #include <CommonAPI/Runtime.hpp>
 #endif
 
-namespace CommonAPI {;
+namespace CommonAPI {
 
 #if defined(USE_CONSOLE) || defined(USE_FILE)
 std::mutex LoggerImpl::mutex_;
