@@ -147,6 +147,7 @@ install(TARGETS CommonAPI
         RUNTIME DESTINATION ${INSTALL_BIN_DIR}
         ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
         PUBLIC_HEADER DESTINATION "${INSTALL_INCLUDE_DIR}/CommonAPI"
+        INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR}
 )
 
 ##############################################################################
