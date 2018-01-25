@@ -21,6 +21,9 @@ struct COMMONAPI_EXPORT CallInfo {
     CallInfo(Timeout_t _timeout, Sender_t _sender)
         : timeout_(_timeout), sender_(_sender) {
     }
+    CallInfo(const CallInfo &_other)
+        : timeout_(_other.timeout_), sender_(_other.sender_) {
+    }
 
     Timeout_t timeout_;
     Sender_t sender_;

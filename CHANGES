@@ -1,5 +1,8 @@
 Changes
 =======
+v3.1.12.3
+- Added copy constructor for CommonAPI CallInfo
+
 v3.1.12.2
 - Defer Runtime destruction till shared object is unloaded
 
