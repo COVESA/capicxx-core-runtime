@@ -55,7 +55,9 @@ Runtime::setProperty(const std::string &_name, const std::string &_value) {
 }
 
 std::shared_ptr<Runtime> Runtime::get() {
+#ifndef _WIN32
     std::lock_guard<std::mutex> itsLock(getMutex__);
+#endif
     if(!theRuntimePtr__) {
         theRuntimePtr__ = new std::shared_ptr<Runtime>();
     }

@@ -1,5 +1,10 @@
 Changes
 =======
+
+v3.1.12.4
+- Fix calling of registered subscription status handlers for
+  selective broadcasts
+
 v3.1.12.3
 - Added copy constructor for CommonAPI CallInfo
 

@@ -710,11 +710,11 @@ const Type_ & Variant<Types_...>::get() const {
     if (itsType == valueType_) {
         return *(reinterpret_cast<const Type_ *>(&valueStorage_));
     } else {
-#ifdef __EXCEPTIONS
+#if defined(__EXCEPTIONS) || defined(_CPPUNWIND)
         std::bad_cast toThrow;
         throw toThrow;
 #else
-        printf("SerializableVariant.hpp:%i %s: Incorrect access to variant; attempting to get type not currently contained", __LINE__, __FUNCTION__);
+        printf("Variant.hpp:%i %s: Incorrect access to variant; attempting to get type not currently contained", __LINE__, __FUNCTION__);
         abort();
 #endif
     }

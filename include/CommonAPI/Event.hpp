@@ -115,8 +115,11 @@ typename Event<Arguments_...>::Subscription Event<Arguments_...>::subscribe(List
     pendingSubscriptions_[subscription] = std::move(listeners);
     subscriptionMutex_.unlock();
 
-    if (isFirstListener)
+    if (isFirstListener) {
+        if (!pendingUnsubscriptions_.empty())
+            onLastListenerRemoved(listener);
         onFirstListenerAdded(listener);
+    }
     onListenerAdded(listener, subscription);
 
     return subscription;
