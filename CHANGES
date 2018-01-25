@@ -1,5 +1,8 @@
 Changes
 =======
+v3.1.12.2
+- Defer Runtime destruction till shared object is unloaded
+
 v3.1.12.1
 - replaced std::chrono::high_resolution_clock by std::chrono::steady_clock in MainLoopContext.cpp
 

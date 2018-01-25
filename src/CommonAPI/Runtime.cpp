@@ -27,7 +27,19 @@ const char *COMMONAPI_DEFAULT_CONFIG_FILE = "commonapi.ini";
 const char *COMMONAPI_DEFAULT_CONFIG_FOLDER = "/etc";
 
 std::map<std::string, std::string> properties__;
-std::shared_ptr<Runtime> Runtime::theRuntime__ = std::make_shared<Runtime>();
+static std::shared_ptr<Runtime> * theRuntimePtr__;
+static std::mutex getMutex__;
+
+#ifndef _WIN32
+DEINITIALIZER(RuntimeDeinit) {
+    if (theRuntimePtr__) {
+        std::lock_guard<std::mutex> itsLock(getMutex__);
+        theRuntimePtr__->reset();
+        delete theRuntimePtr__;
+        theRuntimePtr__ = nullptr;
+    }
+}
+#endif
 
 std::string
 Runtime::getProperty(const std::string &_name) {
@@ -43,8 +55,18 @@ Runtime::setProperty(const std::string &_name, const std::string &_value) {
 }
 
 std::shared_ptr<Runtime> Runtime::get() {
-    theRuntime__->init();
-    return theRuntime__;
+    std::lock_guard<std::mutex> itsLock(getMutex__);
+    if(!theRuntimePtr__) {
+        theRuntimePtr__ = new std::shared_ptr<Runtime>();
+    }
+    if (theRuntimePtr__) {
+        if (!*theRuntimePtr__) {
+            *theRuntimePtr__ = std::make_shared<Runtime>();
+            (*theRuntimePtr__)->init();
+        }
+        return *theRuntimePtr__;
+    }
+    return nullptr;
 }
 
 Runtime::Runtime()

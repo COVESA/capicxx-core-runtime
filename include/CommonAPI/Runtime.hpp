@@ -188,7 +188,6 @@ private:
     bool isInitialized_;
 
     static std::map<std::string, std::string> properties_;
-    static std::shared_ptr<Runtime> theRuntime__;
 
 friend class ProxyManager;
 };
