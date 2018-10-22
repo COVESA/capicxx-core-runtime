@@ -129,6 +129,9 @@ list(SORT CAPI_SRCS)
 add_library(CommonAPI SHARED ${CAPI_SRCS})
 target_link_libraries(CommonAPI PRIVATE ${DL_LIBRARY} ${DLT_LIBRARIES})
 set_target_properties(CommonAPI PROPERTIES VERSION ${LIBCOMMONAPI_MAJOR_VERSION}.${LIBCOMMONAPI_MINOR_VERSION}.${LIBCOMMONAPI_PATCH_VERSION} SOVERSION ${LIBCOMMONAPI_MAJOR_VERSION}.${LIBCOMMONAPI_MINOR_VERSION}.${LIBCOMMONAPI_PATCH_VERSION} LINKER_LANGUAGE C)
+target_include_directories(CommonAPI INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>)
 set_target_properties (CommonAPI PROPERTIES INTERFACE_LINK_LIBRARY "")
 
 ##############################################################################
@@ -167,23 +170,14 @@ export(PACKAGE CommonAPI)
 # Create the CommonAPIConfig.cmake and CommonAPIConfigVersion files ...
 file(RELATIVE_PATH REL_INCLUDE_DIR "${ABSOLUTE_INSTALL_CMAKE_DIR}" "${ABSOLUTE_INSTALL_INCLUDE_DIR}")
 
-# ... for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include" )
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonAPIConfig.cmake.in
   "${PROJECT_BINARY_DIR}/CommonAPIConfig.cmake" @ONLY)
-
-# ... for the install tree
-set(CONF_INCLUDE_DIRS "\${COMMONAPI_CMAKE_DIR}/${REL_INCLUDE_DIR}")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonAPIConfig.cmake.in
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CommonAPIConfig.cmake" @ONLY)
-
-# ... for both
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonAPIConfigVersion.cmake.in
   "${PROJECT_BINARY_DIR}/CommonAPIConfigVersion.cmake" @ONLY)
 
 # Install the CommonAPIConfig.cmake and CommonAPIConfigVersion.cmake
 install(FILES
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CommonAPIConfig.cmake"
+  "${PROJECT_BINARY_DIR}/CommonAPIConfig.cmake"
   "${PROJECT_BINARY_DIR}/CommonAPIConfigVersion.cmake"
   DESTINATION "${INSTALL_CMAKE_DIR}")
 
