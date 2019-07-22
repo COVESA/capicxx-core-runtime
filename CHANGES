@@ -1,6 +1,12 @@
 Changes
 =======
 
+v3.1.12.6
+- Fix race condition leading to event delivery after unsubscription
+
+v3.1.12.5
+- Initialize valueType in copy ctors of Variant class
+
 v3.1.12.4
 - Fix calling of registered subscription status handlers for
   selective broadcasts

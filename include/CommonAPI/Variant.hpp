@@ -619,7 +619,9 @@ Variant<Types_...>::Variant()
 }
 
 template<typename... Types_>
-Variant<Types_...>::Variant(const Variant &_source) {
+Variant<Types_...>::Variant(const Variant &_source) :
+    valueType_(_source.valueType_)
+{
     AssignmentVisitor<Types_...> visitor(*this, false);
     ApplyVoidVisitor<
         AssignmentVisitor<Types_...> , Variant<Types_...>, Types_...
@@ -627,7 +629,8 @@ Variant<Types_...>::Variant(const Variant &_source) {
 }
 
 template<typename... Types_>
-Variant<Types_...>::Variant(Variant &&_source)
+Variant<Types_...>::Variant(Variant &&_source) :
+    valueType_(_source.valueType_)
 {
     AssignmentVisitor<Types_...> visitor(*this, false);
     ApplyVoidVisitor<
@@ -688,7 +691,9 @@ template<typename Type_>
 Variant<Types_...>::Variant(const Type_ &_value,
                             typename std::enable_if<!std::is_const<Type_>::value>::type*,
                             typename std::enable_if<!std::is_reference<Type_>::value>::type*,
-                            typename std::enable_if<!std::is_same<Type_, Variant<Types_...>>::value>::type*) {
+                            typename std::enable_if<!std::is_same<Type_, Variant<Types_...>>::value>::type*) :
+    valueType_(0x0)
+{
     set<typename TypeSelector<Type_, Types_...>::type>(_value, false);
 }
 
@@ -697,7 +702,9 @@ template<typename Type_>
 Variant<Types_...>::Variant(Type_ &&_value,
 typename std::enable_if<!std::is_const<Type_>::value>::type*,
 typename std::enable_if<!std::is_reference<Type_>::value>::type*,
-typename std::enable_if<!std::is_same<Type_, Variant<Types_...>>::value>::type*) {
+typename std::enable_if<!std::is_same<Type_, Variant<Types_...>>::value>::type*) :
+    valueType_(0x0)
+{
     set<typename TypeSelector<Type_, Types_...>::type>(std::move(_value), false);
 }
 
