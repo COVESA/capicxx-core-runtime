@@ -116,7 +116,6 @@ ENDIF(DLT_FOUND)
 ##############################################################################
 
 include_directories(
-    include
     ${DLT_INCLUDE_DIRS}
 )
 
@@ -132,6 +131,7 @@ if (BUILD_SHARED_LIBS)
 else()
     add_library(CommonAPI STATIC ${CAPI_SRCS})
 endif()
+target_include_directories(CommonAPI PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>)
 target_link_libraries(CommonAPI PRIVATE ${DL_LIBRARY} ${DLT_LIBRARIES})
 set_target_properties(CommonAPI PROPERTIES VERSION ${LIBCOMMONAPI_MAJOR_VERSION}.${LIBCOMMONAPI_MINOR_VERSION}.${LIBCOMMONAPI_PATCH_VERSION} SOVERSION ${LIBCOMMONAPI_MAJOR_VERSION}.${LIBCOMMONAPI_MINOR_VERSION}.${LIBCOMMONAPI_PATCH_VERSION} LINKER_LANGUAGE C)
 set_target_properties (CommonAPI PROPERTIES INTERFACE_LINK_LIBRARY "")
