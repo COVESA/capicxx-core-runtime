@@ -6,18 +6,24 @@
 #ifndef COMMONAPI_EXPORT_HPP_
 #define COMMONAPI_EXPORT_HPP_
 
-#ifdef _WIN32
-    #define COMMONAPI_EXPORT __declspec(dllexport)
-    #define COMMONAPI_EXPORT_CLASS_EXPLICIT
+#ifdef COMMONAPI_DLL_COMPILATION
+    #ifdef _WIN32
+        #define COMMONAPI_EXPORT __declspec(dllexport)
+        #define COMMONAPI_EXPORT_CLASS_EXPLICIT
 
-    #if COMMONAPI_DLL_COMPILATION
-        #define COMMONAPI_IMPORT_EXPORT __declspec(dllexport)
+        #if COMMONAPI_INTERNAL_COMPILATION
+            #define COMMONAPI_IMPORT_EXPORT __declspec(dllexport)
+        #else
+            #define COMMONAPI_IMPORT_EXPORT __declspec(dllimport)
+        #endif
     #else
-        #define COMMONAPI_IMPORT_EXPORT __declspec(dllimport)
+        #define COMMONAPI_EXPORT __attribute__ ((visibility ("default")))
+        #define COMMONAPI_EXPORT_CLASS_EXPLICIT COMMONAPI_EXPORT
+        #define COMMONAPI_IMPORT_EXPORT
     #endif
 #else
-    #define COMMONAPI_EXPORT __attribute__ ((visibility ("default")))
-    #define COMMONAPI_EXPORT_CLASS_EXPLICIT COMMONAPI_EXPORT
+    #define COMMONAPI_EXPORT
+    #define COMMONAPI_EXPORT_CLASS_EXPLICIT
     #define COMMONAPI_IMPORT_EXPORT
 #endif
 
