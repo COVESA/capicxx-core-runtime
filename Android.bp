@@ -1,0 +1,36 @@
+cc_library_shared {
+    name: "libCommonAPI",
+    vendor: true,
+    rtti: true,
+    cpp_std: "gnu++11",
+
+    cppflags: [
+        "-fexceptions",
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+        "-Wformat",
+        "-Wformat-security",
+        "-Wconversion",
+        "-fstrict-aliasing",
+        "-fstack-protector",
+        "-fasynchronous-unwind-tables",
+        "-fno-omit-frame-pointer",
+        "-DCOMMONAPI_INTERNAL_COMPILATION",
+        "-Wno-ignored-attributes",
+    ],
+
+    ldflags: ["-Wl,-export-dynamic"],
+
+    srcs: [
+        "src/**/*.cpp",
+    ],
+
+    local_include_dirs: [
+        "include",
+    ],
+
+    export_include_dirs: [
+        "include"
+    ],
+}
