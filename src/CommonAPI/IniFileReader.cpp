@@ -45,50 +45,50 @@ IniFileReader::load(const std::string &_path) {
 
         trim(line);
 
-        std::size_t start = line.find('[');
-        if (start == 0) {
-            std::size_t end = line.find(']');
-            if (end != line.npos) {
-                currentSectionName = line.substr(++start, --end);
-                if (sections_.end() == sections_.find(currentSectionName)) {
-                    currentSection = std::make_shared<Section>();
-                    if (currentSection) {
-                        sections_[currentSectionName] = currentSection;
+        if (!line.empty()) {
+            if (line.front() != ';') {
+                std::size_t start = line.find('[');
+                if (start == 0) {
+                    std::size_t end = line.find(']');
+                    if (end != line.npos) {
+                        currentSectionName = line.substr(++start, --end);
+                        auto currentSectionIt = sections_.find(currentSectionName);
+                        if (sections_.end() == currentSectionIt) {
+                            currentSection = std::make_shared<Section>();
+                            if (currentSection) {
+                                sections_[currentSectionName] = currentSection;
+                            }
+                        } else {
+                            currentSection = currentSectionIt->second;
+                        }
+                    } else {
+                        COMMONAPI_ERROR("Missing \']\' in section definition (line ",
+                            lineCounter, ")");
                     }
-                } else {
-                    COMMONAPI_ERROR("Double definition of section \'",
-                                    currentSectionName,
-                                    "\' ignoring definition (line ",
-                                    lineCounter,
-                                    ")");
-                    currentSection = nullptr;
+                } else if (currentSection) {
+                    std::size_t pos = line.find('=');
+                    if (pos != line.npos) {
+                        std::string key = line.substr(0, pos);
+                        trim(key);
+                        if (currentSection->mappings_.end()
+                            != currentSection->mappings_.find(key)) {
+                            COMMONAPI_ERROR("Double definition for key \'",
+                                key,
+                                "'\' in section \'",
+                                currentSectionName,
+                                "\' (line ",
+                                lineCounter,
+                                ")");
+                        } else {
+                            std::string value = line.substr(pos+1);
+                            trim(value);
+                            currentSection->mappings_[key] = value;
+                        }
+                    } else if (line.size() > 0) {
+                        COMMONAPI_ERROR("Missing \'=\' in key=value definition (line ",
+                            lineCounter, ")");
+                    }
                 }
-            } else {
-                COMMONAPI_ERROR("Missing \']\' in section definition (line ",
-                                lineCounter, ")");
-            }
-        } else if (currentSection) {
-            std::size_t pos = line.find('=');
-            if (pos != line.npos) {
-                std::string key = line.substr(0, pos);
-                trim(key);
-                if (currentSection->mappings_.end()
-                    != currentSection->mappings_.find(key)) {
-                    COMMONAPI_ERROR("Double definition for key \'",
-                                    key,
-                                    "'\' in section \'",
-                                    currentSectionName,
-                                    "\' (line ",
-                                    lineCounter,
-                                    ")");
-                } else {
-                    std::string value = line.substr(pos+1);
-                    trim(value);
-                    currentSection->mappings_[key] = value;
-                }
-            } else if (line.size() > 0) {
-                COMMONAPI_ERROR("Missing \'=\' in key=value definition (line ",
-                                lineCounter, ")");
             }
         }
     }

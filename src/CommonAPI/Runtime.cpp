@@ -19,12 +19,21 @@
 #include <CommonAPI/Logger.hpp>
 #include <CommonAPI/Runtime.hpp>
 
+#if defined __cpp_lib_filesystem
+#include <filesystem>
+namespace fs_ns = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs_ns = std::experimental::filesystem;
+#endif
+
 namespace CommonAPI {
 
 const char *COMMONAPI_DEFAULT_BINDING = "dbus";
 const char *COMMONAPI_DEFAULT_FOLDER = "/usr/local/lib/commonapi";
 const char *COMMONAPI_DEFAULT_CONFIG_FILE = "commonapi.ini";
 const char *COMMONAPI_DEFAULT_CONFIG_FOLDER = "/etc";
+const char *COMMONAPI_DEFAULT_MULTIPLE_CONFIGS_FOLDER = "/etc/commonapi.d";
 
 std::map<std::string, std::string> properties__;
 static std::shared_ptr<Runtime> * theRuntimePtr__;
@@ -126,14 +135,29 @@ void Runtime::init() {
     std::lock_guard<std::mutex> itsLock(mutex_);
 #endif
     if (!isConfigured_) {
-        // Determine default configuration file
+        // Determine default configuration file/folder
+        defaultConfig_ = COMMONAPI_DEFAULT_MULTIPLE_CONFIGS_FOLDER;
+
         const char *config = getenv("COMMONAPI_CONFIG");
         if (config) {
             defaultConfig_ = config;
-        } else {
-            defaultConfig_ = COMMONAPI_DEFAULT_CONFIG_FOLDER;
-            defaultConfig_ += "/";
-            defaultConfig_ += COMMONAPI_DEFAULT_CONFIG_FILE;
+        }
+
+        // Check if there is a configuration folder:
+        if (fs_ns::exists(defaultConfig_)
+        &&  fs_ns::is_directory(defaultConfig_)
+        && !fs_ns::is_empty(defaultConfig_))
+        {
+
+        }
+        else
+        {
+            if (!config)
+            {
+                defaultConfig_ = COMMONAPI_DEFAULT_CONFIG_FOLDER;
+                defaultConfig_ += "/";
+                defaultConfig_ += COMMONAPI_DEFAULT_CONFIG_FILE;
+            }
         }
 
         // TODO: evaluate return parameter and decide what to do
@@ -172,31 +196,47 @@ Runtime::initFactories() {
 
 bool
 Runtime::readConfiguration() {
-#define MAX_PATH_LEN 255
-    std::string config;
-    bool tryLoadConfig(true);
-    char currentDirectory[MAX_PATH_LEN];
-#ifdef _WIN32
-    if (GetCurrentDirectory(MAX_PATH_LEN, currentDirectory)) {
-#else
-    if (getcwd(currentDirectory, MAX_PATH_LEN)) {
-#endif
-        usedConfig_ = currentDirectory;
-        usedConfig_ += "/";
-        usedConfig_ += COMMONAPI_DEFAULT_CONFIG_FILE;
+    IniFileReader reader;
+    // Reading a complete folder:
+    if (fs_ns::is_directory(defaultConfig_))
+    {
+        usedConfig_ = defaultConfig_;
 
-        struct stat s;
-        if (stat(usedConfig_.c_str(), &s) != 0) {
-            usedConfig_ = defaultConfig_;
-            if (stat(usedConfig_.c_str(), &s) != 0) {
-                tryLoadConfig = false;
+        for (auto &dirEntry : fs_ns::directory_iterator(usedConfig_))
+        {
+            if (!fs_ns::is_directory(dirEntry.path().string()))
+            {
+                reader.load(dirEntry.path().string());
             }
         }
     }
+    else
+    {
+#define MAX_PATH_LEN 255
+        std::string config;
+        bool tryLoadConfig(true);
+        char currentDirectory[MAX_PATH_LEN];
+#ifdef _WIN32
+        if (GetCurrentDirectory(MAX_PATH_LEN, currentDirectory)) {
+#else
+        if (getcwd(currentDirectory, MAX_PATH_LEN)) {
+#endif
+            usedConfig_ = currentDirectory;
+            usedConfig_ += "/";
+            usedConfig_ += COMMONAPI_DEFAULT_CONFIG_FILE;
 
-    IniFileReader reader;
-    if (tryLoadConfig && !reader.load(usedConfig_))
-        return false;
+            struct stat s;
+            if (stat(usedConfig_.c_str(), &s) != 0) {
+                usedConfig_ = defaultConfig_;
+                if (stat(usedConfig_.c_str(), &s) != 0) {
+                    tryLoadConfig = false;
+                }
+            }
+        }
+
+        if (tryLoadConfig && !reader.load(usedConfig_))
+            return false;
+    }
 
     std::string itsConsole("true");
     std::string itsFile;
