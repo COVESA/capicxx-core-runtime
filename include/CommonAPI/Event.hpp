@@ -111,8 +111,7 @@ typename Event<Arguments_...>::Subscription Event<Arguments_...>::subscribe(List
         std::lock_guard<std::recursive_mutex> itsLock(mutex_);
         subscription = nextSubscription_++;
         isFirstListener = (0 == pendingSubscriptions_.size()) && (pendingUnsubscriptions_.size() == subscriptions_.size());
-        listener = std::move(listener);
-        listeners = std::make_tuple(listener, std::move(errorListener));
+        listeners = std::make_tuple(std::move(listener), std::move(errorListener));
         pendingSubscriptions_[subscription] = std::move(listeners);
     }
 
