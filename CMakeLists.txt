@@ -106,6 +106,10 @@ ELSE ()
 ENDIF(MSVC)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCOMMONAPI_LOGLEVEL=COMMONAPI_LOGLEVEL_${MAX_LOG_LEVEL}")
+
+IF(ANDROID)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-attributes -Wno-deprecated-declarations")
+ENDIF()
  
 FIND_PACKAGE(PkgConfig)
 pkg_check_modules(DLT "automotive-dlt >= 2.11")
@@ -205,6 +209,7 @@ add_custom_target(dist
 
 ##############################################################################
 # build documentation
+if (NOT ANDROID)
 FIND_PACKAGE(Doxygen)
 FIND_PROGRAM(ASCIIDOC_PATH asciidoc)
 if (NOT DOXYGEN_FOUND)
@@ -245,6 +250,7 @@ else()
                                    -o doc/README.html
                                    ${PROJECT_BINARY_DIR}/../INSTALL)
     endif()
+endif()
 endif()
 
 ##############################################################################
