@@ -1,24 +1,20 @@
-// Copyright (C) 2015-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2015-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#if !defined (COMMONAPI_INTERNAL_COMPILATION)
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
+#endif
+
 #ifndef COMMONAPI_LOGGER_HPP_
 #define COMMONAPI_LOGGER_HPP_
 
-#include <CommonAPI/LoggerImpl.hpp>
+#include <memory>
+#include <sstream>
+#include <cstdint>
 
-#define COMMONAPI_LOGLEVEL_NONE       0
-#define COMMONAPI_LOGLEVEL_FATAL      1
-#define COMMONAPI_LOGLEVEL_ERROR      2
-#define COMMONAPI_LOGLEVEL_WARNING    3
-#define COMMONAPI_LOGLEVEL_INFO       4
-#define COMMONAPI_LOGLEVEL_DEBUG      5
-#define COMMONAPI_LOGLEVEL_VERBOSE    6
-
-#ifndef COMMONAPI_LOGLEVEL
-#define COMMONAPI_LOGLEVEL COMMONAPI_LOGLEVEL_NONE
-#endif
+#include <CommonAPI/Export.hpp>
 
 #define COMMONAPI_FATAL     CommonAPI::Logger::fatal
 #define COMMONAPI_ERROR     CommonAPI::Logger::error
@@ -29,84 +25,79 @@
 
 namespace CommonAPI {
 
+
 class Logger {
 public:
+    enum class Level : std::uint8_t COMMONAPI_EXPORT {
+        CAPI_LOG_NONE = 0,
+        CAPI_LOG_FATAL = 1,
+        CAPI_LOG_ERROR = 2,
+        CAPI_LOG_WARNING = 3,
+        CAPI_LOG_INFO = 4,
+        CAPI_LOG_DEBUG = 5,
+        CAPI_LOG_VERBOSE = 6
+    };
+    Logger();
+    ~Logger();
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void fatal(LogEntries_... _entries) {
-        log(LoggerImpl::Level::LL_FATAL, _entries...);
+    COMMONAPI_EXPORT static void fatal(LogEntries_&&... _entries) {
+        log(Logger::Level::CAPI_LOG_FATAL, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void error(LogEntries_... _entries) {
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_ERROR
-        log(LoggerImpl::Level::LL_ERROR, _entries...);
-#else
-    std::tuple<LogEntries_...> args(_entries...);
-#endif
+    COMMONAPI_EXPORT static void error(LogEntries_&&... _entries) {
+        log(Logger::Level::CAPI_LOG_ERROR, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void warning(LogEntries_... _entries) {
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_WARNING
-        log(LoggerImpl::Level::LL_WARNING, _entries...);
-#else
-    std::tuple<LogEntries_...> args(_entries...);
-#endif
+    COMMONAPI_EXPORT static void warning(LogEntries_&&... _entries) {
+        log(Logger::Level::CAPI_LOG_WARNING, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void info(LogEntries_... _entries) {
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_INFO
-        log(LoggerImpl::Level::LL_INFO, _entries...);
-#else
-    std::tuple<LogEntries_...> args(_entries...);
-#endif
+    COMMONAPI_EXPORT static void info(LogEntries_&&... _entries) {
+        log(Logger::Level::CAPI_LOG_INFO, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void debug(LogEntries_... _entries) {
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_DEBUG
-        log(LoggerImpl::Level::LL_DEBUG, _entries...);
-#else
-    std::tuple<LogEntries_...> args(_entries...);
-#endif
+    COMMONAPI_EXPORT static void debug(LogEntries_&&... _entries) {
+        log(Logger::Level::CAPI_LOG_DEBUG, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void verbose(LogEntries_... _entries) {
-#if COMMONAPI_LOGLEVEL >= COMMONAPI_LOGLEVEL_VERBOSE
-        log(LoggerImpl::Level::LL_VERBOSE, _entries...);
-#else
-    std::tuple<LogEntries_...> args(_entries...);
-#endif
+    COMMONAPI_EXPORT static void verbose(LogEntries_&&... _entries) {
+        log(Logger::Level::CAPI_LOG_VERBOSE, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void log(LoggerImpl::Level _level, LogEntries_... _entries) {
-#if defined(USE_CONSOLE) || defined(USE_FILE) || defined(USE_DLT)
-      if (LoggerImpl::isLogged(_level)) {
+    COMMONAPI_EXPORT static void log(Logger::Level _level, LogEntries_&&... _entries) {
+        if (isLogged(_level)) {
             std::stringstream buffer;
-            log_intern(buffer, _entries...);
-            LoggerImpl::get()->doLog(_level, buffer.str());
+            logIntern(buffer, std::forward<LogEntries_>(_entries)...);
+            Logger::doLog(_level, buffer.str());
         }
-#else
-        (void)_level;
-        std::tuple<LogEntries_...> args(_entries...);
-#endif
     }
 
-    COMMONAPI_EXPORT static void init(bool, const std::string &, bool, const std::string &);
+    static void init(bool _useConsole, const std::string &_fileName,
+                     bool _useDlt, const std::string& _level);
 
 private:
-    COMMONAPI_EXPORT static void log_intern(std::stringstream &_buffer) {
+    class LoggerImpl;
+    static std::unique_ptr<LoggerImpl> loggerImpl_;
+
+    COMMONAPI_EXPORT static bool isLogged(Level _level);
+    COMMONAPI_EXPORT static void doLog(Level _level, const std::string& _message);
+
+    COMMONAPI_EXPORT static void logIntern(std::stringstream &_buffer) {
         (void)_buffer;
     }
 
     template<typename LogEntry_, typename... MoreLogEntries_>
-    COMMONAPI_EXPORT static void log_intern(std::stringstream &_buffer, LogEntry_ _entry, MoreLogEntries_... _moreEntries) {
+    COMMONAPI_EXPORT static void logIntern(std::stringstream &_buffer, LogEntry_&& _entry,
+                           MoreLogEntries_&& ... _moreEntries) {
         _buffer << _entry;
-        log_intern(_buffer, _moreEntries...);
+        logIntern(_buffer, std::forward<MoreLogEntries_>(_moreEntries)...);
     }
 };
 

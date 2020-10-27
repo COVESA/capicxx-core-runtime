@@ -1,10 +1,10 @@
-// Copyright (C) 2013-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2013-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #if !defined (COMMONAPI_INTERNAL_COMPILATION)
-#error "Only <CommonAPI/CommonAPI.h> can be included directly, this file may disappear or change contents."
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
 #endif
 
 #ifndef COMMONAPI_OUTPUTSTREAM_HPP_
@@ -16,6 +16,7 @@
 #include <CommonAPI/Deployable.hpp>
 #include <CommonAPI/Deployment.hpp>
 #include <CommonAPI/Enumeration.hpp>
+#include <CommonAPI/RangedInteger.hpp>
 #include <CommonAPI/Struct.hpp>
 #include <CommonAPI/Variant.hpp>
 #include <CommonAPI/Version.hpp>
@@ -92,6 +93,11 @@ public:
 
     template<class Deployment_, typename Base_>
     OutputStream &writeValue(const Enumeration<Base_> &_value, const Deployment_ *_depl = nullptr) {
+        return get()->writeValue(_value, _depl);
+    }
+
+    template<class Deployment_, int minimum, int maximum>
+    OutputStream &writeValue(const RangedInteger<minimum, maximum> &_value, const Deployment_ *_depl = nullptr) {
         return get()->writeValue(_value, _depl);
     }
 
@@ -208,6 +214,11 @@ inline OutputStream<Derived_>& operator<<(OutputStream<Derived_> &_output, const
 template<class Derived_, typename Base_>
 OutputStream<Derived_> &operator<<(OutputStream<Derived_> &_output, const Enumeration<Base_> &_value) {
     return _output.template writeValue<EmptyDeployment>(_value);
+}
+
+template<class Derived_, int minimum, int maximum>
+OutputStream<Derived_> &operator<<(OutputStream<Derived_> &_output, const RangedInteger<minimum, maximum> &_value) {
+    return _output.template writeValue<EmptyDeployment, minimum, maximum>(_value);
 }
 
 template<class Derived_, typename... Types_>

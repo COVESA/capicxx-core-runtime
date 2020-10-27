@@ -1,10 +1,10 @@
-// Copyright (C) 2013-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2013-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #if !defined (COMMONAPI_INTERNAL_COMPILATION)
-#error "Only <CommonAPI/CommonAPI.h> can be included directly, this file may disappear or change contents."
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
 #endif
 
 #ifndef COMMONAPI_TYPES_HPP_
@@ -16,6 +16,10 @@
 #include <memory>
 #include <tuple>
 
+#ifndef _WIN32
+#include <sys/types.h>
+#endif
+
 // define CallStatus before including Event.hpp
 namespace CommonAPI {
     enum class CallStatus {
@@ -26,7 +30,8 @@ namespace CommonAPI {
         REMOTE_ERROR,
         UNKNOWN,
         INVALID_VALUE,
-        SUBSCRIPTION_REFUSED
+        SUBSCRIPTION_REFUSED,
+        SERIALIZATION_ERROR
     };
 } // namespace CommonAPI
 
@@ -35,6 +40,7 @@ namespace CommonAPI {
 #include <CommonAPI/ContainerUtils.hpp>
 #include <CommonAPI/Event.hpp>
 #include <CommonAPI/Export.hpp>
+#include <CommonAPI/RangedInteger.hpp>
 #include <CommonAPI/Version.hpp>
 
 #if  __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)
@@ -83,6 +89,13 @@ typedef std::string ConnectionId_t;
 typedef int Timeout_t; // in ms, -1 means "forever"
 typedef uint32_t Sender_t;
 
+#ifdef _WIN32
+typedef std::uint32_t uid_t;
+typedef std::uint32_t gid_t;
+#else
+typedef ::uid_t uid_t;
+typedef ::gid_t gid_t;
+#endif
 /**
  * \brief Identifies a client sending a call to a stub.
  *
@@ -94,6 +107,8 @@ public:
     virtual ~ClientId() { }
     virtual bool operator==(ClientId& clientIdToCompare) = 0;
     virtual std::size_t hashCode() = 0;
+    virtual uid_t getUid() const = 0;
+    virtual gid_t getGid() const = 0;
 };
 
 template <typename ... Args_>

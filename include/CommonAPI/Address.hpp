@@ -1,7 +1,11 @@
-// Copyright (C) 2015-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2015-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#if !defined (COMMONAPI_INTERNAL_COMPILATION)
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
+#endif
 
 #ifndef COMMONAPI_ADDRESS_HPP_
 #define COMMONAPI_ADDRESS_HPP_
@@ -21,7 +25,9 @@ public:
             const std::string &_interface,
             const std::string &_instance);
     COMMONAPI_EXPORT Address(const Address &_source);
-    COMMONAPI_EXPORT virtual ~Address();
+    COMMONAPI_EXPORT virtual ~Address() = default;
+
+    COMMONAPI_EXPORT Address &operator=(const Address &_other);
 
     COMMONAPI_EXPORT bool operator==(const Address &_other) const;
     COMMONAPI_EXPORT bool operator!=(const Address &_other) const;

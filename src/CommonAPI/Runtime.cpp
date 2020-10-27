@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2013-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -220,12 +220,17 @@ Runtime::readConfiguration() {
     section    = reader.getSection("default");
     if (section) {
         std::string binding = section->getValue("binding");
-        if ("" != binding)
+        if ("" != binding) {
             defaultBinding_ = binding;
-
+        }
         std::string folder = section->getValue("folder");
-        if ("" != folder)
+        if ("" != folder) {
             defaultFolder_ = folder;
+        }
+        std::string callTimeout = section->getValue("callTimeout");
+        if ("" != callTimeout) {
+            defaultCallTimeout_ = std::stoi(callTimeout);
+        }
     }
 
     section = reader.getSection("proxy");
@@ -293,6 +298,10 @@ Runtime::createProxy(
 bool
 Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
                         std::shared_ptr<StubBase> _stub, const ConnectionId_t &_connectionId) {
+    if (!_stub) {
+        return false;
+    }
+
     if (!isInitialized_) {
         initFactories();
     }
@@ -311,6 +320,10 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
 bool
 Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
                         std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
+    if (!_stub) {
+        return false;
+    }
+
     if (!isInitialized_) {
         initFactories();
     }
@@ -490,6 +503,10 @@ Runtime::registerStubHelper(const std::string &_domain, const std::string &_inte
     return (_useDefault && defaultFactory_ ?
                 defaultFactory_->registerStub(_domain, _interface, _instance, _stub, _context) :
                 false);
+}
+
+Timeout_t Runtime::getDefaultCallTimeout() const {
+    return defaultCallTimeout_;
 }
 
 } //Namespace CommonAPI

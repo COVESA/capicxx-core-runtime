@@ -1,10 +1,10 @@
-// Copyright (C) 2013-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2013-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #if !defined (COMMONAPI_INTERNAL_COMPILATION)
-#error "Only <CommonAPI/CommonAPI.h> can be included directly, this file may disappear or change contents."
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
 #endif
 
 #ifndef COMMONAPI_RUNTIME_HPP_
@@ -38,8 +38,6 @@ public:
 
     COMMONAPI_EXPORT Runtime();
     COMMONAPI_EXPORT virtual ~Runtime();
-
-    COMMONAPI_EXPORT void init();
 
     template<template<typename ...> class ProxyClass_, typename ... AttributeExtensions_>
     COMMONAPI_EXPORT std::shared_ptr<
@@ -138,8 +136,10 @@ public:
     inline const std::string &getDefaultBinding() const { return defaultBinding_; };
 
     COMMONAPI_EXPORT void initFactories();
+    COMMONAPI_EXPORT Timeout_t getDefaultCallTimeout() const;
 
 private:
+    COMMONAPI_EXPORT void init();
     COMMONAPI_EXPORT bool readConfiguration();
     COMMONAPI_EXPORT bool splitAddress(const std::string &, std::string &, std::string &, std::string &);
 
@@ -174,6 +174,7 @@ private:
     std::string defaultBinding_;
     std::string defaultFolder_;
     std::string defaultConfig_;
+    Timeout_t defaultCallTimeout_;
 
     std::map<std::string, std::shared_ptr<Factory>> factories_;
     std::shared_ptr<Factory> defaultFactory_;

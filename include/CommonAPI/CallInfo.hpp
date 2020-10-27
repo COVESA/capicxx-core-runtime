@@ -1,29 +1,26 @@
-// Copyright (C) 2015-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2015-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#if !defined (COMMONAPI_INTERNAL_COMPILATION)
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
+#endif
 
 #ifndef COMMONAPI_CALLINFO_HPP_
 #define COMMONAPI_CALLINFO_HPP_
 
 #include <CommonAPI/Config.hpp>
 #include <CommonAPI/Types.hpp>
+#include <string>
 
 namespace CommonAPI {
 
 struct COMMONAPI_EXPORT CallInfo {
-    CallInfo()
-        : timeout_(DEFAULT_SEND_TIMEOUT_MS), sender_(0) {
-    }
-    CallInfo(Timeout_t _timeout)
-        : timeout_(_timeout), sender_(0) {
-    }
-    CallInfo(Timeout_t _timeout, Sender_t _sender)
-        : timeout_(_timeout), sender_(_sender) {
-    }
-    CallInfo(const CallInfo &_other)
-        : timeout_(_other.timeout_), sender_(_other.sender_) {
-    }
+    CallInfo();
+    CallInfo(Timeout_t _timeout);
+    CallInfo(const CallInfo &_other);
+    CallInfo(Timeout_t _timeout, Sender_t _sender);
 
     Timeout_t timeout_;
     Sender_t sender_;
@@ -31,4 +28,4 @@ struct COMMONAPI_EXPORT CallInfo {
 
 } // namespace CommonAPI
 
-#endif // COMMONAPI_ADDRESS_HPP_
+#endif // COMMONAPI_CALLINFO_HPP_

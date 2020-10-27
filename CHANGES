@@ -1,6 +1,10 @@
 Changes
 =======
 
+v3.2.0
+- Support ABI compatible changes (additional attributes, broadcast and methods added to the end of 
+  the interface specification)
+
 v3.1.12.6
 - Fix race condition leading to event delivery after unsubscription
 

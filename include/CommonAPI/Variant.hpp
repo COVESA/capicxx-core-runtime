@@ -1,7 +1,14 @@
-// Copyright (C) 2013-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2013-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+#if !defined (COMMONAPI_INTERNAL_COMPILATION)
+#error "Only <CommonAPI/CommonAPI.hpp> can be included directly, this file may disappear or change contents."
+#endif
+
+#ifndef COMMONAPI_VARIANT_HPP_
+#define COMMONAPI_VARIANT_HPP_
 
 #include <cstdint>
 #include <iostream>
@@ -10,17 +17,10 @@
 #include <tuple>
 #include <type_traits>
 
-#if !defined (COMMONAPI_INTERNAL_COMPILATION)
-#error "Only <CommonAPI/CommonAPI.h> can be included directly, this file may disappear or change contents."
-#endif
 
 #include <CommonAPI/Deployable.hpp>
 #include <CommonAPI/Deployment.hpp>
 #include <CommonAPI/Logger.hpp>
-
-
-#ifndef COMMONAPI_VARIANT_HPP_
-#define COMMONAPI_VARIANT_HPP_
 
 namespace CommonAPI {
 

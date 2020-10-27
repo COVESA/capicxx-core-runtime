@@ -1,0 +1,38 @@
+capi_srcs = [
+    "src/CommonAPI/**/*.cpp"
+]
+
+cc_defaults {
+    name: "capi_defaults",
+    cppflags: [
+	"-std=c++11",
+        "-Wall",
+        "-Wextra",
+        "-Wformat",
+        "-Wformat-security",
+        "-Wconversion",
+	"-Wno-attributes",
+        "-fexceptions",
+        "-fstrict-aliasing",
+        "-fstack-protector",
+        "-fasynchronous-unwind-tables",
+        "-fno-omit-frame-pointer",
+        "-Werror",
+	"-fvisibility=hidden",
+	"-DCOMMONAPI_INTERNAL_COMPILATION"
+    ]
+}
+
+cc_library_shared {
+    name: "libCommonAPI",
+    vendor: true,
+    srcs: capi_srcs,
+    defaults: [
+        "capi_defaults"
+    ],
+    local_include_dirs: [
+        "include"
+    ],
+    export_include_dirs: ["include"],
+    rtti: true
+}

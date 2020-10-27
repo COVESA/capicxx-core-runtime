@@ -1,8 +1,8 @@
 ### CommonAPI C++ Core Runtime
 
 ##### Copyright
-Copyright (C) 2016-2017, Bayerische Motoren Werke Aktiengesellschaft (BMW AG).
-Copyright (C) 2016-2017, GENIVI Alliance, Inc.
+Copyright (C) 2016-2020, Bayerische Motoren Werke Aktiengesellschaft (BMW AG).
+Copyright (C) 2016-2020, GENIVI Alliance, Inc.
 
 This file is part of GENIVI Project IPC Common API C++.
 Contributions are licensed to the GENIVI Alliance under one or more Contribution License Agreements or MPL 2.0.
@@ -33,3 +33,16 @@ You can change the installation directory by the CMake variable _CMAKE_INSTALL_P
 
 For further build instructions (build for windows, build documentation, tests etc.) please refer to the CommonAPI tutorial.
 
+##### Build Instructions for Android
+
+In general for building the Android source tree the instructions found on the pages from the Android Open Source Project (AOSP) apply (https://source.android.com/setup/build/requirements).
+
+To integrate the CommonAPI Core Runtime library into the build process, the source code together with the Android.bp file has to be inserted into the Android source tree (by simply copying or by fetching with a custom platform manifest).
+When building the Android source tree, the Android.bp file is automatically found and considered by the build system.
+
+In order that the CommonAPI Core Runtime library is also included in the Android image, the library has to be added to the PRODUCT_PACKAGES variable in one of a device/target specific makefile:
+
+```
+PRODUCT_PACKAGES += \
+    libCommonAPI
+```

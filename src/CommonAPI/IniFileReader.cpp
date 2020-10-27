@@ -1,4 +1,4 @@
-// Copyright (C) 2015-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2015-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -44,6 +44,11 @@ IniFileReader::load(const std::string &_path) {
         lineCounter++;
 
         trim(line);
+
+        // Handle comments
+        std::size_t comment = line.find(';');
+        if (comment == 0)
+        	continue;
 
         std::size_t start = line.find('[');
         if (start == 0) {

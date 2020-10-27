@@ -1,4 +1,4 @@
-// Copyright (C) 2015-2017 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+// Copyright (C) 2015-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -12,7 +12,6 @@
 namespace CommonAPI {
 
 Address::Address() {
-
 }
 
 Address::Address(const std::string &_address) {
@@ -32,7 +31,13 @@ Address::Address(const Address &_source)
       instance_(_source.instance_) {
 }
 
-Address::~Address() {
+Address &
+Address::operator=(const Address &_other) {
+    domain_ = _other.domain_;
+    interface_ = _other.interface_;
+    instance_ = _other.instance_;
+
+    return (*this);
 }
 
 bool
