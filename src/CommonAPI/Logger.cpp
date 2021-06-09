@@ -31,7 +31,8 @@ public:
     }
 
     void init(bool _useConsole, const std::string &_fileName, bool _useDlt,
-               const std::string& _level) {
+               const std::string& _level,
+	       const std::string& _logApplication, const std::string& _logContext) {
         useConsole_ = _useConsole;
         maximumLogLevel_ = stringAsLevel(_level);
         useDlt_ = _useDlt;
@@ -45,13 +46,13 @@ public:
         }
 #ifdef USE_DLT
         if (useDlt_) {
-            std::string app = Runtime::getProperty("LogApplication");
+            std::string app = _logApplication;
             if (!app.empty()) {
                 ownAppID_ = true;
                 DLT_REGISTER_APP(app.c_str(), "CommonAPI Application");
             }
 
-            std::string context = Runtime::getProperty("LogContext");
+            std::string context = _logContext;
             if (context == "")
                 context = "CAPI";
             DLT_REGISTER_CONTEXT(dlt_, context.c_str(), "CAPI");
@@ -183,8 +184,9 @@ Logger::Logger() = default;
 Logger::~Logger() = default;
 
 void Logger::init(bool _useConsole, const std::string &_fileName, bool _useDlt,
-                  const std::string& _level) {
-    loggerImpl_->init(_useConsole, _fileName, _useDlt, _level);
+                  const std::string& _level,
+		  const std::string& _logApplication, const std::string& _logContext) {
+    loggerImpl_->init(_useConsole, _fileName, _useDlt, _level, _logApplication, _logContext);
 }
 
 bool Logger::isLogged(Level _level) {
