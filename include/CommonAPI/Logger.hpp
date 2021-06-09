@@ -80,7 +80,8 @@ public:
     }
 
     static void init(bool _useConsole, const std::string &_fileName,
-                     bool _useDlt, const std::string& _level);
+                     bool _useDlt, const std::string& _level,
+		     const std::string& _logApplication, const std::string& _logContext);
 
 private:
     class LoggerImpl;

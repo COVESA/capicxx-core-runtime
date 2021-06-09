@@ -202,6 +202,8 @@ Runtime::readConfiguration() {
     std::string itsFile;
     std::string itsDlt("false");
     std::string itsLevel("info");
+    std::string itsLogApplication;
+    std::string itsLogContext;
 
     std::shared_ptr<IniFileReader::Section> section
         = reader.getSection("logging");
@@ -210,12 +212,16 @@ Runtime::readConfiguration() {
         itsFile = section->getValue("file");
         itsDlt = section->getValue("dlt");
         itsLevel = section->getValue("level");
+	itsLogApplication = section->getValue("logApplication");
+	itsLogContext = section->getValue("logContext");
     }
 
     Logger::init((itsConsole == "true"),
                  itsFile,
                  (itsDlt == "true"),
-                 itsLevel);
+                 itsLevel,
+		 itsLogApplication,
+		 itsLogContext);
 
     section    = reader.getSection("default");
     if (section) {
