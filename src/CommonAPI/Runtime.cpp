@@ -256,6 +256,20 @@ std::shared_ptr<Proxy>
 Runtime::createProxy(
         const std::string &_domain, const std::string &_interface, const std::string &_instance,
         const ConnectionId_t &_connectionId) {
+    return createDynamicProxy(_domain, _interface, _instance, _instance, _connectionId);
+}
+
+std::shared_ptr<Proxy>
+Runtime::createProxy(
+        const std::string &_domain, const std::string &_interface, const std::string &_instance,
+        std::shared_ptr<MainLoopContext> _context) {
+    return createDynamicProxy(_domain, _interface, _instance, _instance, _context);
+}
+
+std::shared_ptr<Proxy>
+Runtime::createDynamicProxy(
+    const std::string &_domain, const std::string &_interface, const std::string &_template_instance, const std::string &_instance,
+    const ConnectionId_t &_connectionId) {
     if (!isInitialized_) {
         initFactories();
     }
@@ -265,7 +279,7 @@ Runtime::createProxy(
     if (!proxy) {
         // ...it seems do not, lets try to load a library that does...
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
-        std::string library = getLibrary(_domain, _interface, _instance, true);
+        std::string library = getLibrary(_domain, _interface, _template_instance, true);
         if (loadLibrary(library) || defaultFactory_) {
             proxy = createProxyHelper(_domain, _interface, _instance, _connectionId, true);
         }
@@ -274,9 +288,9 @@ Runtime::createProxy(
 }
 
 std::shared_ptr<Proxy>
-Runtime::createProxy(
-        const std::string &_domain, const std::string &_interface, const std::string &_instance,
-        std::shared_ptr<MainLoopContext> _context) {
+Runtime::createDynamicProxy(
+    const std::string &_domain, const std::string &_interface, const std::string &_template_instance, const std::string &_instance,
+    std::shared_ptr<MainLoopContext> _context) {
     if (!isInitialized_) {
         initFactories();
     }
@@ -286,7 +300,7 @@ Runtime::createProxy(
     if (!proxy) {
         // ...it seems do not, lets try to load a library that does...
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
-        std::string library = getLibrary(_domain, _interface, _instance, true);
+        std::string library = getLibrary(_domain, _interface, _template_instance, true);
         if (loadLibrary(library) || defaultFactory_) {
             proxy = createProxyHelper(_domain, _interface, _instance, _context, true);
         }
@@ -298,6 +312,19 @@ Runtime::createProxy(
 bool
 Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
                         std::shared_ptr<StubBase> _stub, const ConnectionId_t &_connectionId) {
+    return registerDynamicStub(_domain, _interface, _instance, _instance, _stub, _connectionId);
+}
+
+bool
+Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
+                        std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
+    return registerDynamicStub(_domain, _interface, _instance, _instance, _stub, _context);
+}
+
+
+bool
+Runtime::registerDynamicStub(const std::string &_domain, const std::string &_interface, const std::string &_template_instance, const std::string &_instance,
+    std::shared_ptr<StubBase> _stub, const ConnectionId_t &_connectionId) {
     if (!_stub) {
         return false;
     }
@@ -308,7 +335,7 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
 
     bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId, false);
     if (!isRegistered) {
-        std::string library = getLibrary(_domain, _interface, _instance, false);
+        std::string library = getLibrary(_domain, _interface, _template_instance, false);
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         if (loadLibrary(library) || defaultFactory_) {
             isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId, true);
@@ -318,8 +345,8 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
 }
 
 bool
-Runtime::registerStub(const std::string &_domain, const std::string &_interface, const std::string &_instance,
-                        std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
+Runtime::registerDynamicStub(const std::string &_domain, const std::string &_interface, const std::string &_template_instance, const std::string &_instance,
+    std::shared_ptr<StubBase> _stub, std::shared_ptr<MainLoopContext> _context) {
     if (!_stub) {
         return false;
     }
@@ -330,7 +357,7 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
 
     bool isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context, false);
     if (!isRegistered) {
-        std::string library = getLibrary(_domain, _interface, _instance, false);
+        std::string library = getLibrary(_domain, _interface, _template_instance, false);
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         if (loadLibrary(library) || defaultFactory_) {
             isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context, true);

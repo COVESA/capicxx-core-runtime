@@ -76,6 +76,48 @@ public:
         return nullptr;
     }
 
+    template<template<typename ...> class ProxyClass_, typename ... AttributeExtensions_>
+    COMMONAPI_EXPORT std::shared_ptr<
+        ProxyClass_<AttributeExtensions_...>
+    >
+        buildDynamicProxy(const std::string &_domain,
+            const std::string &_template_instance,
+            const std::string &_instance,
+            const ConnectionId_t &_connectionId = DEFAULT_CONNECTION_ID) {
+        std::shared_ptr<Proxy> proxy
+            = createDynamicProxy(_domain,
+                ProxyClass_<AttributeExtensions_...>::getInterface(),
+                _template_instance,
+                _instance,
+                _connectionId);
+
+        if (proxy) {
+            return std::make_shared<ProxyClass_<AttributeExtensions_...>>(proxy);
+        }
+        return nullptr;
+    }
+
+    template<template<typename ...> class ProxyClass_, typename ... AttributeExtensions_>
+    COMMONAPI_EXPORT std::shared_ptr<
+        ProxyClass_<AttributeExtensions_...>
+    >
+        buildDynamicProxy(const std::string &_domain,
+            const std::string &_template_instance,
+            const std::string &_instance,
+            std::shared_ptr<MainLoopContext> _context) {
+        std::shared_ptr<Proxy> proxy
+            = createDynamicProxy(_domain,
+                ProxyClass_<AttributeExtensions_...>::getInterface(),
+                _template_instance,
+                _instance,
+                _context);
+        if (proxy) {
+            return std::make_shared<ProxyClass_<AttributeExtensions_...>>(proxy);
+        }
+        return nullptr;
+    }
+
+
     template <template<typename ...> class ProxyClass_, template<typename> class AttributeExtension_>
     COMMONAPI_EXPORT std::shared_ptr<typename DefaultAttributeProxyHelper<ProxyClass_, AttributeExtension_>::class_t>
     buildProxyWithDefaultAttributeExtension(const std::string &_domain,
@@ -124,6 +166,25 @@ public:
         return registerStub(_domain, Stub_::StubInterface::getInterface(), _instance, _service, _context);
     }
 
+    template<typename Stub_>
+    COMMONAPI_EXPORT bool registerDynamicService(const std::string &_domain,
+        const std::string &_template_instance,
+        const std::string &_instance,
+        std::shared_ptr<Stub_> _service,
+        const ConnectionId_t &_connectionId = DEFAULT_CONNECTION_ID) {
+        return registerDynamicStub(_domain, Stub_::StubInterface::getInterface(), _template_instance, _instance, _service, _connectionId);
+    }
+
+    template<typename Stub_>
+    COMMONAPI_EXPORT bool registerDynamicService(const std::string &_domain,
+        const std::string &_template_instance,
+        const std::string &_instance,
+        std::shared_ptr<Stub_> _service,
+        std::shared_ptr<MainLoopContext> _context) {
+        return registerDynamicStub(_domain, Stub_::StubInterface::getInterface(), _template_instance, _instance, _service, _context);
+    }
+
+
     COMMONAPI_EXPORT bool unregisterService(const std::string &_domain,
                             const std::string &_interface,
                             const std::string &_instance) {
@@ -147,7 +208,10 @@ private:
                                        const ConnectionId_t &);
     COMMONAPI_EXPORT std::shared_ptr<Proxy> createProxy(const std::string &, const std::string &, const std::string &,
                                        std::shared_ptr<MainLoopContext>);
-
+    COMMONAPI_EXPORT std::shared_ptr<Proxy> createDynamicProxy(const std::string &, const std::string &, const std::string &, const std::string &,
+        const ConnectionId_t &);
+    COMMONAPI_EXPORT std::shared_ptr<Proxy> createDynamicProxy(const std::string &, const std::string &, const std::string &, const std::string &,
+        std::shared_ptr<MainLoopContext>);
     COMMONAPI_EXPORT std::shared_ptr<Proxy> createProxyHelper(const std::string &, const std::string &, const std::string &,
                                              const ConnectionId_t &, bool);
     COMMONAPI_EXPORT std::shared_ptr<Proxy> createProxyHelper(const std::string &, const std::string &, const std::string &,
@@ -158,6 +222,10 @@ private:
                       std::shared_ptr<StubBase>, const ConnectionId_t &);
     COMMONAPI_EXPORT bool registerStub(const std::string &, const std::string &, const std::string &,
                       std::shared_ptr<StubBase>, std::shared_ptr<MainLoopContext>);
+    COMMONAPI_EXPORT bool registerDynamicStub(const std::string &, const std::string &, const std::string &, const std::string &,
+        std::shared_ptr<StubBase>, const ConnectionId_t &);
+    COMMONAPI_EXPORT bool registerDynamicStub(const std::string &, const std::string &, const std::string &, const std::string &,
+        std::shared_ptr<StubBase>, std::shared_ptr<MainLoopContext>);
     COMMONAPI_EXPORT bool registerStubHelper(const std::string &, const std::string &, const std::string &,
                             std::shared_ptr<StubBase>, const ConnectionId_t &, bool);
     COMMONAPI_EXPORT bool registerStubHelper(const std::string &, const std::string &, const std::string &,
