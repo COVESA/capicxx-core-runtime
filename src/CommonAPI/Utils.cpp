@@ -31,7 +31,7 @@ void trim(std::string& toTrim) {
         std::find_if(
             toTrim.begin(),
             toTrim.end(),
-            std::not1(std::ptr_fun(isspace))
+            std::not1(std::function<int(int)>(isspace))
         )
     );
 
@@ -39,7 +39,7 @@ void trim(std::string& toTrim) {
         std::find_if(
             toTrim.rbegin(),
             toTrim.rend(),
-            std::not1(std::ptr_fun(isspace))).base(),
+            std::not1(std::function<int(int)>(isspace))).base(),
             toTrim.end()
     );
 }
