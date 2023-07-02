@@ -74,6 +74,7 @@ std::shared_ptr<Runtime> Runtime::get() {
 Runtime::Runtime()
     : defaultBinding_(COMMONAPI_DEFAULT_BINDING),
       defaultFolder_(COMMONAPI_DEFAULT_FOLDER),
+      defaultCallTimeout_(0),
       isConfigured_(false),
       isInitialized_(false) {
 }
