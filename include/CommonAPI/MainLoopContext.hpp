@@ -204,10 +204,10 @@ public:
         : name_(_name){
     }
 
-    COMMONAPI_EXPORT MainLoopContext(const MainLoopContext&) = delete;
-    COMMONAPI_EXPORT MainLoopContext& operator=(const MainLoopContext&) = delete;
-    COMMONAPI_EXPORT MainLoopContext(MainLoopContext&&) = delete;
-    COMMONAPI_EXPORT MainLoopContext& operator=(MainLoopContext&&) = delete;
+    MainLoopContext(const MainLoopContext&) = delete;
+    MainLoopContext& operator=(const MainLoopContext&) = delete;
+    MainLoopContext(MainLoopContext&&) = delete;
+    MainLoopContext& operator=(MainLoopContext&&) = delete;
 
     COMMONAPI_EXPORT const std::string &getName() const;
 
