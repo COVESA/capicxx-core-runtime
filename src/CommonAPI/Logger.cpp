@@ -7,7 +7,59 @@
 #include <CommonAPI/Logger.hpp>
 
 #ifdef USE_DLT
+#ifndef ANDROID
 #include <dlt/dlt.h>
+#endif
+#endif
+
+#ifdef ANDROID
+#include <utils/Log.h>
+
+#ifdef ALOGE
+#undef ALOGE
+#endif
+
+#define ALOGE(LOG_TAG, ...) ((void)ALOG(LOG_ERROR, LOG_TAG, __VA_ARGS__))
+#ifndef LOGE
+#define LOGE ALOGE
+#endif
+
+#ifdef ALOGW
+#undef ALOGW
+#endif
+
+#define ALOGW(LOG_TAG, ...) ((void)ALOG(LOG_WARN, LOG_TAG, __VA_ARGS__))
+#ifndef LOGE
+#define LOGW ALOGW
+#endif
+
+#ifdef ALOGI
+#undef ALOGI
+#endif
+
+#define ALOGI(LOG_TAG, ...) ((void)ALOG(LOG_INFO, LOG_TAG, __VA_ARGS__))
+#ifndef LOGE
+#define LOGI ALOGI
+#endif
+
+#ifdef ALOGD
+#undef ALOGD
+#endif
+
+#define ALOGD(LOG_TAG, ...) ((void)ALOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__))
+#ifndef LOGE
+#define LOGD ALOGD
+#endif
+
+#ifdef ALOGV
+#undef ALOGV
+#endif
+
+#define ALOGV(LOG_TAG, ...) ((void)ALOG(LOG_VERBOSE, LOG_TAG, __VA_ARGS__))
+#ifndef LOGE
+#define LOGV ALOGV
+#endif
+
 #endif
 
 #include <cstdint>
@@ -25,7 +77,9 @@ public:
             useConsole_(true),
             useDlt_(false)
 #ifdef USE_DLT
+#ifndef ANDROID
             , ownAppID_(false)
+#endif
 #endif
     {
     }
@@ -44,6 +98,7 @@ public:
             }
         }
 #ifdef USE_DLT
+#ifndef ANDROID
         if (useDlt_) {
             std::string app = Runtime::getProperty("LogApplication");
             if (!app.empty()) {
@@ -57,10 +112,12 @@ public:
             DLT_REGISTER_CONTEXT(dlt_, context.c_str(), "CAPI");
         }
 #endif
+#endif
     }
 
     ~LoggerImpl() {
 #ifdef USE_DLT
+#ifndef ANDROID
         if (useDlt_) {
             DLT_UNREGISTER_CONTEXT(dlt_);
             if (ownAppID_) {
@@ -68,6 +125,7 @@ public:
                 ;
             }
         }
+#endif
 #endif
     }
 
@@ -78,8 +136,36 @@ public:
     void doLog(Logger::Level _level, const std::string &_message) {
         if (useConsole_) {
             std::lock_guard<std::mutex> itsLock(mutex_);
+
+#ifndef ANDROID
             std::cerr << "[CAPI][" << levelAsString(_level) << "] " << _message
                     << std::endl;
+#else
+           std::string app = Runtime::getProperty("LogApplication");
+
+            switch (_level) {
+                case Logger::Level::CAPI_LOG_FATAL:
+                    ALOGE(app.c_str(), "CAPI: %s ", _message.c_str());
+                    break;
+                case Logger::Level::CAPI_LOG_ERROR:
+                    ALOGE(app.c_str(), "CAPI: %s ", _message.c_str());
+                    break;
+                case Logger::Level::CAPI_LOG_WARNING:
+                    ALOGW(app.c_str(), "CAPI: %s ", _message.c_str());
+                    break;
+                case Logger::Level::CAPI_LOG_INFO:
+                    ALOGI(app.c_str(), "CAPI: %s ", _message.c_str());
+                    break;
+                case Logger::Level::CAPI_LOG_DEBUG:
+                    ALOGD(app.c_str(), "CAPI: %s ", _message.c_str());
+                    break;
+                case Logger::Level::CAPI_LOG_VERBOSE:
+                    ALOGV(app.c_str(), "CAPI: %s ", _message.c_str());
+                    break;
+                default:
+                    ALOGI(app.c_str(), "CAPI: %s ", _message.c_str());
+            };
+#endif // !ANDROID
         }
         if (file_ && file_->is_open()) {
             std::lock_guard<std::mutex> itsLock(mutex_);
@@ -88,9 +174,11 @@ public:
         }
 
 #ifdef USE_DLT
+#ifndef ANDROID
         if (useDlt_) {
             DLT_LOG_STRING(dlt_, levelAsDlt(_level), _message.c_str());
         }
+#endif
 #endif
 
     }
@@ -138,6 +226,7 @@ private:
     }
 
 #ifdef USE_DLT
+#ifndef ANDROID
     static DltLogLevelType levelAsDlt(Logger::Level _level) {
         switch (_level) {
             case Logger::Level::CAPI_LOG_NONE:
@@ -159,6 +248,7 @@ private:
         }
     }
 #endif
+#endif
 
 private:
     std::mutex mutex_;
@@ -171,28 +261,33 @@ private:
 
     bool useDlt_;
 #ifdef USE_DLT
+#ifndef ANDROID
     DLT_DECLARE_CONTEXT(dlt_)
     bool ownAppID_;
 #endif
+#endif
 };
-
-std::unique_ptr<Logger::LoggerImpl> Logger::loggerImpl_ =
-        std::unique_ptr<Logger::LoggerImpl>(new Logger::LoggerImpl());
 
 Logger::Logger() = default;
 Logger::~Logger() = default;
 
+std::shared_ptr<Logger::LoggerImpl> Logger::getLoggerImpl()
+{
+    static std::shared_ptr<Logger::LoggerImpl> loggerImpl = std::make_shared<Logger::LoggerImpl>();
+    return loggerImpl;
+}
+
 void Logger::init(bool _useConsole, const std::string &_fileName, bool _useDlt,
                   const std::string& _level) {
-    loggerImpl_->init(_useConsole, _fileName, _useDlt, _level);
+    getLoggerImpl()->init(_useConsole, _fileName, _useDlt, _level);
 }
 
 bool Logger::isLogged(Level _level) {
-    return loggerImpl_->isLogged(_level);
+    return getLoggerImpl()->isLogged(_level);
 }
 
 void Logger::doLog(Level _level, const std::string& _message) {
-    loggerImpl_->doLog(_level, _message);
+    getLoggerImpl()->doLog(_level, _message);
 }
 
 } //namespace CommonAPI

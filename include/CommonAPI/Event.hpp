@@ -39,7 +39,7 @@ public:
     /**
      * \brief Constructor
      */
-    Event() : nextSubscription_(0) {};
+    Event() : nextSubscription_(0) {}
 
     /**
      * \brief Subscribe a listener to this event
@@ -107,12 +107,13 @@ typename Event<Arguments_...>::Subscription Event<Arguments_...>::subscribe(List
     bool isFirstListener;
     Listeners listeners;
 
-    subscriptionMutex_.lock();
-    subscription = nextSubscription_++;
-    isFirstListener = (0 == pendingSubscriptions_.size()) && (pendingUnsubscriptions_.size() == subscriptions_.size());
-    listeners = std::make_tuple(listener, std::move(errorListener));
-    pendingSubscriptions_[subscription] = std::move(listeners);
-    subscriptionMutex_.unlock();
+    {
+        std::lock_guard<std::mutex> itsSubscriptionLock(subscriptionMutex_);
+        subscription = nextSubscription_++;
+        isFirstListener = (0 == pendingSubscriptions_.size()) && (pendingUnsubscriptions_.size() == subscriptions_.size());
+        listeners = std::make_tuple(listener, std::move(errorListener));
+        pendingSubscriptions_[subscription] = std::move(listeners);
+    }
 
     if (isFirstListener) {
         if (!pendingUnsubscriptions_.empty())
@@ -130,30 +131,31 @@ void Event<Arguments_...>::unsubscribe(const Subscription subscription) {
     bool hasUnsubscribed(false);
     Listener listener;
 
-    subscriptionMutex_.lock();
-    auto listenerIterator = subscriptions_.find(subscription);
-    if (subscriptions_.end() != listenerIterator) {
-        if (pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
-            if (0 == pendingSubscriptions_.erase(subscription)) {
-                pendingUnsubscriptions_.insert(subscription);
-                listener = std::get<0>(listenerIterator->second);
-                hasUnsubscribed = true;
-            }
-            isLastListener = (pendingUnsubscriptions_.size() == subscriptions_.size());
-        }
-    }
-    else {
-        listenerIterator = pendingSubscriptions_.find(subscription);
-        if (pendingSubscriptions_.end() != listenerIterator) {
-            listener = std::get<0>(listenerIterator->second);
-            if (0 != pendingSubscriptions_.erase(subscription)) {
+    {
+        std::lock_guard<std::mutex> itsSubscriptionLock(subscriptionMutex_);
+        auto listenerIterator = subscriptions_.find(subscription);
+        if (subscriptions_.end() != listenerIterator) {
+            if (pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
+                if (0 == pendingSubscriptions_.erase(subscription)) {
+                    pendingUnsubscriptions_.insert(subscription);
+                    listener = std::get<0>(listenerIterator->second);
+                    hasUnsubscribed = true;
+                }
                 isLastListener = (pendingUnsubscriptions_.size() == subscriptions_.size());
-                hasUnsubscribed = true;
             }
         }
+        else {
+            listenerIterator = pendingSubscriptions_.find(subscription);
+            if (pendingSubscriptions_.end() != listenerIterator) {
+                listener = std::get<0>(listenerIterator->second);
+                if (0 != pendingSubscriptions_.erase(subscription)) {
+                    isLastListener = (pendingUnsubscriptions_.size() == subscriptions_.size());
+                    hasUnsubscribed = true;
+                }
+            }
+        }
+        isLastListener = isLastListener && (0 == pendingSubscriptions_.size());
     }
-    isLastListener = isLastListener && (0 == pendingSubscriptions_.size());
-    subscriptionMutex_.unlock();
 
     if (hasUnsubscribed) {
         onListenerRemoved(listener, subscription);
@@ -166,8 +168,8 @@ void Event<Arguments_...>::unsubscribe(const Subscription subscription) {
 template<typename ... Arguments_>
 void Event<Arguments_...>::notifyListeners(const Arguments_&... eventArguments) {
 
-    notificationMutex_.lock();
-    subscriptionMutex_.lock();
+    std::lock_guard<std::mutex> itsNotificationLock(notificationMutex_);
+    std::unique_lock<std::mutex> itsSubscriptionLock(subscriptionMutex_);
     for (auto iterator = pendingUnsubscriptions_.begin();
          iterator != pendingUnsubscriptions_.end();
          iterator++) {
@@ -182,19 +184,17 @@ void Event<Arguments_...>::notifyListeners(const Arguments_&... eventArguments) 
     }
     pendingSubscriptions_.clear();
 
-    subscriptionMutex_.unlock();
+    itsSubscriptionLock.unlock();
     for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
         (std::get<0>(iterator->second))(eventArguments...);
     }
-
-    notificationMutex_.unlock();
 }
 
 template<typename ... Arguments_>
 void Event<Arguments_...>::notifySpecificListener(const Subscription subscription, const Arguments_&... eventArguments) {
 
-    notificationMutex_.lock();
-    subscriptionMutex_.lock();
+    std::lock_guard<std::mutex> itsNotificationLock(notificationMutex_);
+    std::unique_lock<std::mutex> itsSubscriptionLock(subscriptionMutex_);
     for (auto iterator = pendingUnsubscriptions_.begin();
          iterator != pendingUnsubscriptions_.end();
          iterator++) {
@@ -210,50 +210,47 @@ void Event<Arguments_...>::notifySpecificListener(const Subscription subscriptio
     }
     pendingSubscriptions_.clear();
 
-
-    subscriptionMutex_.unlock();
+    itsSubscriptionLock.unlock();
     for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
         if (subscription == iterator->first) {
             (std::get<0>(iterator->second))(eventArguments...);
         }
     }
-
-    notificationMutex_.unlock();
 }
 
 template<typename ... Arguments_>
 void Event<Arguments_...>::notifySpecificError(const Subscription subscription, const CallStatus status) {
 
-    notificationMutex_.lock();
-    subscriptionMutex_.lock();
-    for (auto iterator = pendingUnsubscriptions_.begin();
-         iterator != pendingUnsubscriptions_.end();
-         iterator++) {
-        subscriptions_.erase(*iterator);
-    }
-    pendingUnsubscriptions_.clear();
+    {
+        std::lock_guard<std::mutex> itsNotificationLock(notificationMutex_);
+        std::unique_lock<std::mutex> itsSubscriptionLock(subscriptionMutex_);
+        for (auto iterator = pendingUnsubscriptions_.begin();
+             iterator != pendingUnsubscriptions_.end();
+             iterator++) {
+            subscriptions_.erase(*iterator);
+        }
+        pendingUnsubscriptions_.clear();
 
-    for (auto iterator = pendingSubscriptions_.begin();
-         iterator != pendingSubscriptions_.end();
-         iterator++) {
-        subscriptions_.insert(*iterator);
-    }
-    pendingSubscriptions_.clear();
+        for (auto iterator = pendingSubscriptions_.begin();
+             iterator != pendingSubscriptions_.end();
+             iterator++) {
+            subscriptions_.insert(*iterator);
+        }
+        pendingSubscriptions_.clear();
 
-    subscriptionMutex_.unlock();
-    for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
-        if (subscription == iterator->first) {
-            ErrorListener listener = std::get<1>(iterator->second);
-            if (listener) {
-                listener(status);
+        itsSubscriptionLock.unlock();
+        for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
+            if (subscription == iterator->first) {
+                ErrorListener listener = std::get<1>(iterator->second);
+                if (listener) {
+                    listener(status);
+                }
             }
         }
     }
 
-    notificationMutex_.unlock();
-
     if (status != CommonAPI::CallStatus::SUCCESS) {
-        subscriptionMutex_.lock();
+        std::lock_guard<std::mutex> itsSubscriptionLock(subscriptionMutex_);
         auto listenerIterator = subscriptions_.find(subscription);
         if (subscriptions_.end() != listenerIterator) {
             if (pendingUnsubscriptions_.end() == pendingUnsubscriptions_.find(subscription)) {
@@ -268,15 +265,14 @@ void Event<Arguments_...>::notifySpecificError(const Subscription subscription, 
                 pendingSubscriptions_.erase(subscription);
             }
         }
-        subscriptionMutex_.unlock();
     }
 }
 
 template<typename ... Arguments_>
 void Event<Arguments_...>::notifyErrorListeners(const CallStatus status) {
 
-    notificationMutex_.lock();
-    subscriptionMutex_.lock();
+    std::lock_guard<std::mutex> itsNotificationLock(notificationMutex_);
+    std::unique_lock<std::mutex> itsSubscriptionLock(subscriptionMutex_);
     for (auto iterator = pendingUnsubscriptions_.begin();
          iterator != pendingUnsubscriptions_.end();
          iterator++) {
@@ -291,16 +287,13 @@ void Event<Arguments_...>::notifyErrorListeners(const CallStatus status) {
     }
     pendingSubscriptions_.clear();
 
-    subscriptionMutex_.unlock();
-
+    itsSubscriptionLock.unlock();
     for (auto iterator = subscriptions_.begin(); iterator != subscriptions_.end(); iterator++) {
         ErrorListener listener = std::get<1>(iterator->second);
         if (listener) {
             listener(status);
         }
     }
-
-    notificationMutex_.unlock();
 }
 
 

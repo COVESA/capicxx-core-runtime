@@ -96,6 +96,7 @@ typedef std::uint32_t gid_t;
 typedef ::uid_t uid_t;
 typedef ::gid_t gid_t;
 #endif
+
 /**
  * \brief Identifies a client sending a call to a stub.
  *
@@ -109,6 +110,12 @@ public:
     virtual std::size_t hashCode() = 0;
     virtual uid_t getUid() const = 0;
     virtual gid_t getGid() const = 0;
+    virtual std::string getEnv() const {
+        return "";
+    }
+    virtual std::string getHostAddress() const {
+        return "";
+    }
 };
 
 template <typename ... Args_>

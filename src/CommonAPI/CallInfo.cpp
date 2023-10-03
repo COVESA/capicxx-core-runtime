@@ -35,6 +35,11 @@ CallInfo::CallInfo(Timeout_t _timeout, Sender_t _sender)
             timeout_ = globalCallTimeout;
         }
     }
+
+    //If timeout is set to -1, timeout should be the max value possible
+    if(timeout_ < 0){
+        timeout_ = std::numeric_limits<Timeout_t>::max();
+    }
 }
 
 } // namespace CommonAPI

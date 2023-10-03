@@ -1,8 +1,40 @@
 Changes
 =======
 
+v3.2.3-r7
+- Fixed warnings with gcc11 for Wextra-extra-semi flag
+- Fix capi-core-runtime Runtime::loadLibrary
+- vSomeIP Security: Update vsomeip_sec
+- Fixed commonapi-core-runtime windows build
+
+v3.2.3-r6
+- Fix race condition.
+- Remove mutex and add exception handling to RuntimeDeinit.
+- Fix double initialization of loggerImpl.
+
+v3.2.3-r5
+- Linux: avoid static initialization of std::mutex
+- Replace deprecated std::ptr_fun
+
+v3.2.3
+- Properly initialize Runtime::defaultCallTimeout_
+- Removed GENIVI copyright line
+- Fix bug in assignment operator of Variant in case of self-assignment
+- Ensure to stop struct deserialization on error
+- Implement "no_timeout" in method responses
+- Use COMMONAPI_EXPORT_CLASS_EXPLICIT to export classes
+- Removed libdlt dependency from android
+- Add support to logs in Android
+- Update android build files
+
+v3.2.2
+- Support retrieval of environment (hostname) from client identifier.
+
+v3.2.1
+- Use lock objects and remove self assignment.
+
 v3.2.0
-- Support ABI compatible changes (additional attributes, broadcast and methods added to the end of 
+- Support ABI compatible changes (additional attributes, broadcast and methods added to the end of
   the interface specification)
 
 v3.1.12.6
@@ -47,4 +79,3 @@ v3.1.9
 - Added subscription parameter to 'Event::onListenerRemoved' function. This is needed for managing the added and removed listeners respectively for mapping the listeners on the subscription.
 - Replaced variadic macros with variadic templates for CommonAPI logger.
 - Removed obsolete usleep() macro.
-

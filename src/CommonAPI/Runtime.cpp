@@ -14,6 +14,7 @@
 
 #include <algorithm>
 
+#include <CommonAPI/Config.hpp>
 #include <CommonAPI/Factory.hpp>
 #include <CommonAPI/IniFileReader.hpp>
 #include <CommonAPI/Logger.hpp>
@@ -33,7 +34,10 @@ static std::mutex getMutex__;
 #ifndef _WIN32
 DEINITIALIZER(RuntimeDeinit) {
     if (theRuntimePtr__) {
-        std::lock_guard<std::mutex> itsLock(getMutex__);
+        // TODO: This mutex is causing a crash due to the changes introduced with 938f3d1. Since
+        // this "deinitializer" only runs on the main thread, no mutex should be needed. Leaving a
+        // comment pending a refactor.
+        // std::lock_guard<std::mutex> itsLock(getMutex__);
         theRuntimePtr__->reset();
         delete theRuntimePtr__;
         theRuntimePtr__ = nullptr;
@@ -74,6 +78,7 @@ std::shared_ptr<Runtime> Runtime::get() {
 Runtime::Runtime()
     : defaultBinding_(COMMONAPI_DEFAULT_BINDING),
       defaultFolder_(COMMONAPI_DEFAULT_FOLDER),
+      defaultCallTimeout_(DEFAULT_SEND_TIMEOUT),
       isConfigured_(false),
       isInitialized_(false) {
 }
@@ -266,7 +271,12 @@ Runtime::createProxy(
         // ...it seems do not, lets try to load a library that does...
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         std::string library = getLibrary(_domain, _interface, _instance, true);
-        if (loadLibrary(library) || defaultFactory_) {
+        bool libraryLoaded = loadLibrary(library);
+
+        if (libraryLoaded || defaultFactory_) {
+            if(!libraryLoaded){
+                COMMONAPI_DEBUG("Loading interface library failed, using default factory now.");
+            }
             proxy = createProxyHelper(_domain, _interface, _instance, _connectionId, true);
         }
     }
@@ -287,7 +297,12 @@ Runtime::createProxy(
         // ...it seems do not, lets try to load a library that does...
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
         std::string library = getLibrary(_domain, _interface, _instance, true);
-        if (loadLibrary(library) || defaultFactory_) {
+        bool libraryLoaded = loadLibrary(library);
+
+        if (libraryLoaded || defaultFactory_) {
+            if(!libraryLoaded){
+                COMMONAPI_DEBUG("Loading interface library failed, using default factory now.");
+            }
             proxy = createProxyHelper(_domain, _interface, _instance, _context, true);
         }
     }
@@ -310,7 +325,12 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
     if (!isRegistered) {
         std::string library = getLibrary(_domain, _interface, _instance, false);
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
-        if (loadLibrary(library) || defaultFactory_) {
+        bool libraryLoaded = loadLibrary(library);
+
+        if (libraryLoaded || defaultFactory_) {
+            if(!libraryLoaded){
+                COMMONAPI_DEBUG("Loading interface library failed, using default factory now.");
+            }
             isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _connectionId, true);
         }
     }
@@ -332,7 +352,12 @@ Runtime::registerStub(const std::string &_domain, const std::string &_interface,
     if (!isRegistered) {
         std::string library = getLibrary(_domain, _interface, _instance, false);
         std::lock_guard<std::mutex> itsGuard(loadMutex_);
-        if (loadLibrary(library) || defaultFactory_) {
+        bool libraryLoaded = loadLibrary(library);
+
+        if (libraryLoaded || defaultFactory_) {
+            if(!libraryLoaded){
+                COMMONAPI_DEBUG("Loading interface library failed, using default factory now.");
+            }
             isRegistered = registerStubHelper(_domain, _interface, _instance, _stub, _context, true);
         }
     }
@@ -407,7 +432,7 @@ Runtime::loadLibrary(const std::string &_library) {
 
         // Check the version information
         while (soStart < itsLibrary.length()) {
-            if (itsLibrary[soStart] != '.'
+            if (itsLibrary[soStart] != '.' && itsLibrary[soStart] != '-'
                     && !std::isdigit(static_cast<unsigned char>(itsLibrary[soStart]))) {
                 break;
             }
@@ -432,7 +457,7 @@ Runtime::loadLibrary(const std::string &_library) {
             isLoaded = false;
         }
         #else
-        if (dlopen(itsLibrary.c_str(), RTLD_LAZY | RTLD_GLOBAL) != 0) {
+        if (dlopen(itsLibrary.c_str(), RTLD_LAZY | RTLD_GLOBAL) != NULL) {
             loadedLibraries_.insert(itsLibrary);
             COMMONAPI_DEBUG("Loading interface library \"", itsLibrary, "\" succeeded.");
         }

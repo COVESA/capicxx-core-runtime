@@ -10,6 +10,8 @@
     #define COMMONAPI_EXPORT __declspec(dllexport)
     #define COMMONAPI_EXPORT_CLASS_EXPLICIT
 
+    #define COMMONAPI_METHOD_EXPORT COMMONAPI_EXPORT
+
     #if COMMONAPI_DLL_COMPILATION
         #define COMMONAPI_IMPORT_EXPORT __declspec(dllexport)
     #else
@@ -19,6 +21,9 @@
     #define COMMONAPI_EXPORT __attribute__ ((visibility ("default")))
     #define COMMONAPI_EXPORT_CLASS_EXPLICIT COMMONAPI_EXPORT
     #define COMMONAPI_IMPORT_EXPORT
+
+    #define COMMONAPI_METHOD_EXPORT
+
 #endif
 
 #endif // COMMONAPI_EXPORT_HPP_

@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <tuple>
+#include <CommonAPI/Logger.hpp>
 
 namespace CommonAPI {
 
@@ -38,8 +39,12 @@ struct StructReader<Index_, Input_, V_<Values_...>, D_<Depls_...>> {
                     V_<Values_...> &_values,
                     const D_<Depls_...> *_depls) {
         StructReader<Index_-1, Input_, V_<Values_...>, D_<Depls_...>>{}(_input, _values, _depls);
-        _input.template readValue<>(std::get<Index_>(_values.values_),
-                                    (_depls ? std::get<Index_>(_depls->values_) : nullptr));
+        if (_input.hasError()) {
+            COMMONAPI_ERROR("StructReader: deserialization failed at index: ", Index_-1);
+        } else {
+            _input.template readValue<>(std::get<Index_>(_values.values_),
+                                        (_depls ? std::get<Index_>(_depls->values_) : nullptr));
+        }
     }
 };
 
@@ -52,7 +57,11 @@ struct StructReader<Index_, Input_, V_<Values_...>, D_> {
                     V_<Values_...> &_values,
                     const D_ *_depls) {
         StructReader<Index_-1, Input_, V_<Values_...>, D_>{}(_input, _values, _depls);
-        _input.template readValue<D_>(std::get<Index_>(_values.values_));
+        if (_input.hasError()) {
+            COMMONAPI_ERROR("StructReader: deserialization failed at index: ", Index_-1);
+        } else {
+            _input.template readValue<D_>(std::get<Index_>(_values.values_));
+        }
     }
 };
 
@@ -65,6 +74,9 @@ struct StructReader<0, Input_, V_<Values_...>, D_<Depls_...>> {
                     const D_<Depls_...> *_depls) {
         _input.template readValue<>(std::get<0>(_values.values_),
                                     (_depls ? std::get<0>(_depls->values_) : nullptr));
+        if (_input.hasError()) {
+            COMMONAPI_ERROR("StructReader: deserialization failed at index: 0");
+        }
     }
 };
 
@@ -77,6 +89,9 @@ struct StructReader<0, Input_, V_<Values_...>, D_> {
                     const D_ *_depls) {
         (void)_depls;
         _input.template readValue<D_>(std::get<0>(_values.values_));
+        if (_input.hasError()) {
+            COMMONAPI_ERROR("StructReader: deserialization failed at index: 0");
+        }
     }
 };
 

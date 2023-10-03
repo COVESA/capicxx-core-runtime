@@ -26,9 +26,9 @@
 namespace CommonAPI {
 
 
-class Logger {
+class COMMONAPI_EXPORT_CLASS_EXPLICIT Logger {
 public:
-    enum class Level : std::uint8_t COMMONAPI_EXPORT {
+    enum class Level : std::uint8_t COMMONAPI_METHOD_EXPORT {
         CAPI_LOG_NONE = 0,
         CAPI_LOG_FATAL = 1,
         CAPI_LOG_ERROR = 2,
@@ -41,37 +41,37 @@ public:
     ~Logger();
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void fatal(LogEntries_&&... _entries) {
+    COMMONAPI_METHOD_EXPORT static void fatal(LogEntries_&&... _entries) {
         log(Logger::Level::CAPI_LOG_FATAL, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void error(LogEntries_&&... _entries) {
+    COMMONAPI_METHOD_EXPORT static void error(LogEntries_&&... _entries) {
         log(Logger::Level::CAPI_LOG_ERROR, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void warning(LogEntries_&&... _entries) {
+    COMMONAPI_METHOD_EXPORT static void warning(LogEntries_&&... _entries) {
         log(Logger::Level::CAPI_LOG_WARNING, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void info(LogEntries_&&... _entries) {
+    COMMONAPI_METHOD_EXPORT static void info(LogEntries_&&... _entries) {
         log(Logger::Level::CAPI_LOG_INFO, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void debug(LogEntries_&&... _entries) {
+    COMMONAPI_METHOD_EXPORT static void debug(LogEntries_&&... _entries) {
         log(Logger::Level::CAPI_LOG_DEBUG, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void verbose(LogEntries_&&... _entries) {
+    COMMONAPI_METHOD_EXPORT static void verbose(LogEntries_&&... _entries) {
         log(Logger::Level::CAPI_LOG_VERBOSE, std::forward<LogEntries_>(_entries)...);
     }
 
     template<typename... LogEntries_>
-    COMMONAPI_EXPORT static void log(Logger::Level _level, LogEntries_&&... _entries) {
+    COMMONAPI_METHOD_EXPORT static void log(Logger::Level _level, LogEntries_&&... _entries) {
         if (isLogged(_level)) {
             std::stringstream buffer;
             logIntern(buffer, std::forward<LogEntries_>(_entries)...);
@@ -79,22 +79,22 @@ public:
         }
     }
 
-    static void init(bool _useConsole, const std::string &_fileName,
+    COMMONAPI_METHOD_EXPORT static void init(bool _useConsole, const std::string &_fileName,
                      bool _useDlt, const std::string& _level);
 
 private:
     class LoggerImpl;
-    static std::unique_ptr<LoggerImpl> loggerImpl_;
+    COMMONAPI_METHOD_EXPORT static std::shared_ptr<LoggerImpl> getLoggerImpl();
 
-    COMMONAPI_EXPORT static bool isLogged(Level _level);
-    COMMONAPI_EXPORT static void doLog(Level _level, const std::string& _message);
+    COMMONAPI_METHOD_EXPORT static bool isLogged(Level _level);
+    COMMONAPI_METHOD_EXPORT static void doLog(Level _level, const std::string& _message);
 
-    COMMONAPI_EXPORT static void logIntern(std::stringstream &_buffer) {
+    COMMONAPI_METHOD_EXPORT static void logIntern(std::stringstream &_buffer) {
         (void)_buffer;
     }
 
     template<typename LogEntry_, typename... MoreLogEntries_>
-    COMMONAPI_EXPORT static void logIntern(std::stringstream &_buffer, LogEntry_&& _entry,
+    COMMONAPI_METHOD_EXPORT static void logIntern(std::stringstream &_buffer, LogEntry_&& _entry,
                            MoreLogEntries_&& ... _moreEntries) {
         _buffer << _entry;
         logIntern(_buffer, std::forward<MoreLogEntries_>(_moreEntries)...);

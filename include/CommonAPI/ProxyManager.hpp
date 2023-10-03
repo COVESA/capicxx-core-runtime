@@ -22,7 +22,7 @@
 
 namespace CommonAPI {
 
-class ProxyManager {
+class COMMONAPI_EXPORT_CLASS_EXPLICIT ProxyManager {
 public:
     typedef std::function<void(const CallStatus &, const std::vector<std::string> &)> GetAvailableInstancesCallback;
     typedef std::function<void(const CallStatus &, const AvailabilityStatus &)> GetInstanceAvailabilityStatusCallback;
@@ -72,12 +72,12 @@ public:
     }
 
 protected:
-    COMMONAPI_EXPORT std::shared_ptr<Proxy> createProxy(const std::string &,
+    COMMONAPI_METHOD_EXPORT std::shared_ptr<Proxy> createProxy(const std::string &,
                                        const std::string &,
                                        const std::string &,
                                        const ConnectionId_t &_connection) const;
 
-    COMMONAPI_EXPORT std::shared_ptr<Proxy> createProxy(const std::string &,
+    COMMONAPI_METHOD_EXPORT std::shared_ptr<Proxy> createProxy(const std::string &,
                                        const std::string &,
                                        const std::string &,
                                        std::shared_ptr<MainLoopContext> _context) const;
