@@ -3,6 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <cctype>
 #include <algorithm>
 #include <sstream>
 #include <functional>
@@ -31,7 +32,7 @@ void trim(std::string& toTrim) {
         std::find_if(
             toTrim.begin(),
             toTrim.end(),
-            std::not1(std::ptr_fun(isspace))
+            [](int c) {return !std::isspace(c);}
         )
     );
 
@@ -39,7 +40,7 @@ void trim(std::string& toTrim) {
         std::find_if(
             toTrim.rbegin(),
             toTrim.rend(),
-            std::not1(std::ptr_fun(isspace))).base(),
+            [](int c) {return !std::isspace(c);}).base(),
             toTrim.end()
     );
 }

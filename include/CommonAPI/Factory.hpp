@@ -28,7 +28,7 @@ public:
     typedef std::function<void(std::vector<std::string> &)> AvailableInstancesCbk_t;
     typedef std::function<void(bool)> InstanceAliveCbk_t;
 
-    virtual ~Factory() {};
+    virtual ~Factory() {}
 
     virtual void init() = 0;
 
@@ -54,8 +54,8 @@ public:
                               std::shared_ptr<StubBase> _stub,
                               std::shared_ptr<MainLoopContext> mainLoopContext) = 0;
 
-    virtual bool unregisterStub(const std::string &_domain, 
-                                const std::string &_interface, 
+    virtual bool unregisterStub(const std::string &_domain,
+                                const std::string &_interface,
                                 const std::string &_instance) = 0;
 };
 

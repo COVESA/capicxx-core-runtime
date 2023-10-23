@@ -10,7 +10,7 @@ PROJECT(libcommonapi)
 # version of CommonAPI
 SET( LIBCOMMONAPI_MAJOR_VERSION 3 )
 SET( LIBCOMMONAPI_MINOR_VERSION 2 )
-SET( LIBCOMMONAPI_PATCH_VERSION 0 )
+SET( LIBCOMMONAPI_PATCH_VERSION 3 )
 
 message(STATUS "Project name: ${PROJECT_NAME}")
 
@@ -24,6 +24,10 @@ message(STATUS "This is CMake for Common API C++ Version ${COMPONENT_VERSION}.")
 set(DL_LIBRARY "")
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(DL_LIBRARY "dl")
+
+    # force all use of std::mutx and std::recursive_mutex to use runtime init
+    # instead of static initialization so mutexes can be hooked to enable PI as needed
+    add_definitions(-D_GTHREAD_USE_MUTEX_INIT_FUNC -D_GTHREAD_USE_RECURSIVE_MUTEX_INIT_FUNC)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 ##############################################################################
@@ -102,7 +106,8 @@ IF(MSVC)
     add_definitions(-DCOMMONAPI_INTERNAL_COMPILATION -DCOMMONAPI_DLL_COMPILATION)
     add_compile_options(/EHsc /wd4996)
 ELSE ()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Wformat -Wformat-security -Wconversion -fexceptions -fstrict-aliasing -fstack-protector -fasynchronous-unwind-tables -fno-omit-frame-pointer -Werror -DCOMMONAPI_INTERNAL_COMPILATION -fvisibility=hidden")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -Werror=extra-semi -Wformat -Wformat-security -Wconversion -fexceptions -fstrict-aliasing -fstack-protector-strong -fasynchronous-unwind-tables -fno-omit-frame-pointer -Werror -DCOMMONAPI_INTERNAL_COMPILATION -fvisibility=hidden")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wformat-security -fstack-protector-strong")
 ENDIF(MSVC)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCOMMONAPI_LOGLEVEL=COMMONAPI_LOGLEVEL_${MAX_LOG_LEVEL}")
@@ -129,6 +134,9 @@ list(SORT CAPI_SRCS)
 add_library(CommonAPI SHARED ${CAPI_SRCS})
 target_link_libraries(CommonAPI PRIVATE ${DL_LIBRARY} ${DLT_LIBRARIES})
 set_target_properties(CommonAPI PROPERTIES VERSION ${LIBCOMMONAPI_MAJOR_VERSION}.${LIBCOMMONAPI_MINOR_VERSION}.${LIBCOMMONAPI_PATCH_VERSION} SOVERSION ${LIBCOMMONAPI_MAJOR_VERSION}.${LIBCOMMONAPI_MINOR_VERSION}.${LIBCOMMONAPI_PATCH_VERSION} LINKER_LANGUAGE C)
+target_include_directories(CommonAPI INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>)
 set_target_properties (CommonAPI PROPERTIES INTERFACE_LINK_LIBRARY "")
 
 ##############################################################################
@@ -167,23 +175,14 @@ export(PACKAGE CommonAPI)
 # Create the CommonAPIConfig.cmake and CommonAPIConfigVersion files ...
 file(RELATIVE_PATH REL_INCLUDE_DIR "${ABSOLUTE_INSTALL_CMAKE_DIR}" "${ABSOLUTE_INSTALL_INCLUDE_DIR}")
 
-# ... for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include" )
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonAPIConfig.cmake.in
   "${PROJECT_BINARY_DIR}/CommonAPIConfig.cmake" @ONLY)
-
-# ... for the install tree
-set(CONF_INCLUDE_DIRS "\${COMMONAPI_CMAKE_DIR}/${REL_INCLUDE_DIR}")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonAPIConfig.cmake.in
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CommonAPIConfig.cmake" @ONLY)
-
-# ... for both
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonAPIConfigVersion.cmake.in
   "${PROJECT_BINARY_DIR}/CommonAPIConfigVersion.cmake" @ONLY)
 
 # Install the CommonAPIConfig.cmake and CommonAPIConfigVersion.cmake
 install(FILES
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CommonAPIConfig.cmake"
+  "${PROJECT_BINARY_DIR}/CommonAPIConfig.cmake"
   "${PROJECT_BINARY_DIR}/CommonAPIConfigVersion.cmake"
   DESTINATION "${INSTALL_CMAKE_DIR}")
 
@@ -255,4 +254,3 @@ if(NOT WIN32 AND PKG_CONFIG_FOUND)
 endif()
 
 ##############################################################################
-

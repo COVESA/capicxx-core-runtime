@@ -49,4 +49,3 @@ protected:
 } // namespace CommonAPI
 
 #endif // COMMONAPI_PROXY_HPP_
-

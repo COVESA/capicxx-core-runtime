@@ -650,19 +650,23 @@ Variant<Types_...>::~Variant() {
 
 template<typename... Types_>
 Variant<Types_...>& Variant<Types_...>::operator=(const Variant<Types_...> &_source) {
-    AssignmentVisitor<Types_...> visitor(*this, hasValue());
-    ApplyVoidVisitor<
-        AssignmentVisitor<Types_...>, Variant<Types_...>, Types_...
-    >::visit(visitor, _source);
+    if (*this != _source) {
+        AssignmentVisitor<Types_...> visitor(*this, hasValue());
+        ApplyVoidVisitor<
+            AssignmentVisitor<Types_...>, Variant<Types_...>, Types_...
+        >::visit(visitor, _source);
+    }
     return *this;
 }
 
 template<typename... Types_>
 Variant<Types_...>& Variant<Types_...>::operator=(Variant<Types_...> &&_source) {
-    AssignmentVisitor<Types_...> visitor(*this, hasValue());
-    ApplyVoidVisitor<
-        AssignmentVisitor<Types_...>, Variant<Types_...>, Types_...
-    >::visit(visitor, _source);
+    if (*this != _source) {
+        AssignmentVisitor<Types_...> visitor(*this, hasValue());
+        ApplyVoidVisitor<
+            AssignmentVisitor<Types_...>, Variant<Types_...>, Types_...
+        >::visit(visitor, _source);
+    }
     return *this;
 }
 
