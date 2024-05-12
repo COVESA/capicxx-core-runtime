@@ -15,6 +15,7 @@
 #include <unordered_set>
 #include <memory>
 #include <tuple>
+#include <string>
 
 #ifndef _WIN32
 #include <sys/types.h>
