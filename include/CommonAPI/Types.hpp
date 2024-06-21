@@ -14,6 +14,7 @@
 #include <functional>
 #include <unordered_set>
 #include <memory>
+#include <string>
 #include <tuple>
 
 #ifndef _WIN32
