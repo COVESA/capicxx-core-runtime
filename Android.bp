@@ -4,7 +4,7 @@ cc_defaults {
     rtti: true,
 
     cppflags: [
-        "-std=c++11",
+        "-std=c++17",
         "-Wall",
         "-Wextra",
         "-Wformat",

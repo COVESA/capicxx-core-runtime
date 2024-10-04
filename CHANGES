@@ -1,6 +1,13 @@
 Changes
 =======
 
+v3.2.4
+- Added github workflow to build the project in Ubuntu and Windows
+
+v3.2.3-r8
+- Fix Copyright & github link in README
+- (dev) Warn about multiple subscriptions
+
 v3.2.3-r7
 - Fixed warnings with gcc11 for Wextra-extra-semi flag
 - Fix capi-core-runtime Runtime::loadLibrary

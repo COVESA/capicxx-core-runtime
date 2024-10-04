@@ -90,6 +90,16 @@ protected:
         (void)_listener;
     }
 
+    /**
+     * \brief Get the number of subscriptions to this event.
+     *
+     * \warning This method acquires a lock on `subscriptionMutex_`.
+     */
+    std::size_t getSubscriptionCount() const {
+        std::lock_guard<std::mutex> itsSubscriptionLock(subscriptionMutex_);
+        return subscriptions_.size();
+    }
+
 private:
     ListenersMap subscriptions_;
     Subscription nextSubscription_;
@@ -98,7 +108,7 @@ private:
     SubscriptionsSet pendingUnsubscriptions_;
 
     std::mutex notificationMutex_;
-    std::mutex subscriptionMutex_;
+    mutable std::mutex subscriptionMutex_;
 };
 
 template<typename ... Arguments_>
