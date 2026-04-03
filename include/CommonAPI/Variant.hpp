@@ -614,8 +614,10 @@ struct TypeIndex<Type_, Types_...> {
 
 template<typename... Types_>
 Variant<Types_...>::Variant()
-    : valueType_(TypesTupleSize::value) {
-    ApplyVoidIndexVisitor<Variant<Types_...>, Types_...>::visit(*this, valueType_);
+    : valueType_(0) {
+    // valueType_ == 0: empty variant; hasValue() returns false.
+    // The storage is intentionally left uninitialized — accessing the
+    // value of an empty variant via get<T>() will throw std::bad_cast.
 }
 
 template<typename... Types_>
