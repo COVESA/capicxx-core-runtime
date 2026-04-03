@@ -207,6 +207,8 @@ Runtime::readConfiguration() {
     std::string itsFile;
     std::string itsDlt("false");
     std::string itsLevel("info");
+    std::string itsApplication;
+    std::string itsContext;
 
     std::shared_ptr<IniFileReader::Section> section
         = reader.getSection("logging");
@@ -215,7 +217,19 @@ Runtime::readConfiguration() {
         itsFile = section->getValue("file");
         itsDlt = section->getValue("dlt");
         itsLevel = section->getValue("level");
+        itsApplication = section->getValue("application");
+        itsContext = section->getValue("context");
     }
+
+    // Set DLT application/context properties before Logger::init() so that
+    // Logger::init() can read them via Runtime::getProperty(). Without this,
+    // the properties are empty at init time because user code calling
+    // Runtime::setProperty("LogApplication", ...) in main() runs AFTER the
+    // static/constructor initialisation that calls Logger::init().
+    if (!itsApplication.empty())
+        setProperty("LogApplication", itsApplication);
+    if (!itsContext.empty())
+        setProperty("LogContext", itsContext);
 
     Logger::init((itsConsole == "true"),
                  itsFile,
