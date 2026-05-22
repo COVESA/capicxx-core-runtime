@@ -38,9 +38,8 @@ IniFileReader::load(const std::string &_path) {
     std::string currentSectionName;
     std::shared_ptr<Section> currentSection;
 
-    while (!configStream.eof()) {
-        std::string line;
-        std::getline(configStream, line);
+    std::string line;
+    while (std::getline(configStream, line)) {
         lineCounter++;
 
         trim(line);
